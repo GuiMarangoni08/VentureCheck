@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VentureCheck — Diagnóstico de Negócio</title>
+<title>VentureCheck — O Guia do Empreendedor do Brasil</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@300;400;500&display=swap');
 
@@ -506,17 +506,19 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 <div class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">Venture<span>Check</span></div>
-    <div class="logo-tag">v0.5 · Diagnóstico de Negócio</div>
+    <div class="logo-tag">v0.6 · O Guia do Empreendedor do Brasil</div>
   </div>
 
   <div class="dna-badge">
-    <div class="dna-badge-label">⚡ DNA Board · 18 mentes</div>
+    <div class="dna-badge-label">⚡ DNA Board · 26 Mentores</div>
     <div class="dna-badge-names">
       Tallis · Nardon · Soares · Rony<br>
       Benchimol · Bloisi · Stelleo<br>
-      Zuck · Musk · Orosco<br>
-      Allan · Denis · Henry · Leandro<br>
-      <em>Napoli · Adibe · L.C.F · Zanetti</em>
+      Zuck · Musk · Orosco · Allan<br>
+      Denis · Henry · Farielo · Napoli<br>
+      <em>Adibe · L.C.F · Zanetti · Flávio</em><br>
+      <em>Romero · Esteves · Street · Vélez</em><br>
+      <em>Kazah · Szekasy · Rottenberg</em>
     </div>
   </div>
 
@@ -548,7 +550,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
         <span id="save-text" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:1px">SALVO</span>
       </div>
       <div class="pulse"></div>
-      <span class="status-text">18 MENTORES · SISTEMA ATIVO</span>
+      <span class="status-text">26 MENTORES · SISTEMA ATIVO</span>
     </div>
   </div>
 
@@ -568,15 +570,15 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
         </div>
       </div>
       <div class="hero">
-        <h1>DIAGNÓSTICO<br><em>DE NEGÓCIO</em><br>EM 30 MINUTOS</h1>
-        <p>14 dos maiores empreendedores do Brasil analisam sua ideia. Sem reunião. Sem espera. Relatório completo com viabilidade, financeiro, MVP, priorização e roadmap.</p>
-        <button class="btn btn-p" style="font-size:14px;padding:14px 32px" onclick="startModeB()">▶ Iniciar diagnóstico gratuito</button>
+        <h1>SUA IDEIA<br><em>MERECE A</em><br>VERDADE</h1>
+        <p>26 dos maiores empreendedores e investidores do Brasil analisam sua ideia. Sem reunião. Sem espera. Relatório completo em 30 minutos.</p>
+        <button class="btn btn-p" style="font-size:14px;padding:14px 32px" onclick="startModeB()">▶ Validar minha ideia agora</button>
         <div class="hero-meta">
           <div class="hero-stat"><div class="hero-stat-num" id="h-total">0</div><div class="hero-stat-label">Diagnósticos</div></div>
           <div class="hero-divider"></div>
           <div class="hero-stat"><div class="hero-stat-num" id="h-approved">0</div><div class="hero-stat-label">Aprovados</div></div>
           <div class="hero-divider"></div>
-          <div class="hero-stat"><div class="hero-stat-num">18</div><div class="hero-stat-label">Mentores</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">26</div><div class="hero-stat-label">Mentores</div></div>
           <div class="hero-divider"></div>
           <div class="hero-stat"><div class="hero-stat-num">6</div><div class="hero-stat-label">Módulos</div></div>
         </div>
@@ -623,8 +625,37 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
       <!-- DNA Board -->
       <div class="dna-section">
-        <div class="section-title">⚡ DNA BOARD — 14 MENTES ANALISANDO SUA IDEIA</div>
+        <div class="section-title">⚡ DNA BOARD — 26 MENTORES ANALISANDO SUA IDEIA</div>
         <div class="dna-grid" id="dna-grid"></div>
+      </div>
+
+      <!-- Planos -->
+      <div class="dna-section" style="padding:22px;margin-bottom:0">
+        <div class="section-title">💎 ESCOLHA SEU PLANO</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+          <div style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r2);padding:24px;text-align:center">
+            <div style="font-size:28px;margin-bottom:8px">🌱</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">Validação</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);letter-spacing:2px">R$149</div>
+            <div style="font-size:11px;color:var(--t2);margin:12px 0;line-height:1.7">IMI · Análise de mercado · Veredito · Providências · Manual · 6 perguntas</div>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startModeB()">Começar →</button>
+          </div>
+          <div style="background:var(--s2);border:2px solid var(--accent);border-radius:var(--r2);padding:24px;text-align:center;position:relative">
+            <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;font-size:9px;font-weight:700;letter-spacing:2px;padding:3px 12px;border-radius:20px">MAIS POPULAR</div>
+            <div style="font-size:28px;margin-bottom:8px">🚀</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">Diagnóstico</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);letter-spacing:2px">R$497</div>
+            <div style="font-size:11px;color:var(--t2);margin:12px 0;line-height:1.7">Tudo do Validação + 7 blocos profundos · Financeiro · MVP · Priorização · Roadmap · Riscos</div>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startModeB()">Começar →</button>
+          </div>
+          <div style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r2);padding:24px;text-align:center">
+            <div style="font-size:28px;margin-bottom:8px">💎</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">Captação</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);letter-spacing:2px">R$999</div>
+            <div style="font-size:11px;color:var(--t2);margin:12px 0;line-height:1.7">Tudo do Diagnóstico + Valuation · Data room · Pitch deck · Perfil do investidor ideal</div>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startModeB()">Começar →</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -791,27 +822,35 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
 <script>
 // ══════════════════════════════════════════════════════════════
-// DNA BOARD — 14 MENTES
+// DNA BOARD — 26 MENTORES
 // ══════════════════════════════════════════════════════════════
 const DNA = [
   {name:'Tallis Gomes',co:'Easy Taxi · Singu',av:'🚀',sk:'Validação · Escala global',dna:'TALLIS GOMES (Easy Taxi, Singu): Valida em 90 dias ou pivota. Pensa global desde o dia 1. Velocidade de aprendizado vale mais que perfeição. Pergunta: "em 90 dias você consegue provar que isso funciona?" Avalia urgência real do empreendedor.'},
   {name:'Bruno Nardon',co:'Rappi BR · G4',av:'⚡',sk:'Execução brutal · Dono',dna:'BRUNO NARDON (Rappi, G4): Obsessão por execução. Avalia mentalidade de dono vs funcionário. Questiona com brutalidade: "quanto vendeu essa semana?" Startup que não vende desde o dia 1 está morrendo devagar.'},
-  {name:'Alfredo Soares',co:'G4 Educação',av:'📈',sk:'Vendas · Gestão por resultado',dna:'ALFREDO SOARES (G4): Vendas é o oxigênio. Avalia se o empreendedor sabe vender. Questiona CAC real e ciclo de vendas. Pergunta: "você já vendeu para alguém que não é seu amigo?" Defende OKRs desde o início.'},
+  {name:'Alfredo Soares',co:'G4 Educação',av:'📈',sk:'Vendas · OKRs',dna:'ALFREDO SOARES (G4): Vendas é o oxigênio. Avalia se o empreendedor sabe vender. Questiona CAC real e ciclo de vendas. Pergunta: "você já vendeu para alguém que não te conhece?" Defende OKRs desde o início.'},
   {name:'Rony Meisler',co:'Reserva · Cabeça de Dono',av:'🎯',sk:'Propósito + lucro · Marca',dna:'RONY MEISLER (Reserva): Negócio sem propósito não tem longevidade. Avalia se a marca tem alma. Questiona o "porquê" visceral. Pergunta: "daqui a 10 anos, o que esse negócio transformou no mundo?"'},
   {name:'G. Benchimol',co:'XP Investimentos',av:'🏦',sk:'Longo prazo · Ecossistema',dna:'GUILHERME BENCHIMOL (XP): Pensa em décadas. Avalia paciência estratégica. Analisa potencial de ecossistema. Pergunta: "em 20 anos esse negócio pode ser referência do setor?"'},
-  {name:'F. Bloisi',co:'iFood',av:'🍔',sk:'Escala complexa · Marketplace',dna:'FABRÍCIO BLOISI (iFood): Como funciona com 100x o tamanho? Avalia gargalos operacionais. Analisa problema ovo-galinha. Pergunta: "qual seu maior custo unitário e como cai com escala?"'},
-  {name:'Stelleo Tolda',co:'Mercado Livre',av:'🌎',sk:'Plataforma · Paciência estratégica',dna:'STELLEO TOLDA (Mercado Livre): Construiu ecossistema com paciência. Avalia se pensa em plataforma não só produto. Pergunta: "como você tornará o cliente cada vez mais dependente da sua plataforma positivamente?"'},
-  {name:'Mark Zuckerberg',co:'Meta',av:'👁',sk:'Crescimento · Dados',dna:'ZUCKERBERG (Meta): Qual é a métrica norte? Avalia loops de retenção e network effects. Pergunta: "qual feature está mais correlacionada com retenção de longo prazo?" Potencial de hábito diário.'},
+  {name:'F. Bloisi',co:'iFood',av:'🍔',sk:'Escala complexa · Marketplace',dna:'FABRÍCIO BLOISI (iFood): Como funciona com 100x o tamanho? Avalia gargalos operacionais. Pergunta: "qual seu maior custo unitário e como cai com escala?"'},
+  {name:'Stelleo Tolda',co:'Mercado Livre',av:'🌎',sk:'Plataforma · Paciência estratégica',dna:'STELLEO TOLDA (Mercado Livre): Construiu ecossistema com paciência. Pergunta: "como você tornará o cliente cada vez mais dependente da sua plataforma positivamente?"'},
+  {name:'Mark Zuckerberg',co:'Meta',av:'👁',sk:'Crescimento · Dados',dna:'ZUCKERBERG (Meta): Qual é a métrica norte? Avalia loops de retenção e network effects. Pergunta: "qual feature está mais correlacionada com retenção de longo prazo?"'},
   {name:'Elon Musk',co:'Tesla · SpaceX',av:'🔥',sk:'Primeiros princípios · Missão',dna:'ELON MUSK (Tesla, SpaceX): Primeiros princípios — questiona cada premissa. Pergunta: "por que isso não foi feito antes? Qual é a barreira real?" Questiona custo de cada componente.'},
-  {name:'Thiago Orosco',co:'RD Station',av:'📊',sk:'SaaS B2B · Produto que educa',dna:'THIAGO OROSCO (RD Station): SaaS B2B no Brasil. Avalia maturidade digital do segmento. Questiona churn potencial. Pergunta: "como seu produto torna o cliente mais inteligente com o tempo?"'},
-  {name:'Allan Barros',co:'Pulsee · Acelerai',av:'💡',sk:'Capital inteligente · Aceleração',dna:'ALLAN BARROS (Pulsee, Acelerai): Cap table para capital inteligente. Questiona uso do capital. Pergunta: "qual é sua taxa de aprendizado por real investido?" Avalia maturidade para receber investimento.'},
-  {name:'Denis Wang',co:'Growth · Digital',av:'📡',sk:'Growth hacking · Aquisição digital',dna:'DENIS WANG: Growth como motor. Avalia canais de aquisição e custo por canal. Questiona loops virais. Pergunta: "qual canal vai trazer seus primeiros 1000 clientes e quanto vai custar?" Analisa métricas de ativação e retenção.'},
-  {name:'Henry Zylberstein',co:'Venture Building',av:'🏗',sk:'Inovação · Venture building',dna:'HENRY ZYLBERSTEIN: Estruturação de negócios complexos. Avalia governança e estrutura societária. Pergunta: "quem são os parceiros estratégicos que podem acelerar esse negócio e como você os atrai?"'},
-  {name:'A. Napoli',co:'Endeavor · Scale-ups',av:'🦁',sk:'Scale-up · Governança · Endeavor',dna:'ANTONIO NAPOLI (Endeavor Brasil): Especialista em scale-ups e governança de alto crescimento. Avalia se o negócio tem estrutura para crescer sem implodir. Questiona governança societária, processos e cultura antes de escalar. Pergunta: "quando você tiver 50 funcionários, o que vai quebrar primeiro na sua gestão?" Analisa se o fundador está construindo uma empresa ou um projeto pessoal.'},
-  {name:'João Adibe',co:'Gestão · Alta Performance',av:'🏆',sk:'Alta performance · Gestão de pessoas',dna:'JOÃO ADIBE (Alta Performance): Especialista em gestão de pessoas e cultura de alta performance. Avalia se o time tem os comportamentos certos para executar em velocidade de startup. Questiona ritmo de decisão, accountability e se existe cultura de feedback real. Pergunta: "quem no seu time você demitiria amanhã se pudesse ser completamente honesto — e por que ainda não fez isso?" Analisa se a liderança inspira ou apenas gerencia.'},
-  {name:'L.C. Fernandes',co:'Fundador · Investidor Serial',av:'🎖',sk:'Legado · Resiliência · Investidor',dna:'LUIZ CESAR FERNANDES (Investidor Serial): Décadas construindo e investindo em negócios relevantes no Brasil. Avalia potencial de legado e impacto de longo prazo. Questiona se o fundador tem resiliência para atravessar as crises inevitáveis dos primeiros 3 anos. Pergunta: "quando tudo der errado — e vai dar — o que vai te fazer continuar?" Analisa se o negócio tem potencial de se tornar referência geracional no setor.'},
+  {name:'Thiago Orosco',co:'RD Station',av:'📊',sk:'SaaS B2B · Produto que educa',dna:'THIAGO OROSCO (RD Station): SaaS B2B no Brasil. Avalia maturidade digital do segmento. Pergunta: "como seu produto torna o cliente mais inteligente com o tempo?"'},
+  {name:'Allan Barros',co:'Pulsee · Acelerai',av:'💡',sk:'Capital inteligente · Aceleração',dna:'ALLAN BARROS (Pulsee, Acelerai): Cap table para capital inteligente. Pergunta: "qual é sua taxa de aprendizado por real investido?"'},
+  {name:'Denis Wang',co:'Growth · Digital',av:'📡',sk:'Growth hacking · Aquisição digital',dna:'DENIS WANG: Growth como motor. Pergunta: "qual canal vai trazer seus primeiros 1000 clientes e quanto vai custar?"'},
+  {name:'Henry Zylberstein',co:'Venture Building',av:'🏗',sk:'Inovação · Venture building',dna:'HENRY ZYLBERSTEIN: Estruturação de negócios complexos. Pergunta: "quem são os parceiros estratégicos que podem acelerar esse negócio?"'},
   {name:'Leandro Farielo',co:'Finanças · Startups',av:'📉',sk:'Unit economics · Eficiência',dna:'LEANDRO FARIELO: Unit economics é a saúde real. Avalia margem de contribuição e burn rate. Pergunta: "qual é sua margem unitária hoje e qual ela precisa ser para o negócio ser sustentável?"'},
-  {name:'C. Zanetti',co:'Direito · Startups · M&A',av:'⚖️',sk:'Jurídico · Regulatório · Cap table',dna:'CRISTIANO ZANETTI (Direito Empresarial e Startups): Especialista em estruturação jurídica de startups, M&A e contratos empresariais. Avalia se o negócio tem as bases legais para crescer sem explodir. Questiona estrutura societária, cap table, acordos de sócios, proteção de propriedade intelectual e compliance regulatório. Para negócios em saúde, finanças, educação e dados — avalia conformidade com LGPD, ANVISA, Banco Central e CVM. Pergunta: "se um investidor fizer due diligence amanhã, quais são os 3 problemas jurídicos que ele vai encontrar que podem travar o deal?" Analisa se o empreendedor está construindo em terreno firme ou sobre uma bomba-relógio legal que vai explodir na hora da captação ou do exit.'}
+  {name:'A. Napoli',co:'Endeavor · Scale-ups',av:'🦁',sk:'Scale-up · Governança',dna:'ANTONIO NAPOLI (Endeavor Brasil): Especialista em scale-ups. Pergunta: "quando você tiver 50 funcionários, o que vai quebrar primeiro na sua gestão?"'},
+  {name:'João Adibe',co:'Gestão · Alta Performance',av:'🏆',sk:'Alta performance · Cultura',dna:'JOÃO ADIBE: Especialista em gestão de pessoas e cultura de alta performance. Pergunta: "quem no seu time você demitiria amanhã se pudesse ser completamente honesto?"'},
+  {name:'L.C. Fernandes',co:'Investidor Serial',av:'🎖',sk:'Legado · Resiliência',dna:'LUIZ CESAR FERNANDES: Décadas construindo e investindo no Brasil. Pergunta: "quando tudo der errado — e vai dar — o que vai te fazer continuar?"'},
+  {name:'C. Zanetti',co:'Direito · Startups · M&A',av:'⚖️',sk:'Jurídico · Cap table',dna:'CRISTIANO ZANETTI: Estruturação jurídica de startups e M&A. Pergunta: "se um investidor fizer due diligence amanhã, quais são os 3 problemas jurídicos que ele vai encontrar?"'},
+  {name:'Flávio Augusto',co:'Wise Up · Geração de Valor',av:'💪',sk:'Vendas em escala · Abundância',dna:'FLÁVIO AUGUSTO (Wise Up): Vendas como única alavanca. Pergunta: "se você saísse de férias por 30 dias amanhã, sua empresa venderia sem você?" Mentalidade de abundância vs escassez.'},
+  {name:'Rogério Romero',co:'BuscaPé',av:'⏱',sk:'Timing de mercado · E-commerce',dna:'ROGÉRIO ROMERO (BuscaPé): Pioneiro do e-commerce brasileiro. Timing de mercado é tudo. Pergunta: "qual é o comportamento que você precisa mudar no seu cliente — e quanto tempo e dinheiro vai custar?"'},
+  {name:'Luis Esteves',co:'BTG Pactual',av:'🏛',sk:'Mercado de capitais · Estrutura',dna:'LUIS ESTEVES (BTG Pactual): Visão de mercado de capitais. Pergunta: "se você fosse ao mercado captar R$50M amanhã, qual seria a primeira pergunta de um gestor de fundo?"'},
+  {name:'André Street',co:'Stone Co.',av:'⚔️',sk:'Fintech · Disrupção',dna:'ANDRÉ STREET (Stone Co.): Entrou num mercado dominado e ganhou. Pergunta: "quem perde dinheiro quando você cresce — e o que eles vão fazer para te parar?"'},
+  {name:'David Vélez',co:'Nubank',av:'💜',sk:'Produto digital · NPS',dna:'DAVID VÉLEZ (Nubank): NPS como métrica de vida ou morte. Pergunta: "qual é a feature do seu produto que faz o cliente ligar para um amigo e falar que precisa conhecer?"'},
+  {name:'Hernán Kazah',co:'Kaszek Ventures',av:'🦅',sk:'VC · Ecossistema latino',dna:'HERNÁN KAZAH (Kaszek Ventures): Maior fundo de VC da América Latina. Pergunta: "você está preparado para o que vem depois do sucesso — quando precisar se reinventar como líder?"'},
+  {name:'Nicolas Szekasy',co:'Kaszek · MercadoLivre',av:'📐',sk:'Estrutura financeira · Exit',dna:'NICOLAS SZEKASY (Kaszek, CFO MercadoLivre): Estruturou as finanças do MercadoLivre. Pergunta: "em qual cenário seu investidor multiplica o capital por 10x — e qual é a probabilidade real?"'},
+  {name:'Linda Rottenberg',co:'Endeavor Global',av:'🌍',sk:'High-impact entrepreneurship',dna:'LINDA ROTTENBERG (Endeavor Global): Criou o conceito de High-Impact Entrepreneurship. Pergunta: "se sua empresa tiver sucesso total, quantas vidas ela vai mudar diretamente?"'}
 ];
 
 function renderDNA(){
@@ -1368,7 +1407,7 @@ function buildQA(){
 // ══════════════════════════════════════════════════════════════
 function renderAnalysis(d){
   document.getElementById('ana-title').textContent=`RELATÓRIO — ${(S.session?.biz||d.biz||'ANÁLISE').toUpperCase()}`;
-  document.getElementById('ana-meta').textContent=`${new Date().toLocaleDateString('pt-BR',{dateStyle:'full'})} · Empreendedor: ${S.session?.name||'—'} · DNA Board 18 mentores`;
+  document.getElementById('ana-meta').textContent=`${new Date().toLocaleDateString('pt-BR',{dateStyle:'full'})} · Empreendedor: ${S.session?.name||'—'} · DNA Board 26 mentores`;
 
   const vc=d.verdict==='APROVADO'?'ok':d.verdict==='REPROVADO'?'no':'rev';
   const vi=d.verdict==='APROVADO'?'✅':d.verdict==='REPROVADO'?'❌':'⚠️';
@@ -1376,7 +1415,7 @@ function renderAnalysis(d){
     <div class="verdict-wrap ${vc}">
       <div>
         <div class="verdict-v">${vi} ${d.verdict}</div>
-        <div class="verdict-sub">VEREDITO DO DNA BOARD · 18 MENTORES</div>
+        <div class="verdict-sub">VEREDITO DO DNA BOARD · 26 MENTORES</div>
         <div class="verdict-chips">${DNA.map(p=>`<span class="vchip">${p.av} ${p.name.split(' ')[0]}</span>`).join('')}</div>
       </div>
       <div class="verdict-resumo">"${d.resumo||''}"</div>
@@ -1476,9 +1515,9 @@ async function callClaude(messages, maxTokens=4000){
 // ═══════════════════════════════════════════════
 // SYSTEM PROMPT — AS 4 CAMADAS
 // ═══════════════════════════════════════════════
-const SYSTEM_PROMPT=`Você é o VentureCheck DNA Board — fusão de 14 grandes empreendedores numa inteligência única de análise de negócios.
+const SYSTEM_PROMPT=`Você é o VentureCheck DNA Board — fusão de 26 dos maiores empreendedores e investidores do Brasil e do mundo numa inteligência única de análise de negócios.
 
-DNA DOS 14 MENTORES:
+DNA DOS 26 MENTORES:
 ${DNA.map(p=>p.dna).join('\n')}
 
 ═══ CAMADA 1 — IDENTIDADE ═══
@@ -1531,6 +1570,15 @@ Gere perguntas que NENHUM formulário genérico faria. Perguntas específicas pa
 Responda SOMENTE com este JSON:
 {
   "intro": "frase de 1-2 linhas contextualizando o que você identificou na descrição e o que vai explorar nas perguntas",
+  "imi": {
+    "score": 0-100,
+    "nivel": "Semente|Germinando|Crescendo|Pronta",
+    "problema": 0-20,
+    "solucao": 0-20,
+    "mercado": 0-20,
+    "founder": 0-20,
+    "tracao": 0-20
+  },
   "questions": [
     {
       "question": "a pergunta completa e específica",
@@ -1575,7 +1623,7 @@ Máximo 4 perguntas complementares se necessário.`}];
 }
 
 function finalPrompt(qa){
-  return[{role:'user',content:`Análise completa de viabilidade — DNA Board 18 mentores.
+  return[{role:'user',content:`Análise completa de viabilidade — DNA Board 26 mentores.
 
 ${qa}
 
