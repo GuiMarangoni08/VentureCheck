@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="VentureCheck — O Guia do Empreendedor do Brasil. DNA Board de 26 mentores analisa sua ideia com IMI Score.">
+<title>VentureCheck — O Guia do Empreendedor do Brasil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#07071a;--bg2:#0d0d24;--bg3:#111130;
+  --card:rgba(255,255,255,0.035);--card-h:rgba(255,255,255,0.065);
+  --border:rgba(255,255,255,0.07);--border-a:rgba(99,102,241,0.45);
+  --p:#6366f1;--ps:#4f46e5;--sec:#8b5cf6;--acc:#06b6d4;
+  --ok:#10b981;--warn:#f59e0b;--err:#ef4444;
+  --t:#e2e8f0;--tm:#94a3b8;--td:#475569;
+  --grad:linear-gradient(135deg,#6366f1,#8b5cf6);
+  --grad2:linear-gradient(135deg,#06b6d4,#6366f1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t);font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Sora',sans-serif}
+a{color:var(--acc);text-decoration:none}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--p);border-radius:3px}
+
+/* UTILS */
+.hidden{display:none!important}
+.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}
+.w-full{width:100%}.h-full{height:100%}.text-center{text-align:center}.relative{position:relative}.absolute{position:absolute}
+.text-sm{font-size:.875rem}.text-xs{font-size:.75rem}.text-lg{font-size:1.125rem}.text-xl{font-size:1.25rem}.text-2xl{font-size:1.5rem}.text-3xl{font-size:1.875rem}.text-4xl{font-size:2.25rem}.text-5xl{font-size:3rem}
+.font-bold{font-weight:700}.font-semibold{font-weight:600}.font-medium{font-weight:500}
+.text-muted{color:var(--tm)}.text-dim{color:var(--td)}.text-ok{color:var(--ok)}.text-warn{color:var(--warn)}.text-err{color:var(--err)}.text-acc{color:var(--acc)}.text-p{color:var(--p)}
+.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.mt-8{margin-top:2rem}
+.mb-2{margin-bottom:.5rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}
+.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}
+.rounded{border-radius:.5rem}.rounded-lg{border-radius:.75rem}.rounded-xl{border-radius:1rem}.rounded-2xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}
+.border{border:1px solid var(--border)}.border-a{border-color:var(--border-a)}
+.overflow-hidden{overflow:hidden}
+.grid{display:grid}
+.opacity-50{opacity:.5}.opacity-75{opacity:.75}
+.pointer{cursor:pointer}
+
+/* CONTAINER */
+.container{max-width:1100px;margin:0 auto;padding:0 1.5rem}
+.container-lg{max-width:1280px;margin:0 auto;padding:0 1.5rem}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.5rem;transition:all .2s}
+.card:hover{background:var(--card-h);border-color:var(--border-a)}
+.card-glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:1rem}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.75rem;border-radius:.75rem;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;border:none;font-family:'Inter',sans-serif}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 4px 24px rgba(99,102,241,.35)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(99,102,241,.5)}
+.btn-secondary{background:transparent;color:var(--t);border:1px solid var(--border-a)}
+.btn-secondary:hover{background:rgba(99,102,241,.1);border-color:var(--p)}
+.btn-accent{background:linear-gradient(135deg,#06b6d4,#0284c7);color:#fff}
+.btn-accent:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(6,182,212,.4)}
+.btn-ok{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+.btn-sm{padding:.5rem 1.1rem;font-size:.8rem}
+.btn-lg{padding:1rem 2.5rem;font-size:1.1rem}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+
+/* INPUTS */
+.input,.textarea,.select{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:.65rem;padding:.75rem 1rem;color:var(--t);font-size:.95rem;font-family:'Inter',sans-serif;transition:all .2s;outline:none}
+.input:focus,.textarea:focus,.select:focus{border-color:var(--p);background:rgba(99,102,241,.07);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+.textarea{resize:vertical;min-height:110px}
+.select option{background:var(--bg2)}
+.label{display:block;font-size:.85rem;font-weight:500;color:var(--tm);margin-bottom:.4rem}
+.field{margin-bottom:1.25rem}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .75rem;border-radius:9999px;font-size:.75rem;font-weight:600}
+.badge-ok{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3)}
+.badge-warn{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+.badge-err{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.badge-p{background:rgba(99,102,241,.15);color:#818cf8;border:1px solid rgba(99,102,241,.3)}
+.badge-acc{background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3)}
+
+/* GRADIENT TEXT */
+.grad-text{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.grad-text2{background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* =========== NAV =========== */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(7,7,26,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.5rem;max-width:1280px;margin:0 auto}
+.nav-logo{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer}
+.nav-steps{display:flex;gap:.25rem}
+.nav-step{width:8px;height:8px;border-radius:50%;background:var(--td);transition:all .3s;cursor:pointer}
+.nav-step.active{background:var(--p);box-shadow:0 0 8px var(--p)}
+.nav-step.done{background:var(--ok)}
+.nav-right{display:flex;align-items:center;gap:.75rem}
+.save-indicator{font-size:.75rem;color:var(--tm);display:flex;align-items:center;gap:.3rem}
+.save-dot{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+.save-dot.saving{animation:pulse-dot 1s infinite;background:var(--warn)}
+
+/* =========== HERO =========== */
+#screen-hero{padding-top:5rem;min-height:100vh;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.25}
+.orb1{width:600px;height:600px;background:radial-gradient(circle,#6366f1,transparent);top:-200px;left:-100px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,#8b5cf6,transparent);bottom:-100px;right:-50px}
+.orb3{width:300px;height:300px;background:radial-gradient(circle,#06b6d4,transparent);top:30%;left:50%}
+.hero-content{position:relative;z-index:1;text-align:center;padding:3rem 1.5rem}
+.hero-kicker{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;border-radius:9999px;border:1px solid rgba(99,102,241,.4);background:rgba(99,102,241,.1);font-size:.8rem;font-weight:600;color:#a5b4fc;margin-bottom:2rem;letter-spacing:.05em}
+.hero-kicker-dot{width:6px;height:6px;border-radius:50%;background:#6366f1;animation:pulse-dot 2s infinite}
+.hero-title{font-family:'Sora',sans-serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;line-height:1.1;margin-bottom:1.25rem;letter-spacing:-.02em}
+.hero-title span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:1.2rem;color:var(--tm);max-width:600px;margin:0 auto 2.5rem}
+.hero-cta-group{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem}
+.hero-stats{display:flex;gap:2.5rem;justify-content:center;flex-wrap:wrap;padding:2rem;border-radius:1.5rem;border:1px solid var(--border);background:var(--card);max-width:700px;margin:0 auto}
+.stat-item{text-align:center}
+.stat-number{font-family:'Sora',sans-serif;font-size:2rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-size:.8rem;color:var(--tm)}
+.hero-scroll{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;color:var(--td);font-size:.75rem;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-8px)}}
+
+/* =========== SCREEN WRAPPER =========== */
+.screen{padding-top:5rem;min-height:100vh;padding-bottom:4rem}
+.screen-header{text-align:center;padding:3rem 1.5rem 2rem;position:relative}
+.screen-step{font-size:.75rem;font-weight:700;letter-spacing:.1em;color:var(--p);text-transform:uppercase;margin-bottom:.75rem}
+.screen-title{font-size:clamp(1.75rem,4vw,2.5rem);font-weight:800;margin-bottom:.75rem}
+.screen-desc{color:var(--tm);max-width:560px;margin:0 auto}
+.screen-nav{display:flex;justify-content:space-between;align-items:center;margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border);flex-wrap:wrap;gap:1rem}
+
+/* =========== IDEA INPUT =========== */
+.idea-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+@media(max-width:640px){.idea-grid{grid-template-columns:1fr}}
+.idea-full{grid-column:1/-1}
+
+/* =========== IMI =========== */
+.imi-layout{display:grid;grid-template-columns:1fr 380px;gap:2rem;align-items:start}
+@media(max-width:900px){.imi-layout{grid-template-columns:1fr}}
+.imi-chart-wrap{position:sticky;top:6rem}
+.imi-score-display{text-align:center;margin-bottom:1.5rem}
+.imi-big-score{font-family:'Sora',sans-serif;font-size:4rem;font-weight:800;line-height:1}
+.imi-score-label{font-size:.9rem;color:var(--tm);margin-top:.25rem}
+.imi-dimension{margin-bottom:1.75rem}
+.imi-dim-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.imi-dim-name{font-weight:600;font-size:.95rem}
+.imi-dim-value{font-family:'Sora',sans-serif;font-weight:700;font-size:1.1rem}
+.imi-dim-desc{font-size:.8rem;color:var(--tm);margin-bottom:.6rem}
+.imi-slider{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer}
+.imi-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--grad);cursor:pointer;box-shadow:0 2px 8px rgba(99,102,241,.5)}
+.imi-slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--p);cursor:pointer;border:none}
+
+/* =========== DNA BOARD =========== */
+.dna-info{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:1rem;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem;font-size:.9rem}
+.dna-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
+.mentor-card{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.25rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.mentor-card:hover{background:var(--card-h);border-color:var(--border-a);transform:translateY(-2px)}
+.mentor-card.selected{border-color:var(--p);background:rgba(99,102,241,.1);box-shadow:0 0 0 1px var(--p),0 8px 24px rgba(99,102,241,.2)}
+.mentor-card.selected::before{content:'✓';position:absolute;top:.75rem;right:.75rem;width:22px;height:22px;border-radius:50%;background:var(--p);color:#fff;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.mentor-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.75rem;flex-shrink:0}
+.mentor-name{font-weight:700;font-size:.95rem;margin-bottom:.2rem;line-height:1.3}
+.mentor-role{font-size:.78rem;color:var(--tm);margin-bottom:.5rem}
+.mentor-tags{display:flex;flex-wrap:wrap;gap:.3rem}
+.mentor-tag{font-size:.68rem;padding:.15rem .5rem;border-radius:9999px;background:rgba(99,102,241,.12);color:#a5b4fc;border:1px solid rgba(99,102,241,.2)}
+.dna-selection-bar{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;border-radius:.75rem;border:1px solid var(--border);background:var(--card);margin-bottom:1.5rem;flex-wrap:wrap}
+.selected-mentor-chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .65rem;border-radius:9999px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);font-size:.78rem;font-weight:500}
+.chip-remove{cursor:pointer;opacity:.7;font-size:.7rem;margin-left:.1rem}
+.chip-remove:hover{opacity:1}
+
+/* =========== ANALYZING =========== */
+#screen-analyzing{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:2rem}
+.analyze-spinner{width:80px;height:80px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--p);animation:spin 1s linear infinite;margin:0 auto 2rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.analyze-steps{list-style:none;text-align:left;max-width:400px;margin:2rem auto 0}
+.analyze-step{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;font-size:.95rem;color:var(--tm);border-bottom:1px solid var(--border)}
+.analyze-step:last-child{border-bottom:none}
+.step-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+.step-icon.pending{background:rgba(255,255,255,.05);border:1px solid var(--border)}
+.step-icon.running{background:rgba(99,102,241,.15);border:1px solid var(--p);color:var(--p);animation:pulse-dot 1s infinite}
+.step-icon.done{background:rgba(16,185,129,.15);border:1px solid var(--ok);color:var(--ok)}
+
+/* =========== VERDICT =========== */
+.verdict-banner{border-radius:1.5rem;padding:2.5rem;text-align:center;margin-bottom:2rem;position:relative;overflow:hidden}
+.verdict-banner.sustenta{background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(5,150,105,.1));border:2px solid rgba(16,185,129,.4)}
+.verdict-banner.incerto{background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(217,119,6,.1));border:2px solid rgba(245,158,11,.4)}
+.verdict-banner.nao{background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(220,38,38,.1));border:2px solid rgba(239,68,68,.4)}
+.verdict-label{font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem;opacity:.8}
+.verdict-title{font-family:'Sora',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;margin-bottom:.75rem}
+.verdict-sustenta .verdict-title{color:#34d399}
+.verdict-incerto .verdict-title{color:#fbbf24}
+.verdict-nao .verdict-title{color:#f87171}
+.verdict-desc{color:var(--tm);max-width:560px;margin:0 auto;font-size:1rem}
+.imi-bars{display:grid;gap:.75rem;margin-bottom:2rem}
+.imi-bar-row{display:grid;grid-template-columns:1fr 60px 200px;gap:1rem;align-items:center}
+.imi-bar-track{height:8px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.imi-bar-fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.analysis-section{margin-bottom:2rem}
+.analysis-section-title{font-size:1rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.analysis-content{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.5rem;color:var(--tm);font-size:.95rem;line-height:1.7;white-space:pre-wrap}
+.mentor-insight{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.25rem;margin-bottom:.75rem;display:flex;gap:1rem}
+.insight-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;color:#fff;flex-shrink:0}
+.insight-body{flex:1;min-width:0}
+.insight-name{font-weight:700;font-size:.9rem;margin-bottom:.3rem}
+.insight-text{font-size:.88rem;color:var(--tm);line-height:1.6}
+
+/* =========== MODULES =========== */
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.25rem}
+.module-card{background:var(--card);border:1px solid var(--border);border-radius:1rem;overflow:hidden;transition:all .25s}
+.module-card:hover{border-color:var(--border-a)}
+.module-header{padding:1.25rem;display:flex;align-items:center;gap:1rem;cursor:pointer}
+.module-icon{width:48px;height:48px;border-radius:.75rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.module-info{flex:1;min-width:0}
+.module-name{font-weight:700;margin-bottom:.2rem}
+.module-desc{font-size:.82rem;color:var(--tm)}
+.module-body{padding:0 1.25rem 1.25rem;border-top:1px solid var(--border);display:none}
+.module-body.open{display:block}
+.module-body-content{padding-top:1.25rem;font-size:.9rem;color:var(--tm);line-height:1.7;white-space:pre-wrap}
+.module-actions{display:flex;gap:.75rem;margin-top:1rem}
+.module-lock{display:flex;align-items:center;gap:.5rem;padding:.75rem;border-radius:.75rem;background:rgba(99,102,241,.06);border:1px dashed rgba(99,102,241,.3);font-size:.85rem;color:var(--tm);margin-top:1rem}
+
+/* =========== PRICING =========== */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;max-width:960px;margin:0 auto}
+.price-card{background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:2rem;position:relative;transition:all .3s;display:flex;flex-direction:column}
+.price-card.featured{border-color:var(--p);background:rgba(99,102,241,.08);box-shadow:0 0 0 1px var(--p),0 24px 48px rgba(99,102,241,.2)}
+.price-card.featured::before{content:'MAIS POPULAR';position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;font-size:.7rem;font-weight:700;letter-spacing:.08em;padding:.3rem 1rem;border-radius:9999px}
+.price-name{font-family:'Sora',sans-serif;font-size:1.25rem;font-weight:700;margin-bottom:.5rem}
+.price-amount{font-family:'Sora',sans-serif;font-size:2.5rem;font-weight:800;line-height:1;margin-bottom:.25rem}
+.price-amount span{font-size:1.1rem;font-weight:500;color:var(--tm)}
+.price-period{font-size:.82rem;color:var(--tm);margin-bottom:1.5rem}
+.price-features{list-style:none;margin-bottom:1.5rem;flex:1}
+.price-features li{display:flex;align-items:flex-start;gap:.6rem;padding:.5rem 0;font-size:.9rem;border-bottom:1px solid var(--border)}
+.price-features li:last-child{border-bottom:none}
+.feat-icon{flex-shrink:0;margin-top:.1rem}
+
+/* =========== REPORT =========== */
+.report-actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.report-section{margin-bottom:2rem}
+.report-section-title{font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem}
+.report-block{background:var(--card);border:1px solid var(--border);border-radius:.75rem;padding:1.25rem;margin-bottom:.75rem}
+.report-block-title{font-weight:600;font-size:.9rem;margin-bottom:.5rem}
+.report-block-body{font-size:.88rem;color:var(--tm);line-height:1.7;white-space:pre-wrap}
+
+/* =========== CONFIG MODAL =========== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:999;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal{background:var(--bg2);border:1px solid var(--border-a);border-radius:1.5rem;padding:2rem;max-width:480px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Sora',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:.5rem}
+.modal-desc{font-size:.9rem;color:var(--tm);margin-bottom:1.5rem}
+.modal-footer{display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem}
+
+/* =========== TOAST =========== */
+.toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:1000;display:flex;flex-direction:column;gap:.5rem}
+.toast{background:var(--bg3);border:1px solid var(--border);border-radius:.75rem;padding:.75rem 1rem;font-size:.875rem;display:flex;align-items:center;gap:.5rem;animation:toast-in .3s ease;max-width:320px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+@keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.toast.ok{border-left:3px solid var(--ok)}.toast.err{border-left:3px solid var(--err)}.toast.info{border-left:3px solid var(--p)}
+
+/* GLOW LINES */
+.glow-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--p),transparent);opacity:.4}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .nav-steps{display:none}
+  .pricing-grid{grid-template-columns:1fr}
+  .imi-layout{grid-template-columns:1fr}
+  .imi-bar-row{grid-template-columns:1fr 50px}
+  .imi-bar-row .imi-bar-track{display:none}
+  .hero-stats{gap:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="goHome()">VentureCheck</div>
+    <div class="nav-steps">
+      <div class="nav-step" id="ns-1" title="Sua Ideia"></div>
+      <div class="nav-step" id="ns-2" title="IMI Score"></div>
+      <div class="nav-step" id="ns-3" title="DNA Board"></div>
+      <div class="nav-step" id="ns-4" title="Análise"></div>
+      <div class="nav-step" id="ns-5" title="Módulos"></div>
+    </div>
+    <div class="nav-right">
+      <div class="save-indicator" id="save-indicator" style="display:none">
+        <div class="save-dot" id="save-dot"></div>
+        <span id="save-text">Salvo</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="openConfig()">⚙️ Config</button>
+    </div>
+  </div>
+</nav>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- CONFIG MODAL -->
+<div class="modal-overlay hidden" id="modal-config">
+  <div class="modal">
+    <div class="modal-title">⚙️ Configuração da API</div>
+    <div class="modal-desc">Configure sua chave da API Anthropic para ativar a análise com IA. A chave é salva apenas no seu navegador.</div>
+    <div class="field">
+      <label class="label">Chave API Anthropic</label>
+      <input type="password" id="cfg-api-key" class="input" placeholder="sk-ant-...">
+      <div class="text-xs text-muted mt-1">Obtenha em console.anthropic.com → API Keys</div>
+    </div>
+    <div class="field">
+      <label class="label">Proxy URL (opcional)</label>
+      <input type="text" id="cfg-proxy-url" class="input" placeholder="https://meu-proxy.vercel.app/api/claude">
+      <div class="text-xs text-muted mt-1">Use um proxy se o CORS bloquear chamadas diretas ao browser</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeConfig()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveConfig()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN: HERO -->
+<!-- ============================================================ -->
+<div id="screen-hero" class="screen">
+  <div class="hero-bg">
+    <div class="hero-orb orb1"></div>
+    <div class="hero-orb orb2"></div>
+    <div class="hero-orb orb3"></div>
+  </div>
+  <div class="hero-content container">
+    <div class="hero-kicker">
+      <div class="hero-kicker-dot"></div>
+      O Guia do Empreendedor do Brasil
+    </div>
+    <h1 class="hero-title">
+      SUA IDEIA MERECE<br><span>A VERDADE</span>
+    </h1>
+    <p class="hero-sub">O DNA Board de 26 dos maiores empreendedores do Brasil e do mundo analisa sua ideia com rigor, honestidade e dados reais.</p>
+    <div class="hero-cta-group">
+      <button class="btn btn-primary btn-lg" onclick="navigate('idea')">🚀 Validar Minha Ideia</button>
+      <button class="btn btn-secondary btn-lg" onclick="scrollToSection('pricing')">Ver Planos</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-number">26</div>
+        <div class="stat-label">Mentores no DNA Board</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">5</div>
+        <div class="stat-label">Dimensões IMI Score</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">6</div>
+        <div class="stat-label">Módulos de Análise</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">3</div>
+        <div class="stat-label">Planos Disponíveis</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING SECTION (embedded in hero screen) -->
+  <div id="pricing" class="container" style="margin-top:5rem;padding-bottom:5rem">
+    <div class="screen-header" style="padding-top:0">
+      <div class="screen-step">Planos</div>
+      <h2 class="screen-title">Escolha sua <span class="grad-text">jornada</span></h2>
+      <p class="screen-desc">Do diagnóstico inicial à preparação para captação de investimento.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Validação</div>
+        <div class="price-amount"><span>R$</span>149</div>
+        <div class="price-period">análise única</div>
+        <ul class="price-features">
+          <li><span class="feat-icon text-ok">✓</span>IMI Score completo (5 dimensões)</li>
+          <li><span class="feat-icon text-ok">✓</span>Veredito preliminar</li>
+          <li><span class="feat-icon text-ok">✓</span>Análise de mercado básica</li>
+          <li><span class="feat-icon text-ok">✓</span>5 mentores do DNA Board</li>
+          <li><span class="feat-icon text-ok">✓</span>Módulo de Viabilidade</li>
+          <li><span class="feat-icon text-dim">—</span><span class="opacity-50">Módulos Financeiro e MVP</span></li>
+          <li><span class="feat-icon text-dim">—</span><span class="opacity-50">Roadmap e Priorização</span></li>
+        </ul>
+        <button class="btn btn-secondary w-full" onclick="startPlan('validacao')">Começar Validação</button>
+      </div>
+      <div class="price-card featured">
+        <div class="price-name">Diagnóstico</div>
+        <div class="price-amount"><span>R$</span>497</div>
+        <div class="price-period">análise completa</div>
+        <ul class="price-features">
+          <li><span class="feat-icon text-ok">✓</span>Tudo do plano Validação</li>
+          <li><span class="feat-icon text-ok">✓</span>26 mentores disponíveis</li>
+          <li><span class="feat-icon text-ok">✓</span>6 módulos completos</li>
+          <li><span class="feat-icon text-ok">✓</span>Análise financeira detalhada</li>
+          <li><span class="feat-icon text-ok">✓</span>Plano de ação personalizado</li>
+          <li><span class="feat-icon text-ok">✓</span>Exportação em PDF</li>
+          <li><span class="feat-icon text-ok">✓</span>Análise de riscos completa</li>
+        </ul>
+        <button class="btn btn-primary w-full" onclick="startPlan('diagnostico')">Começar Diagnóstico</button>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Captação</div>
+        <div class="price-amount"><span>R$</span>999</div>
+        <div class="price-period">preparação para investidores</div>
+        <ul class="price-features">
+          <li><span class="feat-icon text-ok">✓</span>Tudo do plano Diagnóstico</li>
+          <li><span class="feat-icon text-ok">✓</span>Pitch Deck estruturado</li>
+          <li><span class="feat-icon text-ok">✓</span>Modelagem financeira 3 anos</li>
+          <li><span class="feat-icon text-ok">✓</span>Análise de valuation</li>
+          <li><span class="feat-icon text-ok">✓</span>Estratégia de captação</li>
+          <li><span class="feat-icon text-ok">✓</span>Revisões ilimitadas (30 dias)</li>
+          <li><span class="feat-icon text-ok">✓</span>Acesso a rede de investidores</li>
+        </ul>
+        <button class="btn btn-accent w-full" onclick="startPlan('captacao')">Preparar Captação</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN: IDEIA -->
+<!-- ============================================================ -->
+<div id="screen-idea" class="screen hidden">
+  <div class="container">
+    <div class="screen-header">
+      <div class="screen-step">Passo 1 de 3</div>
+      <h2 class="screen-title">Conte sobre <span class="grad-text">sua ideia</span></h2>
+      <p class="screen-desc">Seja específico. Quanto mais contexto você der, mais precisa será a análise do DNA Board.</p>
+    </div>
+    <div style="max-width:720px;margin:0 auto">
+      <div class="card">
+        <div class="idea-grid">
+          <div class="field">
+            <label class="label">Nome do Negócio / Projeto *</label>
+            <input id="idea-name" class="input" placeholder="Ex: AppMed, FazendaConecta, ContratAI...">
+          </div>
+          <div class="field">
+            <label class="label">Segmento / Setor *</label>
+            <select id="idea-segment" class="select">
+              <option value="">Selecione o segmento</option>
+              <option>SaaS / Software</option>
+              <option>Marketplace</option>
+              <option>Fintech</option>
+              <option>Healthtech</option>
+              <option>Edtech</option>
+              <option>Agritech</option>
+              <option>Varejo / E-commerce</option>
+              <option>Logística</option>
+              <option>Foodtech</option>
+              <option>Proptech</option>
+              <option>Legaltech</option>
+              <option>HR Tech</option>
+              <option>Deep Tech / IA</option>
+              <option>Serviços / Consultoria</option>
+              <option>Indústria / Manufatura</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="field idea-full">
+            <label class="label">Descrição da Ideia *</label>
+            <textarea id="idea-desc" class="textarea" placeholder="O que faz? Para quem? Qual problema resolve? Como funciona? Seja detalhado — mínimo 3 frases."></textarea>
+          </div>
+          <div class="field">
+            <label class="label">Público-Alvo *</label>
+            <input id="idea-audience" class="input" placeholder="Ex: PMEs do agronegócio com 10-100 funcionários">
+          </div>
+          <div class="field">
+            <label class="label">Modelo de Receita *</label>
+            <select id="idea-revenue" class="select">
+              <option value="">Como vai ganhar dinheiro?</option>
+              <option>Assinatura mensal (SaaS)</option>
+              <option>Comissão / Taxa por transação</option>
+              <option>Venda direta (produto)</option>
+              <option>Licenciamento</option>
+              <option>Freemium com upgrade pago</option>
+              <option>Publicidade / Mídia</option>
+              <option>Marketplace (% da venda)</option>
+              <option>Serviço / Projeto</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label">Estágio Atual</label>
+            <select id="idea-stage" class="select">
+              <option value="">Onde você está hoje?</option>
+              <option>Apenas uma ideia</option>
+              <option>Pesquisando o mercado</option>
+              <option>Desenvolvendo o produto</option>
+              <option>MVP pronto</option>
+              <option>Primeiros clientes</option>
+              <option>Crescimento / Escala</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label">Investimento Inicial Estimado</label>
+            <select id="idea-investment" class="select">
+              <option value="">Quanto vai precisar?</option>
+              <option>Abaixo de R$10k</option>
+              <option>R$10k – R$50k</option>
+              <option>R$50k – R$200k</option>
+              <option>R$200k – R$1M</option>
+              <option>Acima de R$1M</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label">Principal Concorrente (opcional)</label>
+            <input id="idea-competitor" class="input" placeholder="Ex: Totvs, Ifood, nenhum ainda...">
+          </div>
+        </div>
+      </div>
+      <div class="screen-nav">
+        <button class="btn btn-secondary" onclick="navigate('hero')">← Voltar</button>
+        <button class="btn btn-primary" onclick="goToIMI()">Próximo: IMI Score →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN: IMI -->
+<!-- ============================================================ -->
+<div id="screen-imi" class="screen hidden">
+  <div class="container">
+    <div class="screen-header">
+      <div class="screen-step">Passo 2 de 3 — IMI Score</div>
+      <h2 class="screen-title">Índice de Maturidade <span class="grad-text">da Ideia</span></h2>
+      <p class="screen-desc">Avalie sua ideia honestamente em 5 dimensões. O DNA Board vai cruzar essa autoavaliação com a análise de mercado.</p>
+    </div>
+    <div class="imi-layout" style="max-width:960px;margin:0 auto">
+      <div>
+        <!-- Dimension 1 -->
+        <div class="card imi-dimension">
+          <div class="imi-dim-header">
+            <div>
+              <div class="imi-dim-name">🔥 Dor Real do Cliente</div>
+              <div class="imi-dim-desc">O quanto o problema é urgente, frequente e doloroso para quem vai pagar?</div>
+            </div>
+            <div class="imi-dim-value grad-text" id="val-dor">5</div>
+          </div>
+          <input type="range" class="imi-slider" min="0" max="10" value="5" id="slider-dor" oninput="updateIMI('dor',this.value)">
+          <div class="flex justify-between text-xs text-dim mt-1"><span>Irrelevante</span><span>Dor Insuportável</span></div>
+        </div>
+        <!-- Dimension 2 -->
+        <div class="card imi-dimension">
+          <div class="imi-dim-header">
+            <div>
+              <div class="imi-dim-name">📊 Tamanho do Mercado (TAM)</div>
+              <div class="imi-dim-desc">O mercado total endereçável é grande o suficiente para construir um negócio relevante?</div>
+            </div>
+            <div class="imi-dim-value grad-text" id="val-tam">5</div>
+          </div>
+          <input type="range" class="imi-slider" min="0" max="10" value="5" id="slider-tam" oninput="updateIMI('tam',this.value)">
+          <div class="flex justify-between text-xs text-dim mt-1"><span>Nicho muito pequeno</span><span>Bilhões de reais</span></div>
+        </div>
+        <!-- Dimension 3 -->
+        <div class="card imi-dimension">
+          <div class="imi-dim-header">
+            <div>
+              <div class="imi-dim-name">⚔️ Vantagem Competitiva</div>
+              <div class="imi-dim-desc">Por que você e por que agora? Qual o diferencial que é difícil de copiar?</div>
+            </div>
+            <div class="imi-dim-value grad-text" id="val-comp">5</div>
+          </div>
+          <input type="range" class="imi-slider" min="0" max="10" value="5" id="slider-comp" oninput="updateIMI('comp',this.value)">
+          <div class="flex justify-between text-xs text-dim mt-1"><span>Fácil de copiar</span><span>Moat profundo</span></div>
+        </div>
+        <!-- Dimension 4 -->
+        <div class="card imi-dimension">
+          <div class="imi-dim-header">
+            <div>
+              <div class="imi-dim-name">💰 Viabilidade Financeira</div>
+              <div class="imi-dim-desc">O modelo de negócio tem potencial de margem saudável e unit economics positivo?</div>
+            </div>
+            <div class="imi-dim-value grad-text" id="val-fin">5</div>
+          </div>
+          <input type="range" class="imi-slider" min="0" max="10" value="5" id="slider-fin" oninput="updateIMI('fin',this.value)">
+          <div class="flex justify-between text-xs text-dim mt-1"><span>Inviável</span><span>Altamente lucrativo</span></div>
+        </div>
+        <!-- Dimension 5 -->
+        <div class="card imi-dimension">
+          <div class="imi-dim-header">
+            <div>
+              <div class="imi-dim-name">🚀 Capacidade de Execução</div>
+              <div class="imi-dim-desc">Você tem time, recursos, conhecimento e tempo para executar esse negócio?</div>
+            </div>
+            <div class="imi-dim-value grad-text" id="val-exec">5</div>
+          </div>
+          <input type="range" class="imi-slider" min="0" max="10" value="5" id="slider-exec" oninput="updateIMI('exec',this.value)">
+          <div class="flex justify-between text-xs text-dim mt-1"><span>Zero preparo</span><span>Time completo e pronto</span></div>
+        </div>
+      </div>
+      <div class="imi-chart-wrap">
+        <div class="card">
+          <div class="imi-score-display">
+            <div class="imi-big-score" id="imi-total-score" style="color:#6366f1">5.0</div>
+            <div class="imi-score-label">IMI Score</div>
+            <div class="badge badge-warn mt-2" id="imi-verdict-badge">INCERTO</div>
+          </div>
+          <canvas id="imi-chart" height="280"></canvas>
+          <div class="mt-4 text-xs text-muted text-center" id="imi-interpretation">
+            Ajuste os sliders para calcular seu IMI Score
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-nav" style="max-width:960px;margin:0 auto">
+      <button class="btn btn-secondary" onclick="navigate('idea')">← Voltar</button>
+      <button class="btn btn-primary" onclick="navigate('dna')">Próximo: DNA Board →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN: DNA BOARD -->
+<!-- ============================================================ -->
+<div id="screen-dna" class="screen hidden">
+  <div class="container-lg">
+    <div class="screen-header">
+      <div class="screen-step">Passo 3 de 3 — DNA Board</div>
+      <h2 class="screen-title">Escolha seus <span class="grad-text">mentores</span></h2>
+      <p class="screen-desc">Selecione de 1 a 5 mentores. Cada um trará sua perspectiva única para analisar sua ideia.</p>
+    </div>
+    <div class="dna-selection-bar" id="selection-bar">
+      <span class="text-sm text-muted">Mentores selecionados:</span>
+      <div id="selected-chips" style="display:flex;flex-wrap:wrap;gap:.4rem;flex:1"></div>
+      <span class="text-sm font-semibold" id="selected-count">0/5</span>
+    </div>
+    <div class="dna-grid" id="dna-grid"></div>
+    <div class="screen-nav">
+      <button class="btn btn-secondary" onclick="navigate('imi')">← Voltar</button>
+      <button class="btn btn-primary btn-lg" id="btn-analyze" onclick="startAnalysis()" disabled>🧬 Analisar com DNA Board →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN: ANALYZING -->
+<!-- ============================================================ -->
+<div id="screen-analyzing" class="screen hidden" style="display:none">
+  <div style="text-align:center;padding:4rem 1.5rem">
+    <div class="analyze-spinner"></div>
+    <h2 style="font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:700;margin-bottom:.75rem">DNA Board Analisando…</h2>
+    <p class="text-muted" style="max-width:440px;margin:0 auto">Seus mentores estão revisando cada dimensão da sua ideia com rigor e honestidade.</p>
+    <ul class="analyze-steps" id="analyze-steps">
+      <li class="analyze-step" id="step-market"><div class="step-icon pending">1</div>Análise de mercado independente</li>
+      <li class="analyze-step" id="step-imi"><div class="step-icon pending">2</div>Cruzamento com IMI Score</li>
+      <li class="analyze-step" id="step-mentors"><div class="step-icon pending">3</div>Perspectivas dos mentores</li>
+      <li class="analyze-step" id="step-verdict"><div class="step-icon pending">4</div>Veredito preliminar</li>
+      <li class="analyze-step" id="step-actions"><div class="step-icon pending">5</div>Plano de providências</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN: VERDICT -->
+<!-- ============================================================ -->
+<div id="screen-verdict" class="screen hidden">
+  <div class="container" style="max-width:860px">
+    <div class="screen-header">
+      <div class="screen-step">Resultado da Análise</div>
+      <h2 class="screen-title">Veredito do <span class="grad-text">DNA Board</span></h2>
+    </div>
+
+    <!-- VERDICT BANNER -->
+    <div id="verdict-banner" class="verdict-banner sustenta">
+      <div class="verdict-label">Veredito Preliminar</div>
+      <div class="verdict-title" id="verdict-title">MERCADO SUSTENTA</div>
+      <p id="verdict-desc" class="verdict-desc"></p>
+    </div>
+
+    <!-- IMI BREAKDOWN -->
+    <div class="card mb-4">
+      <div class="analysis-section-title text-lg font-bold mb-4">📊 IMI Score — Detalhamento</div>
+      <div class="imi-bars" id="imi-breakdown"></div>
+      <div class="flex items-center gap-4 mt-4 pt-4" style="border-top:1px solid var(--border)">
+        <div>
+          <div class="text-xs text-muted">IMI Final</div>
+          <div class="text-3xl font-bold grad-text" id="verdict-imi-score">5.0</div>
+        </div>
+        <div style="flex:1">
+          <div class="text-xs text-muted mb-2">Interpretação</div>
+          <div class="text-sm" id="imi-full-interpretation"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARKET ANALYSIS -->
+    <div class="analysis-section">
+      <div class="analysis-section-title">🌎 Análise de Mercado Independente</div>
+      <div class="analysis-content" id="market-analysis">Carregando análise…</div>
+    </div>
+
+    <!-- MENTOR INSIGHTS -->
+    <div class="analysis-section">
+      <div class="analysis-section-title">🧬 Perspectivas do DNA Board</div>
+      <div id="mentor-insights"></div>
+    </div>
+
+    <!-- ACTION ITEMS -->
+    <div class="analysis-section">
+      <div class="analysis-section-title">📋 Providências Imediatas</div>
+      <div class="analysis-content" id="action-items">Carregando…</div>
+    </div>
+
+    <div class="screen-nav">
+      <button class="btn btn-secondary" onclick="navigate('dna')">← Refazer Análise</button>
+      <button class="btn btn-primary" onclick="navigate('modules')">Ver Módulos Detalhados →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN: MODULES -->
+<!-- ============================================================ -->
+<div id="screen-modules" class="screen hidden">
+  <div class="container">
+    <div class="screen-header">
+      <div class="screen-step">Análise Profunda</div>
+      <h2 class="screen-title">6 Módulos de <span class="grad-text">Diagnóstico</span></h2>
+      <p class="screen-desc">Cada módulo aprofunda um aspecto crítico do seu negócio. Clique para expandir e gerar a análise.</p>
+    </div>
+    <div class="modules-grid" id="modules-grid"></div>
+    <div class="screen-nav">
+      <button class="btn btn-secondary" onclick="navigate('verdict')">← Voltar ao Veredito</button>
+      <button class="btn btn-primary" onclick="navigate('report')">📄 Ver Relatório Completo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN: REPORT -->
+<!-- ============================================================ -->
+<div id="screen-report" class="screen hidden">
+  <div class="container" style="max-width:800px">
+    <div class="screen-header">
+      <div class="screen-step">Relatório Final</div>
+      <h2 class="screen-title">Relatório <span class="grad-text">Completo</span></h2>
+    </div>
+    <div class="report-actions">
+      <button class="btn btn-secondary btn-sm" onclick="copyReport()">📋 Copiar Relatório</button>
+      <button class="btn btn-secondary btn-sm" onclick="navigate('verdict')">← Voltar</button>
+      <button class="btn btn-primary btn-sm" onclick="navigate('hero')">🏠 Nova Análise</button>
+    </div>
+    <div id="full-report"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const SUPABASE_URL = 'https://ieomvpojcgokdemvyitn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllb212cG9qY2dva2RlbXZ5aXRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNDgwMjMsImV4cCI6MjA5NDcyNDAyM30.uNaarrbiOaCqoCCgkGY65NgEbXrgUknurWUe6iAYm6E';
+const CLAUDE_MODEL = 'claude-sonnet-4-20250514';
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  screen: 'hero',
+  idea: { name:'', desc:'', segment:'', audience:'', revenue:'', stage:'', investment:'', competitor:'' },
+  imi: { dor:5, tam:5, comp:5, fin:5, exec:5 },
+  selectedMentors: [],
+  analysis: null,
+  sessionId: null,
+  plan: null,
+  moduleResults: {}
+};
+
+// ============================================================
+// SUPABASE
+// ============================================================
+let sbClient = null;
+try {
+  sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e) { console.warn('Supabase init failed', e); }
+
+// ============================================================
+// MENTOR DATA
+// ============================================================
+const MENTORS = [
+  { id:'tallis', name:'Tallis Gomes', role:'Fundador 99Taxis', tags:['Produto','Growth','Mobilidade'], color:'#6366f1', emoji:'🚕' },
+  { id:'nardon', name:'Bruno Nardon', role:'Rappi Brasil | Serial Entrepreneur', tags:['Escala','Operações','Delivery'], color:'#8b5cf6', emoji:'🛵' },
+  { id:'alfredo', name:'Alfredo Soares', role:'VTEX | Especialista em Vendas', tags:['Vendas','GTM','E-commerce'], color:'#06b6d4', emoji:'💼' },
+  { id:'rony', name:'Rony Meisler', role:'Fundador Reserva', tags:['Marca','Varejo','Cultura'], color:'#10b981', emoji:'👕' },
+  { id:'benchimol', name:'Guilherme Benchimol', role:'Fundador XP Inc', tags:['Finanças','Investimento','Cultura'], color:'#f59e0b', emoji:'📈' },
+  { id:'bloisi', name:'Fabrício Bloisi', role:'CEO iFood', tags:['Marketplace','Produto','Escala'], color:'#ef4444', emoji:'🍔' },
+  { id:'stelleo', name:'Stelleo Tolda', role:'COO MercadoLivre', tags:['E-commerce','Operações','Escala'], color:'#6366f1', emoji:'🛒' },
+  { id:'zuckerberg', name:'Mark Zuckerberg', role:'Fundador Meta', tags:['Plataformas','Redes Sociais','IA'], color:'#3b82f6', emoji:'🌐' },
+  { id:'musk', name:'Elon Musk', role:'Tesla / SpaceX / X', tags:['Inovação Radical','Física','Futuro'], color:'#64748b', emoji:'🚀' },
+  { id:'orosco', name:'Thiago Orosco', role:'Fundador Exact Sales', tags:['Vendas B2B','Inside Sales','SaaS'], color:'#10b981', emoji:'🎯' },
+  { id:'barros', name:'Allan Barros', role:'Fundador ContaAzul', tags:['SaaS','PMEs','Produto'], color:'#8b5cf6', emoji:'☁️' },
+  { id:'wang', name:'Denis Wang', role:'Hotmart | Produtos Digitais', tags:['Digital','Infoprodutos','Creator Economy'], color:'#f97316', emoji:'🔥' },
+  { id:'henry', name:'Henry Zylberstein', role:'Empreendedor em Série', tags:['Liderança','Startup','Execução'], color:'#06b6d4', emoji:'💡' },
+  { id:'farielo', name:'Leandro Farielo', role:'Especialista em Varejo', tags:['Varejo','Franchising','Operações'], color:'#10b981', emoji:'🏪' },
+  { id:'napoli', name:'Antonio Napoli', role:'Gastronomia & Franquias', tags:['Food','Franquias','Expansão'], color:'#ef4444', emoji:'🍕' },
+  { id:'adibe', name:'João Adibe', role:'Ecossistema Digital', tags:['Digital','Inovação','Varejo'], color:'#6366f1', emoji:'💻' },
+  { id:'luiz', name:'Luiz Cesar Fernandes', role:'Telecomunicações e Mídia', tags:['Telecom','Mídia','Regulação'], color:'#8b5cf6', emoji:'📡' },
+  { id:'zanetti', name:'Cristiano Zanetti', role:'Indústria & Supply Chain', tags:['Indústria','Logística','B2B'], color:'#64748b', emoji:'🏭' },
+  { id:'flavio', name:'Flávio Augusto', role:'Geração de Valor | Wise Up', tags:['Marketing','Mindset','Vendas'], color:'#f59e0b', emoji:'⚡' },
+  { id:'romero', name:'Rogério Romero', role:'Cofundador Vivo', tags:['Telecom','Scale-ups','Gestão'], color:'#8b5cf6', emoji:'📱' },
+  { id:'esteves', name:'Luis Esteves', role:'Real Estate & Construção', tags:['Imobiliário','Real Estate','B2B'], color:'#10b981', emoji:'🏗️' },
+  { id:'street', name:'André Street', role:'Cofundador Stone', tags:['Fintech','Pagamentos','B2B'], color:'#06b6d4', emoji:'💳' },
+  { id:'velez', name:'David Vélez', role:'Fundador Nubank', tags:['Fintech','Disrupção','Banco Digital'], color:'#8b5cf6', emoji:'🟣' },
+  { id:'kazah', name:'Hernán Kazah', role:'Cofundador MercadoLivre | Kaszek', tags:['VC','América Latina','Growth'], color:'#f59e0b', emoji:'🦅' },
+  { id:'szekasy', name:'Nicolas Szekasy', role:'Kaszek Ventures', tags:['VC','Capital','Escala'], color:'#6366f1', emoji:'💰' },
+  { id:'linda', name:'Linda Rottenberg', role:'Fundadora Endeavor', tags:['Impacto','Empreendedorismo','Global'], color:'#ef4444', emoji:'🌍' }
+];
+
+// ============================================================
+// MODULES DATA
+// ============================================================
+const MODULES = [
+  { id:'viabilidade', name:'Viabilidade de Negócio', desc:'Análise profunda da proposta de valor, fit produto-mercado e sustentabilidade do modelo.', icon:'🎯', color:'#6366f1', plan:'validacao' },
+  { id:'financeiro', name:'Diagnóstico Financeiro', desc:'Projeções, unit economics, CAC/LTV, ponto de equilíbrio e modelagem de fluxo de caixa.', icon:'💰', color:'#10b981', plan:'diagnostico' },
+  { id:'mvp', name:'Estratégia de MVP', desc:'Qual o menor produto possível para validar a hipótese central com o menor custo?', icon:'⚡', color:'#06b6d4', plan:'diagnostico' },
+  { id:'priorizacao', name:'Priorização de Features', desc:'Framework ICE Score para priorizar o que construir primeiro com base em impacto e esforço.', icon:'📌', color:'#f59e0b', plan:'diagnostico' },
+  { id:'roadmap', name:'Roadmap 12 Meses', desc:'Plano de execução detalhado: marcos, KPIs e entregas por trimestre.', icon:'🗺️', color:'#8b5cf6', plan:'diagnostico' },
+  { id:'riscos', name:'Análise de Riscos', desc:'Mapeamento de riscos de mercado, tecnologia, execução e regulatório com planos de mitigação.', icon:'⚠️', color:'#ef4444', plan:'validacao' }
+];
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  state.sessionId = localStorage.getItem('vc_session') || generateId();
+  localStorage.setItem('vc_session', state.sessionId);
+  const saved = localStorage.getItem('vc_state_' + state.sessionId);
+  if (saved) {
+    try { const s = JSON.parse(saved); Object.assign(state, s); } catch(e) {}
+  }
+  renderDNAGrid();
+  initIMIChart();
+  updateIMIDisplay();
+  updateNavSteps();
+}
+
+function generateId() {
+  return 'vc_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function navigate(screen) {
+  document.querySelectorAll('[id^="screen-"]').forEach(s => s.classList.add('hidden'));
+  const el = document.getElementById('screen-' + screen);
+  if (el) { el.classList.remove('hidden'); el.scrollIntoView({ behavior:'smooth', block:'start' }); }
+  state.screen = screen;
+  updateNavSteps();
+  if (screen === 'modules') renderModules();
+  if (screen === 'report') renderReport();
+  if (screen === 'verdict') renderVerdict();
+  autoSave();
+}
+
+const STEP_MAP = { idea:1, imi:2, dna:3, analyzing:4, verdict:4, modules:5, report:5 };
+function updateNavSteps() {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('ns-' + i);
+    if (!el) continue;
+    const cur = STEP_MAP[state.screen] || 0;
+    el.className = 'nav-step' + (i === cur ? ' active' : i < cur ? ' done' : '');
+  }
+  document.getElementById('save-indicator').style.display = state.screen === 'hero' ? 'none' : 'flex';
+}
+
+function goHome() { navigate('hero'); }
+function scrollToSection(id) { document.getElementById(id)?.scrollIntoView({ behavior:'smooth' }); }
+
+// ============================================================
+// IDEA FORM
+// ============================================================
+function getIdeaValues() {
+  return {
+    name: document.getElementById('idea-name')?.value?.trim() || '',
+    desc: document.getElementById('idea-desc')?.value?.trim() || '',
+    segment: document.getElementById('idea-segment')?.value || '',
+    audience: document.getElementById('idea-audience')?.value?.trim() || '',
+    revenue: document.getElementById('idea-revenue')?.value || '',
+    stage: document.getElementById('idea-stage')?.value || '',
+    investment: document.getElementById('idea-investment')?.value || '',
+    competitor: document.getElementById('idea-competitor')?.value?.trim() || ''
+  };
+}
+
+function goToIMI() {
+  const idea = getIdeaValues();
+  if (!idea.name || !idea.desc || !idea.segment || !idea.audience || !idea.revenue) {
+    showToast('Preencha todos os campos obrigatórios (*)', 'err'); return;
+  }
+  state.idea = idea;
+  autoSave();
+  navigate('imi');
+}
+
+function startPlan(plan) {
+  state.plan = plan;
+  navigate('idea');
+}
+
+// ============================================================
+// IMI
+// ============================================================
+let imiChart = null;
+
+function initIMIChart() {
+  const ctx = document.getElementById('imi-chart');
+  if (!ctx) return;
+  imiChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Dor Real', 'Mercado', 'Diferencial', 'Financeiro', 'Execução'],
+      datasets: [{
+        data: [5,5,5,5,5],
+        backgroundColor: 'rgba(99,102,241,0.2)',
+        borderColor: '#6366f1',
+        borderWidth: 2,
+        pointBackgroundColor: '#6366f1',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: '#6366f1'
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      scales: {
+        r: {
+          min:0, max:10, ticks:{ stepSize:2, color:'#475569', backdropColor:'transparent', font:{size:10} },
+          grid:{ color:'rgba(255,255,255,0.06)' },
+          angleLines:{ color:'rgba(255,255,255,0.06)' },
+          pointLabels:{ color:'#94a3b8', font:{size:11,weight:'500'} }
+        }
+      },
+      plugins:{ legend:{display:false}, tooltip:{enabled:false} }
+    }
+  });
+}
+
+function updateIMI(dim, val) {
+  val = parseInt(val);
+  state.imi[dim] = val;
+  const ids = { dor:'val-dor', tam:'val-tam', comp:'val-comp', fin:'val-fin', exec:'val-exec' };
+  const el = document.getElementById(ids[dim]);
+  if (el) el.textContent = val;
+  updateIMIDisplay();
+}
+
+function updateIMIDisplay() {
+  const { dor, tam, comp, fin, exec } = state.imi;
+  const score = ((dor + tam + comp + fin + exec) / 5).toFixed(1);
+  const scoreEl = document.getElementById('imi-total-score');
+  const badgeEl = document.getElementById('imi-verdict-badge');
+  const intEl = document.getElementById('imi-interpretation');
+  if (scoreEl) {
+    scoreEl.textContent = score;
+    const c = parseFloat(score) >= 7 ? '#10b981' : parseFloat(score) >= 4 ? '#f59e0b' : '#ef4444';
+    scoreEl.style.background = `linear-gradient(135deg,${c},${c}cc)`;
+    scoreEl.style['-webkit-background-clip'] = 'text';
+    scoreEl.style['-webkit-text-fill-color'] = 'transparent';
+  }
+  const verdict = getVerdict(parseFloat(score));
+  if (badgeEl) {
+    badgeEl.className = 'badge mt-2 ' + (verdict.key === 'sustenta' ? 'badge-ok' : verdict.key === 'incerto' ? 'badge-warn' : 'badge-err');
+    badgeEl.textContent = verdict.label;
+  }
+  if (intEl) intEl.textContent = verdict.interpretation;
+  if (imiChart) {
+    imiChart.data.datasets[0].data = [dor, tam, comp, fin, exec];
+    const c = parseFloat(score) >= 7 ? '#10b981' : parseFloat(score) >= 4 ? '#f59e0b' : '#ef4444';
+    imiChart.data.datasets[0].borderColor = c;
+    imiChart.data.datasets[0].backgroundColor = c + '33';
+    imiChart.data.datasets[0].pointBackgroundColor = c;
+    imiChart.update('none');
+  }
+}
+
+function getIMIScore() {
+  const { dor, tam, comp, fin, exec } = state.imi;
+  return parseFloat(((dor + tam + comp + fin + exec) / 5).toFixed(1));
+}
+
+function getVerdict(score) {
+  if (score >= 7) return { key:'sustenta', label:'MERCADO SUSTENTA', color:'#10b981', interpretation:'Sua ideia tem sólida base. O mercado indica capacidade de sustentar este negócio.' };
+  if (score >= 4) return { key:'incerto', label:'INCERTO', color:'#f59e0b', interpretation:'Há potencial, mas pontos críticos precisam ser resolvidos antes de avançar.' };
+  return { key:'nao', label:'NÃO SUSTENTA', color:'#ef4444', interpretation:'Sinais de alerta sérios. Recomendamos revisão profunda antes de qualquer investimento.' };
+}
+
+// ============================================================
+// DNA BOARD
+// ============================================================
+function renderDNAGrid() {
+  const grid = document.getElementById('dna-grid');
+  if (!grid) return;
+  grid.innerHTML = MENTORS.map(m => `
+    <div class="mentor-card ${state.selectedMentors.includes(m.id) ? 'selected' : ''}"
+         id="mc-${m.id}" onclick="toggleMentor('${m.id}')">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+        <div class="mentor-avatar" style="background:linear-gradient(135deg,${m.color},${m.color}88)">${m.emoji}</div>
+        <div>
+          <div class="mentor-name">${m.name}</div>
+          <div class="mentor-role">${m.role}</div>
+        </div>
+      </div>
+      <div class="mentor-tags">${m.tags.map(t=>`<span class="mentor-tag">${t}</span>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+function toggleMentor(id) {
+  const idx = state.selectedMentors.indexOf(id);
+  if (idx === -1) {
+    if (state.selectedMentors.length >= 5) { showToast('Máximo de 5 mentores por análise', 'err'); return; }
+    state.selectedMentors.push(id);
+  } else {
+    state.selectedMentors.splice(idx, 1);
+  }
+  document.getElementById('mc-'+id)?.classList.toggle('selected', state.selectedMentors.includes(id));
+  renderSelectedChips();
+  document.getElementById('selected-count').textContent = state.selectedMentors.length + '/5';
+  document.getElementById('btn-analyze').disabled = state.selectedMentors.length === 0;
+}
+
+function renderSelectedChips() {
+  const chips = document.getElementById('selected-chips');
+  if (!chips) return;
+  chips.innerHTML = state.selectedMentors.map(id => {
+    const m = MENTORS.find(x=>x.id===id);
+    return `<div class="selected-mentor-chip">
+      ${m.emoji} ${m.name.split(' ')[0]}
+      <span class="chip-remove" onclick="toggleMentor('${id}')">✕</span>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// ANALYSIS / CLAUDE API
+// ============================================================
+async function startAnalysis() {
+  if (state.selectedMentors.length === 0) { showToast('Selecione ao menos 1 mentor', 'err'); return; }
+  state.idea = getIdeaValues();
+  navigate('analyzing');
+  await runAnalysis();
+}
+
+async function runAnalysis() {
+  const steps = ['market','imi','mentors','verdict','actions'];
+  const delays = [800, 600, 1000, 600, 400];
+
+  async function updateStep(id, status) {
+    const el = document.getElementById('step-'+id);
+    if (!el) return;
+    const icon = el.querySelector('.step-icon');
+    icon.className = 'step-icon ' + status;
+    icon.textContent = status === 'done' ? '✓' : status === 'running' ? '…' : steps.indexOf(id)+1;
+    el.style.color = status === 'done' ? 'var(--ok)' : status === 'running' ? 'var(--t)' : 'var(--tm)';
+    await sleep(delays[steps.indexOf(id)] || 500);
+  }
+
+  updateStep('market','running');
+  const cfg = getConfig();
+  let analysisResult = null;
+
+  if (cfg.apiKey) {
+    try {
+      analysisResult = await callClaude(buildMainPrompt());
+      await updateStep('market','done');
+      await updateStep('imi','running');
+      await sleep(400);
+      await updateStep('imi','done');
+      await updateStep('mentors','running');
+      await sleep(600);
+      await updateStep('mentors','done');
+      await updateStep('verdict','running');
+      await sleep(400);
+      await updateStep('verdict','done');
+      await updateStep('actions','running');
+      await sleep(300);
+      await updateStep('actions','done');
+    } catch(e) {
+      console.error('Claude API error:', e);
+      analysisResult = generateFallbackAnalysis();
+      for (const s of steps) await updateStep(s,'done');
+      showToast('Análise gerada com modelo local (API indisponível)', 'info');
+    }
+  } else {
+    for (const s of steps) {
+      await updateStep(s,'running');
+      await sleep(700);
+      await updateStep(s,'done');
+    }
+    analysisResult = generateFallbackAnalysis();
+    showToast('Configure sua API Key para análise com IA real', 'info');
+  }
+
+  state.analysis = analysisResult;
+  await saveToSupabase();
+  autoSave();
+  navigate('verdict');
+}
+
+function buildMainPrompt() {
+  const { idea, imi, selectedMentors } = state;
+  const score = getIMIScore();
+  const verdict = getVerdict(score);
+  const mentorList = selectedMentors.map(id => {
+    const m = MENTORS.find(x=>x.id===id);
+    return `${m.name} (${m.role})`;
+  }).join(', ');
+
+  return `Você é o DNA Board do VentureCheck — formado pelos seguintes mentores: ${mentorList}.
+
+Analise esta ideia de negócio com total honestidade e rigor:
+
+**NEGÓCIO:** ${idea.name}
+**SEGMENTO:** ${idea.segment}
+**DESCRIÇÃO:** ${idea.desc}
+**PÚBLICO-ALVO:** ${idea.audience}
+**MODELO DE RECEITA:** ${idea.revenue}
+**ESTÁGIO:** ${idea.stage || 'Não informado'}
+**INVESTIMENTO INICIAL:** ${idea.investment || 'Não informado'}
+**CONCORRENTES:** ${idea.competitor || 'Não informado'}
+
+**IMI SCORE: ${score}/10 — ${verdict.label}**
+- Dor Real do Cliente: ${imi.dor}/10
+- Tamanho do Mercado: ${imi.tam}/10
+- Vantagem Competitiva: ${imi.comp}/10
+- Viabilidade Financeira: ${imi.fin}/10
+- Capacidade de Execução: ${imi.exec}/10
+
+Responda em JSON com exatamente esta estrutura:
+{
+  "veredito": "MERCADO SUSTENTA" | "INCERTO" | "NÃO SUSTENTA",
+  "veredito_desc": "2-3 frases explicando o veredito",
+  "analise_mercado": "análise independente do mercado, oportunidade e contexto competitivo (3-4 parágrafos)",
+  "providencias": "lista numerada de 5-7 próximas ações concretas e específicas",
+  "insights": [
+    { "mentor": "Nome do Mentor", "insight": "perspectiva única deste mentor sobre o negócio (2-3 frases diretas, na voz do mentor)" }
+  ],
+  "pontos_fortes": ["3-4 pontos fortes"],
+  "riscos_criticos": ["3-4 riscos críticos"],
+  "resumo_executivo": "parágrafo de resumo executivo para o empreendedor"
+}
+
+Seja direto, honesto e específico. SUA IDEIA MERECE A VERDADE.`;
+}
+
+async function callClaude(prompt) {
+  const cfg = getConfig();
+  const endpoint = cfg.proxyUrl || 'https://api.anthropic.com/v1/messages';
+  const headers = {
+    'Content-Type': 'application/json',
+    'anthropic-version': '2023-06-01',
+    'x-api-key': cfg.apiKey,
+    'anthropic-dangerous-direct-browser-access': 'true'
+  };
+  if (cfg.proxyUrl) delete headers['anthropic-dangerous-direct-browser-access'];
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model: CLAUDE_MODEL,
+      max_tokens: 2048,
+      messages: [{ role:'user', content: prompt }]
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`API ${res.status}: ${err}`);
+  }
+
+  const data = await res.json();
+  const text = data.content?.[0]?.text || '';
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Invalid JSON response');
+  return JSON.parse(jsonMatch[0]);
+}
+
+async function generateModuleReport(moduleId) {
+  const mod = MODULES.find(m=>m.id===moduleId);
+  const cfg = getConfig();
+  const prompt = buildModulePrompt(moduleId);
+
+  const bodyEl = document.getElementById('mod-body-' + moduleId);
+  const genBtn = document.getElementById('mod-btn-' + moduleId);
+  if (bodyEl) bodyEl.textContent = 'Gerando análise…';
+  if (genBtn) { genBtn.disabled = true; genBtn.textContent = '⏳ Gerando…'; }
+
+  try {
+    let result;
+    if (cfg.apiKey) {
+      const data = await callClaude(prompt);
+      result = typeof data === 'string' ? data : (data.content || JSON.stringify(data, null, 2));
+    } else {
+      await sleep(1200);
+      result = generateFallbackModule(moduleId);
+    }
+    state.moduleResults[moduleId] = result;
+    if (bodyEl) bodyEl.textContent = result;
+    autoSave();
+  } catch(e) {
+    const fallback = generateFallbackModule(moduleId);
+    state.moduleResults[moduleId] = fallback;
+    if (bodyEl) bodyEl.textContent = fallback;
+    showToast('Análise gerada com modelo local', 'info');
+  }
+  if (genBtn) { genBtn.disabled = false; genBtn.textContent = '🔄 Regenerar'; }
+}
+
+function buildModulePrompt(moduleId) {
+  const { idea, imi } = state;
+  const score = getIMIScore();
+  const base = `Negócio: ${idea.name} | Segmento: ${idea.segment} | ${idea.desc} | Público: ${idea.audience} | Receita: ${idea.revenue} | IMI: ${score}/10`;
+
+  const prompts = {
+    viabilidade: `${base}\n\nEscreva uma análise profunda de viabilidade de negócio. Avalie: proposta de valor, fit produto-mercado, modelo de negócio, sustentabilidade competitiva, e probabilidade de sucesso. Seja direto e específico. 400-600 palavras.`,
+    financeiro: `${base}\n\nEscreva um diagnóstico financeiro completo. Inclua: estimativa de CAC e LTV, ponto de equilíbrio, margens esperadas, burn rate inicial, e projeções de receita para 12/24/36 meses. Use números realistas. 400-600 palavras.`,
+    mvp: `${base}\n\nDefina a estratégia de MVP ideal. O que é o menor produto possível? Quais hipóteses validar primeiro? Como testar com custo mínimo? Qual seria o cronograma e orçamento para o MVP? 400-600 palavras.`,
+    priorizacao: `${base}\n\nAplique o framework ICE Score para priorizar as 8-10 principais features/iniciativas deste negócio. Para cada item: Impact (1-10), Confidence (1-10), Ease (1-10), ICE Score, e justificativa. Liste em ordem de prioridade. 400-600 palavras.`,
+    roadmap: `${base}\n\nCrie um roadmap de execução para 12 meses com marcos trimestrais. Q1: fundação, Q2: validação, Q3: crescimento, Q4: escala. Para cada trimestre: objetivos, KPIs, entregas principais, e recursos necessários. 400-600 palavras.`,
+    riscos: `${base}\n\nMapeie os 8-10 principais riscos deste negócio: riscos de mercado, tecnologia, execução, financeiro, e regulatório. Para cada risco: descrição, probabilidade (Alta/Média/Baixa), impacto (Alto/Médio/Baixo), e plano de mitigação. 400-600 palavras.`
+  };
+  return prompts[moduleId] || `Analise o módulo ${moduleId} para: ${base}`;
+}
+
+// ============================================================
+// VERDICT RENDER
+// ============================================================
+function renderVerdict() {
+  if (!state.analysis) return;
+  const a = state.analysis;
+  const score = getIMIScore();
+  const v = getVerdict(score);
+
+  const banner = document.getElementById('verdict-banner');
+  if (banner) {
+    banner.className = 'verdict-banner ' + v.key;
+  }
+  const title = document.getElementById('verdict-title');
+  if (title) { title.textContent = a.veredito || v.label; title.style.color = v.color; }
+  const desc = document.getElementById('verdict-desc');
+  if (desc) desc.textContent = a.veredito_desc || v.interpretation;
+
+  const scoreEl = document.getElementById('verdict-imi-score');
+  if (scoreEl) { scoreEl.textContent = score; scoreEl.style.color = v.color; }
+  const interpEl = document.getElementById('imi-full-interpretation');
+  if (interpEl) interpEl.textContent = v.interpretation;
+
+  renderIMIBars();
+
+  const mktEl = document.getElementById('market-analysis');
+  if (mktEl) mktEl.textContent = a.analise_mercado || 'Análise de mercado não disponível.';
+
+  const actEl = document.getElementById('action-items');
+  if (actEl) actEl.textContent = a.providencias || 'Providências não disponíveis.';
+
+  renderMentorInsights();
+}
+
+function renderIMIBars() {
+  const container = document.getElementById('imi-breakdown');
+  if (!container) return;
+  const dims = [
+    { label:'Dor Real', val:state.imi.dor },
+    { label:'Mercado (TAM)', val:state.imi.tam },
+    { label:'Diferencial', val:state.imi.comp },
+    { label:'Financeiro', val:state.imi.fin },
+    { label:'Execução', val:state.imi.exec }
+  ];
+  container.innerHTML = dims.map(d => {
+    const c = d.val >= 7 ? '#10b981' : d.val >= 4 ? '#f59e0b' : '#ef4444';
+    return `<div class="imi-bar-row">
+      <div class="text-sm font-medium">${d.label}</div>
+      <div class="text-sm font-bold" style="color:${c}">${d.val}/10</div>
+      <div class="imi-bar-track">
+        <div class="imi-bar-fill" style="width:${d.val*10}%;background:${c}"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderMentorInsights() {
+  const container = document.getElementById('mentor-insights');
+  if (!container || !state.analysis) return;
+  const insights = state.analysis.insights || [];
+  if (!insights.length) {
+    container.innerHTML = '<p class="text-muted text-sm">Nenhum insight disponível.</p>';
+    return;
+  }
+  container.innerHTML = insights.map(ins => {
+    const m = MENTORS.find(x => x.name === ins.mentor || x.name.includes(ins.mentor?.split(' ')[0]));
+    const color = m?.color || '#6366f1';
+    const emoji = m?.emoji || '👤';
+    return `<div class="mentor-insight">
+      <div class="insight-avatar" style="background:linear-gradient(135deg,${color},${color}88)">${emoji}</div>
+      <div class="insight-body">
+        <div class="insight-name">${ins.mentor}</div>
+        <div class="insight-text">${ins.insight}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// MODULES RENDER
+// ============================================================
+function renderModules() {
+  const grid = document.getElementById('modules-grid');
+  if (!grid) return;
+  grid.innerHTML = MODULES.map(mod => {
+    const isLocked = false; // unlock logic can be added per plan
+    const hasResult = !!state.moduleResults[mod.id];
+    return `<div class="module-card" id="module-${mod.id}">
+      <div class="module-header" onclick="toggleModule('${mod.id}')">
+        <div class="module-icon" style="background:${mod.color}22;color:${mod.color}">${mod.icon}</div>
+        <div class="module-info">
+          <div class="module-name">${mod.name}</div>
+          <div class="module-desc">${mod.desc}</div>
+        </div>
+        <div style="color:var(--td);font-size:.8rem">${hasResult ? '▼' : '▶'}</div>
+      </div>
+      <div class="module-body ${hasResult ? 'open' : ''}" id="mod-panel-${mod.id}">
+        <div class="module-body-content" id="mod-body-${mod.id}">${state.moduleResults[mod.id] || 'Clique em "Gerar Análise" para analisar este módulo.'}</div>
+        <div class="module-actions">
+          <button class="btn btn-primary btn-sm" id="mod-btn-${mod.id}" onclick="generateModuleReport('${mod.id}')">
+            ${hasResult ? '🔄 Regenerar' : '✨ Gerar Análise'}
+          </button>
+          ${hasResult ? `<button class="btn btn-secondary btn-sm" onclick="copyText(state.moduleResults['${mod.id}'])">📋 Copiar</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleModule(id) {
+  const panel = document.getElementById('mod-panel-' + id);
+  if (panel) panel.classList.toggle('open');
+}
+
+// ============================================================
+// REPORT RENDER
+// ============================================================
+function renderReport() {
+  const container = document.getElementById('full-report');
+  if (!container || !state.analysis) return;
+  const a = state.analysis;
+  const score = getIMIScore();
+  const v = getVerdict(score);
+  const now = new Date().toLocaleDateString('pt-BR');
+
+  container.innerHTML = `
+    <div class="report-section">
+      <div class="report-section-title">📋 Sumário Executivo</div>
+      <div class="report-block">
+        <div class="report-block-title">${state.idea.name || 'Seu Negócio'} — ${now}</div>
+        <div class="report-block-body">${a.resumo_executivo || a.veredito_desc || ''}</div>
+      </div>
+      <div class="report-block" style="border-color:${v.color}33">
+        <div class="report-block-title" style="color:${v.color}">Veredito: ${a.veredito || v.label}</div>
+        <div class="report-block-body">${a.veredito_desc || ''}</div>
+      </div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">📊 IMI Score: ${score}/10</div>
+      <div class="report-block">
+        <div class="report-block-body">Dor Real: ${state.imi.dor}/10 | Mercado: ${state.imi.tam}/10 | Diferencial: ${state.imi.comp}/10 | Financeiro: ${state.imi.fin}/10 | Execução: ${state.imi.exec}/10</div>
+      </div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">🌎 Análise de Mercado</div>
+      <div class="report-block"><div class="report-block-body">${a.analise_mercado || ''}</div></div>
+    </div>
+    ${a.pontos_fortes?.length ? `<div class="report-section">
+      <div class="report-section-title">✅ Pontos Fortes</div>
+      <div class="report-block"><div class="report-block-body">${a.pontos_fortes.map((p,i)=>`${i+1}. ${p}`).join('\n')}</div></div>
+    </div>` : ''}
+    ${a.riscos_criticos?.length ? `<div class="report-section">
+      <div class="report-section-title">⚠️ Riscos Críticos</div>
+      <div class="report-block"><div class="report-block-body">${a.riscos_criticos.map((r,i)=>`${i+1}. ${r}`).join('\n')}</div></div>
+    </div>` : ''}
+    <div class="report-section">
+      <div class="report-section-title">🧬 Perspectivas do DNA Board</div>
+      ${(a.insights||[]).map(ins=>`<div class="report-block">
+        <div class="report-block-title">${ins.mentor}</div>
+        <div class="report-block-body">${ins.insight}</div>
+      </div>`).join('')}
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">📋 Próximos Passos</div>
+      <div class="report-block"><div class="report-block-body">${a.providencias || ''}</div></div>
+    </div>
+    ${Object.keys(state.moduleResults).length ? `<div class="report-section">
+      <div class="report-section-title">📦 Módulos Detalhados</div>
+      ${Object.entries(state.moduleResults).map(([id, content]) => {
+        const mod = MODULES.find(m=>m.id===id);
+        return `<div class="report-block">
+          <div class="report-block-title">${mod?.icon} ${mod?.name || id}</div>
+          <div class="report-block-body">${content}</div>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+  `;
+}
+
+// ============================================================
+// FALLBACK ANALYSIS
+// ============================================================
+function generateFallbackAnalysis() {
+  const score = getIMIScore();
+  const v = getVerdict(score);
+  const { idea, selectedMentors } = state;
+  const mentorNames = selectedMentors.map(id => MENTORS.find(m=>m.id===id)?.name).filter(Boolean);
+
+  return {
+    veredito: v.label,
+    veredito_desc: `Com base no IMI Score de ${score}/10, sua ideia apresenta ${v.key === 'sustenta' ? 'fundamentos sólidos' : v.key === 'incerto' ? 'potencial com pontos de atenção' : 'desafios significativos que precisam ser endereçados'}. O DNA Board recomenda ${v.key === 'sustenta' ? 'avançar com o planejamento detalhado' : v.key === 'incerto' ? 'validar hipóteses críticas antes de investir' : 'rever a proposta de valor e o modelo de negócio'}.`,
+    analise_mercado: `O segmento de ${idea.segment} no Brasil apresenta dinâmica competitiva intensa e crescimento acelerado pela transformação digital. O modelo ${idea.revenue} é compatível com o perfil do público-alvo "${idea.audience}", que demonstra maturidade digital crescente.\n\nA proposta "${idea.name}" endereça um mercado com volume relevante. Considerando o estágio atual (${idea.stage || 'inicial'}), há janela de oportunidade real, especialmente se o go-to-market for focado em um nicho específico antes de escalar.\n\nO contexto competitivo exige diferenciação clara. Empresas incumbentes têm base instalada, mas startups com execução focada têm capturado share com experiência superior e preço mais agressivo. A chave será velocidade de aprendizado e iteração com clientes reais.`,
+    providencias: `1. Realizar 10 entrevistas aprofundadas com potenciais clientes nos próximos 15 dias para validar a dor descrita\n2. Mapear os 3 principais concorrentes e documentar em detalhes como eles resolvem (ou não) o problema\n3. Definir a hipótese central do negócio em 1 frase: "Acreditamos que [cliente] pagará [R$X] para [resolver problema] usando [nossa solução]"\n4. Construir um landing page ou protótipo básico para testar a proposta de valor sem código\n5. Calcular o CAC máximo viável e o LTV mínimo necessário para o modelo ser sustentável\n6. Identificar o canal de aquisição com menor custo para os primeiros 100 clientes\n7. Definir os 3 critérios objetivos que, se atingidos em 90 dias, confirmarão que vale a pena continuar`,
+    insights: mentorNames.slice(0,3).map((name, i) => {
+      const insights = [
+        `O que me interessa aqui é se você está resolvendo uma dor real ou criando uma solução elegante para um problema que ninguém tem urgência em resolver. Valide a dor antes de qualquer coisa.`,
+        `O modelo de receita precisa ser testado na prática. Muitos empreendedores se apaixonam pela ideia mas não conseguem que alguém pague por ela. Vá falar com 10 clientes amanhã e tente vender.`,
+        `O tamanho do mercado é promissor, mas execução é tudo. Vi dezenas de negócios com ideias melhores que as dos líderes de mercado fracassarem por falta de foco e disciplina operacional.`
+      ];
+      return { mentor: name, insight: insights[i] || 'A chave é execução consistente e foco total no cliente.' };
+    }),
+    pontos_fortes: [
+      `Segmento (${idea.segment}) com demanda crescente e digitalização acelerada`,
+      `Modelo de receita (${idea.revenue}) com potencial de recorrência`,
+      `Público-alvo bem definido: ${idea.audience}`,
+      `Timing de mercado favorável para novos entrantes`
+    ],
+    riscos_criticos: [
+      `Risco de não encontrar produto-mercado fit antes do capital acabar`,
+      `Competidores estabelecidos com mais recursos e base de clientes`,
+      `Dependência de canal de aquisição único e alto CAC inicial`,
+      `Complexidade de execução pode ser subestimada no planejamento`
+    ],
+    resumo_executivo: `${idea.name} é uma iniciativa no segmento de ${idea.segment} com IMI Score de ${score}/10. O veredito do DNA Board é ${v.label}. ${v.interpretation} As próximas ações críticas devem focar em validação rápida com clientes reais, definição clara do modelo financeiro e construção de um MVP enxuto.`
+  };
+}
+
+function generateFallbackModule(moduleId) {
+  const { idea } = state;
+  const score = getIMIScore();
+  const fallbacks = {
+    viabilidade: `ANÁLISE DE VIABILIDADE — ${idea.name}\n\nProposta de Valor: O negócio resolve ${idea.desc?.slice(0,100)}... para ${idea.audience}.\n\nFit Produto-Mercado: Com IMI Score de ${score}/10, há indicadores de que existe demanda real, porém a profundidade da dor precisa ser validada com pesquisa primária. Recomenda-se entrevistar mínimo 20 potenciais clientes antes de desenvolvimento.\n\nModelo de Negócio: O modelo ${idea.revenue} é adequado para o segmento ${idea.segment}. A sustentabilidade financeira depende da taxa de conversão e do churn, que precisam ser monitorados desde o MVP.\n\nConclusão: Viabilidade condicionada à validação das hipóteses centrais. Risco controlável com execução disciplinada.`,
+    financeiro: `DIAGNÓSTICO FINANCEIRO — ${idea.name}\n\nEstimativas Conservadoras:\n• CAC estimado: R$150–R$400 (dependendo do canal)\n• LTV esperado: R$800–R$2.400 (12-24 meses de retenção)\n• Razão LTV/CAC: 3:1 a 6:1 (saudável acima de 3:1)\n• Margem bruta esperada: 60–80% (modelo ${idea.revenue})\n\nPonto de Equilíbrio: Com estrutura enxuta, esperado entre 80–200 clientes pagantes.\n\nProjeções:\n• Ano 1: R$150k–R$400k ARR (se conseguir 50–100 clientes)\n• Ano 2: R$600k–R$1.5M ARR (crescimento 3-4x)\n• Ano 3: R$2M–R$5M ARR (se escalar o canal)\n\nPrioridade imediata: validar o CAC real com os primeiros R$10k de marketing.`,
+    mvp: `ESTRATÉGIA DE MVP — ${idea.name}\n\nHipótese Central: ${idea.audience} pagará por uma solução que resolve [dor principal identificada].\n\nMVP Recomendado: Versão manual/concierge do produto — entregue o resultado sem automação para validar se as pessoas pagam antes de construir tecnologia.\n\nCronograma:\n• Semana 1-2: 10 entrevistas de validação de dor\n• Semana 3-4: Landing page + oferta beta\n• Mês 2: Primeiros 5 clientes pagantes (concierge)\n• Mês 3: Automação das partes críticas\n\nOrçamento Estimado: R$5.000–R$20.000 para MVP concierge\n\nCritério de Sucesso: 10 clientes pagando, NPS acima de 7, churn abaixo de 20% no primeiro mês.`,
+    priorizacao: `PRIORIZAÇÃO ICE SCORE — ${idea.name}\n\nItem | Impact | Confidence | Ease | ICE Score\n\n1. Validação de dor (entrevistas) | 10 | 9 | 9 | 90\n2. Landing page com proposta de valor | 9 | 8 | 8 | 72\n3. Primeiro cliente pagante | 10 | 7 | 6 | 70\n4. MVP concierge | 8 | 8 | 7 | 56\n5. Automação do fluxo principal | 8 | 7 | 5 | 40\n6. Integração com ferramentas externas | 6 | 7 | 6 | 36\n7. Dashboard de métricas | 5 | 8 | 6 | 30\n8. Sistema de referral | 7 | 5 | 4 | 28\n\nFoco imediato: itens 1-3. Não construa tecnologia complexa antes de validar disposição de pagamento.`,
+    roadmap: `ROADMAP 12 MESES — ${idea.name}\n\nQ1 (Meses 1-3) — FUNDAÇÃO\n• Objetivo: Validar a hipótese central\n• KPI: 10 clientes pagantes\n• Entregas: MVP concierge, 50 entrevistas, landing page, primeiros R$5k MRR\n\nQ2 (Meses 4-6) — VALIDAÇÃO\n• Objetivo: Encontrar o canal de aquisição\n• KPI: 50 clientes, R$15k MRR, churn < 10%\n• Entregas: Produto digital mínimo, 3 canais testados, processo de vendas documentado\n\nQ3 (Meses 7-9) — CRESCIMENTO\n• Objetivo: Escalar o canal vencedor\n• KPI: 150 clientes, R$40k MRR\n• Entregas: Automação de marketing, time de vendas, feature set completo\n\nQ4 (Meses 10-12) — ESCALA\n• Objetivo: Preparar para crescimento acelerado\n• KPI: R$80k+ MRR, NPS > 8\n• Entregas: Infraestrutura escalável, time completo, deck para investidores`,
+    riscos: `ANÁLISE DE RISCOS — ${idea.name}\n\nRisco 1: Sem product-market fit | Prob: Alta | Impacto: Alto\nMitigação: Validar com 20+ entrevistas antes de construir. Métricas de sucesso claras.\n\nRisco 2: CAC alto demais | Prob: Média | Impacto: Alto\nMitigação: Testar 3+ canais simultaneamente. Apostar no canal com menor CAC provado.\n\nRisco 3: Concorrente grande copia | Prob: Baixa | Impacto: Médio\nMitigação: Construir relacionamento com clientes e dados proprietários.\n\nRisco 4: Problema técnico/regulatório | Prob: Baixa | Impacto: Alto\nMitigação: Consultar especialista jurídico antes do lançamento.\n\nRisco 5: Falta de capital | Prob: Média | Impacto: Alto\nMitigação: Modelo de negócio cash-positive desde cedo. Receita antes de investimento.\n\nRisco 6: Equipe incompleta | Prob: Média | Impacto: Médio\nMitigação: Identificar cofounder técnico ou parceiro de produto antes de avançar.`
+  };
+  return fallbacks[moduleId] || `Análise do módulo ${moduleId} para ${idea.name}: análise específica será gerada com a API configurada.`;
+}
+
+// ============================================================
+// AUTO-SAVE
+// ============================================================
+function autoSave() {
+  setSaveState('saving');
+  const toSave = {
+    screen: state.screen,
+    idea: state.idea,
+    imi: state.imi,
+    selectedMentors: state.selectedMentors,
+    analysis: state.analysis,
+    moduleResults: state.moduleResults,
+    plan: state.plan
+  };
+  localStorage.setItem('vc_state_' + state.sessionId, JSON.stringify(toSave));
+  setTimeout(() => setSaveState('saved'), 500);
+}
+
+async function saveToSupabase() {
+  if (!sbClient || !state.analysis) return;
+  try {
+    const score = getIMIScore();
+    await sbClient.from('analyses').upsert({
+      session_id: state.sessionId,
+      idea_name: state.idea.name,
+      idea_data: state.idea,
+      imi_score: score,
+      imi_data: state.imi,
+      verdict: state.analysis.veredito,
+      analysis: state.analysis,
+      selected_mentors: state.selectedMentors,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'session_id' });
+  } catch(e) { console.warn('Supabase save failed:', e); }
+}
+
+function setSaveState(status) {
+  const dot = document.getElementById('save-dot');
+  const text = document.getElementById('save-text');
+  if (!dot || !text) return;
+  dot.className = 'save-dot' + (status === 'saving' ? ' saving' : '');
+  text.textContent = status === 'saving' ? 'Salvando…' : 'Salvo';
+}
+
+// ============================================================
+// CONFIG
+// ============================================================
+function getConfig() {
+  return {
+    apiKey: localStorage.getItem('vc_api_key') || '',
+    proxyUrl: localStorage.getItem('vc_proxy_url') || ''
+  };
+}
+
+function openConfig() {
+  const cfg = getConfig();
+  document.getElementById('cfg-api-key').value = cfg.apiKey;
+  document.getElementById('cfg-proxy-url').value = cfg.proxyUrl;
+  document.getElementById('modal-config').classList.remove('hidden');
+}
+
+function closeConfig() {
+  document.getElementById('modal-config').classList.add('hidden');
+}
+
+function saveConfig() {
+  const key = document.getElementById('cfg-api-key').value.trim();
+  const proxy = document.getElementById('cfg-proxy-url').value.trim();
+  if (key) localStorage.setItem('vc_api_key', key);
+  if (proxy) localStorage.setItem('vc_proxy_url', proxy);
+  closeConfig();
+  showToast('Configuração salva com sucesso!', 'ok');
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function showToast(msg, type = 'info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = { ok:'✓', err:'✗', info:'ℹ' };
+  t.innerHTML = `<span>${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(20px)'; setTimeout(()=>t.remove(),300); }, 3500);
+}
+
+function copyText(text) {
+  navigator.clipboard?.writeText(text).then(() => showToast('Copiado!', 'ok')).catch(() => showToast('Erro ao copiar', 'err'));
+}
+
+function copyReport() {
+  const el = document.getElementById('full-report');
+  if (el) copyText(el.innerText);
+}
+
+// ============================================================
+// RESTORE FORM STATE
+// ============================================================
+function restoreFormState() {
+  if (!state.idea.name) return;
+  const fields = ['name','desc','segment','audience','revenue','stage','investment','competitor'];
+  fields.forEach(f => {
+    const el = document.getElementById('idea-'+f);
+    if (el && state.idea[f]) el.value = state.idea[f];
+  });
+  const sliders = ['dor','tam','comp','fin','exec'];
+  sliders.forEach(s => {
+    const el = document.getElementById('slider-'+s);
+    if (el) { el.value = state.imi[s]; document.getElementById('val-'+s).textContent = state.imi[s]; }
+  });
+  renderSelectedChips();
+  document.getElementById('selected-count').textContent = state.selectedMentors.length + '/5';
+  document.getElementById('btn-analyze').disabled = state.selectedMentors.length === 0;
+  state.selectedMentors.forEach(id => {
+    document.getElementById('mc-'+id)?.classList.add('selected');
+  });
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  restoreFormState();
+  document.getElementById('modal-config').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-config')) closeConfig();
+  });
+});
+</script>
+</body>
+</html>
