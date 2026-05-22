@@ -851,6 +851,13 @@ function saveSession(data){
   saveSess(sessions);
   clearDraft(); // Limpar rascunho após análise concluída
   renderSessions();
+  // Persistir sessão completa no Supabase
+  sbUpsert('vc_sessions',{
+    id:entry.id, name:entry.name, email:entry.email||null,
+    biz:entry.biz, sector:entry.sector||null, description:entry.desc||null,
+    verdict:entry.verdict, analysis:data, rounds:S.round,
+    updated_at:entry.updatedAt
+  });
 }
 
 function renderSessions(){
@@ -1047,6 +1054,23 @@ function updateBlocksProgress(){
 }
 
 // ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ══════════════════════════════════════════════════════════════
+const SB_URL = 'https://ieomvpojcgokdemvyitn.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllb212cG9qY2dva2RlbXZ5aXRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNDgwMjMsImV4cCI6MjA5NDcyNDAyM30.uNaarrbiOaCqoCCgkGY65NgEbXrgUknurWUe6iAYm6E';
+
+async function sbUpsert(table, data){
+  try{
+    await fetch(`${SB_URL}/rest/v1/${table}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify(data)
+    });
+  }catch(e){console.warn('Supabase sync falhou (offline?):', e);}
+}
+
+// ══════════════════════════════════════════════════════════════
 // SISTEMA DE AUTO-SAVE — 3 CAMADAS
 // ══════════════════════════════════════════════════════════════
 const DRAFT_KEY = 'vc5_draft';
@@ -1081,6 +1105,8 @@ function saveDraft(silent=true){
 
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     showSaveIndicator(silent);
+    // Sync Supabase em background (silencioso)
+    if(S.session?.id) sbUpsert('vc_drafts',{id:S.session.id, session_data:draft, saved_at:draft.savedAt});
   } catch(e){
     console.warn('Auto-save falhou:', e);
   }
@@ -1254,6 +1280,13 @@ function clearDraft(){
   lastSavedHash = '';
   const indicator = document.getElementById('save-indicator');
   if(indicator) indicator.style.display = 'none';
+  // Remover draft do Supabase (sessão concluída)
+  if(S.session?.id){
+    fetch(`${SB_URL}/rest/v1/vc_drafts?id=eq.${S.session.id}`,{
+      method:'DELETE',
+      headers:{'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`}
+    }).catch(()=>{});
+  }
 }
 async function submitAnswers(){
   const answered=Object.values(S.answers).filter(v=>v.trim().length>20).length;
