@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VentureCheck — O Guia do Empreendedor do Brasil</title>
+<title>VentureCheck — Diagnóstico Preciso Para Sua Ideia</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap');
 
 :root {
-  --bg:#060608;--s1:#0e0e12;--s2:#16161c;--s3:#1e1e26;
-  --border:#ffffff0f;--border2:#ffffff1a;--border3:#ffffff28;
-  --accent:#7fff6e;--accent2:#5fdf4e;--accent-dim:rgba(127,255,110,.12);
-  --amber:#ffb347;--amber-dim:rgba(255,179,71,.1);
-  --red:#ff4d6d;--red-dim:rgba(255,77,109,.08);
-  --blue:#4d9eff;--purple:#a78bfa;--teal:#2dd4bf;
-  --text:#f2f2f4;--t2:#9090a0;--t3:#55555f;--t4:#333340;
+  --bg:#05050a;--s1:#0c0c14;--s2:#13131e;--s3:#1a1a28;
+  --border:#ffffff0d;--border2:#ffffff18;--border3:#ffffff26;
+  --accent:#7fff6e;--accent2:#5fdf4e;--accent-dim:rgba(127,255,110,.1);
+  --amber:#ffd166;--amber-dim:rgba(255,209,102,.1);
+  --red:#ff6b6b;--red-dim:rgba(255,107,107,.08);
+  --blue:#6eb8ff;--purple:#c084fc;--teal:#2dd4bf;
+  --text:#f0f0f8;--t2:#8888a8;--t3:#44445a;--t4:#2a2a3a;
   --r:8px;--r2:12px;
 }
 
@@ -506,19 +506,20 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 <div class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">Venture<span>Check</span></div>
-    <div class="logo-tag">v0.6 · O Guia do Empreendedor do Brasil</div>
+    <div class="logo-tag">v0.6 · Diagnóstico Preciso Para Sua Ideia</div>
   </div>
 
   <div class="dna-badge">
-    <div class="dna-badge-label">⚡ DNA Board · 26 Mentores</div>
+    <div class="dna-badge-label">⚡ DNA Board · 30 Lentes</div>
     <div class="dna-badge-names">
-      Tallis · Nardon · Soares · Rony<br>
-      Benchimol · Bloisi · Stelleo<br>
-      Zuck · Musk · Orosco · Allan<br>
-      Denis · Henry · Farielo · Napoli<br>
-      <em>Adibe · L.C.F · Zanetti · Flávio</em><br>
-      <em>Romero · Esteves · Street · Vélez</em><br>
-      <em>Kazah · Szekasy · Rottenberg</em>
+      Problema · Cliente · Produto · Marca<br>
+      Escala · Caixa · Execução · Distribuição<br>
+      Mercado · Concorrência · Risco · Precificação<br>
+      Operação · Fundador · Anjo · Capital<br>
+      <em>Timing · Crescimento · SaaS · Fintech</em><br>
+      <em>Jurídica · Varejo · Imobiliária · Alto Padrão</em><br>
+      <em>Regulatória · Impacto · Plataforma · Princípios</em><br>
+      <em>Capitais · MR Angel</em>
     </div>
   </div>
 
@@ -550,7 +551,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
         <span id="save-text" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:1px">SALVO</span>
       </div>
       <div class="pulse"></div>
-      <span class="status-text">26 MENTORES · SISTEMA ATIVO</span>
+      <span class="status-text">30 LENTES · SISTEMA ATIVO</span>
     </div>
   </div>
 
@@ -570,15 +571,16 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
         </div>
       </div>
       <div class="hero">
-        <h1>SUA IDEIA<br><em>MERECE A</em><br>VERDADE</h1>
-        <p>26 dos maiores empreendedores e investidores do Brasil analisam sua ideia. Sem reunião. Sem espera. Relatório completo em 30 minutos.</p>
-        <button class="btn btn-p" style="font-size:14px;padding:14px 32px" onclick="startModeB()">▶ Validar minha ideia agora</button>
+        <h1>SUA IDEIA<br><em>DIAGNÓSTICO</em><br>PRECISO</h1>
+        <p style="font-family:'Instrument Serif',serif;font-size:16px;font-style:italic;color:var(--t2);margin-bottom:8px;line-height:1.6">"Toda boa ideia sobrevive a qualquer lente. O DNA Board testa a sua por todas elas — antes que o mercado faça isso do jeito difícil."</p>
+        <p>30 lentes analíticas. Análise completa em 30 minutos. Sem reunião. Sem espera.</p>
+        <button class="btn btn-p" style="font-size:14px;padding:14px 32px" onclick="startModeB()">▶ Diagnóstico agora</button>
         <div class="hero-meta">
           <div class="hero-stat"><div class="hero-stat-num" id="h-total">0</div><div class="hero-stat-label">Diagnósticos</div></div>
           <div class="hero-divider"></div>
           <div class="hero-stat"><div class="hero-stat-num" id="h-approved">0</div><div class="hero-stat-label">Aprovados</div></div>
           <div class="hero-divider"></div>
-          <div class="hero-stat"><div class="hero-stat-num">26</div><div class="hero-stat-label">Mentores</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">30</div><div class="hero-stat-label">Lentes</div></div>
           <div class="hero-divider"></div>
           <div class="hero-stat"><div class="hero-stat-num">6</div><div class="hero-stat-label">Módulos</div></div>
         </div>
@@ -625,7 +627,8 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
       <!-- DNA Board -->
       <div class="dna-section">
-        <div class="section-title">⚡ DNA BOARD — 26 MENTORES ANALISANDO SUA IDEIA</div>
+        <div class="section-title">⚡ DNA BOARD — 30 LENTES ANALISANDO SUA IDEIA</div>
+        <p style="font-size:12px;color:var(--t2);margin-bottom:18px;line-height:1.7"><em style="font-family:'Instrument Serif',serif;font-style:italic">Sua ideia vista por lentes que sabem onde olhar. Múltiplos ângulos. Uma análise completa.</em></p>
         <div class="dna-grid" id="dna-grid"></div>
       </div>
 
@@ -734,6 +737,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
       <div class="prog-wrap"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
 
+      <div id="imi-section" style="display:none;margin-bottom:24px"></div>
       <div class="blocks-track" id="blocks-track">
         <div class="bc on" id="bc-1"><span class="bcn">01</span><span class="bcl">Problema</span></div>
         <div class="bc" id="bc-2"><span class="bcn">02</span><span class="bcl">Cliente</span></div>
@@ -822,7 +826,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
 <script>
 // ══════════════════════════════════════════════════════════════
-// DNA BOARD — 26 MENTORES
+// DNA BOARD — 30 LENTES
 // ══════════════════════════════════════════════════════════════
 const DNA = [
   {name:'Tallis Gomes',co:'Easy Taxi · Singu',av:'🚀',sk:'Validação · Escala global',dna:'TALLIS GOMES (Easy Taxi, Singu): Valida em 90 dias ou pivota. Pensa global desde o dia 1. Velocidade de aprendizado vale mais que perfeição. Pergunta: "em 90 dias você consegue provar que isso funciona?" Avalia urgência real do empreendedor.'},
@@ -851,12 +855,50 @@ const DNA = [
   {name:'Hernán Kazah',co:'Kaszek Ventures',av:'🦅',sk:'VC · Ecossistema latino',dna:'HERNÁN KAZAH (Kaszek Ventures): Maior fundo de VC da América Latina. Pergunta: "você está preparado para o que vem depois do sucesso — quando precisar se reinventar como líder?"'},
   {name:'Nicolas Szekasy',co:'Kaszek · MercadoLivre',av:'📐',sk:'Estrutura financeira · Exit',dna:'NICOLAS SZEKASY (Kaszek, CFO MercadoLivre): Estruturou as finanças do MercadoLivre. Pergunta: "em qual cenário seu investidor multiplica o capital por 10x — e qual é a probabilidade real?"'},
   {name:'Linda Rottenberg',co:'Endeavor Global',av:'🌍',sk:'High-impact entrepreneurship',dna:'LINDA ROTTENBERG (Endeavor Global): Criou o conceito de High-Impact Entrepreneurship. Pergunta: "se sua empresa tiver sucesso total, quantas vidas ela vai mudar diretamente?"'}
+  ,
+  {name:'Odair G. Senra',co:'MRV · Construção Civil',av:'🏗',sk:'Construção civil · Escala imobiliária',dna:'ODAIR G. SENRA (MRV): Referência em construção civil e mercado imobiliário de escala. Avalia viabilidade de modelos no setor imobiliário e de construção. Pergunta: "em qual parte do ciclo imobiliário esse negócio ganha dinheiro — e o que acontece quando o ciclo virar?"'},
+  {name:'Elie Horn',co:'Cyrela · Alto Padrão',av:'💎',sk:'Alto padrão · Marca premium',dna:'ELIE HORN (Cyrela): Construiu a maior incorporadora de alto padrão do Brasil. Avalia se o produto justifica preço premium e se a marca tem substância para sustentar o posicionamento. Pergunta: "qual é o detalhe do seu produto que o cliente que paga 3x mais vai notar — e você já colocou isso no MVP?"'},
+  {name:'João Apolinário',co:'Polishop · Varejo',av:'🛒',sk:'Varejo · Produto que se vende',dna:'JOÃO APOLINÁRIO (Polishop): Mestre em fazer produto se vender na frente do cliente. Avalia se o produto tem demo, se tem argumento de venda claro, se o consumidor entende em 30 segundos. Pergunta: "você consegue demonstrar o valor do seu produto em 30 segundos para alguém que nunca te viu?"'},
+  {name:'MR Angel',co:'Ecossistema Anjo BR',av:'👼',sk:'Investimento anjo · Cap table · Founder first',dna:'MR ANGEL (fusão de 12+ investidores anjo brasileiros — Cassio Spina, Camila Farani, João Kepler, Paulo Veras, Zen Santoro, Sergio Furio, Patrick Sigrist, Florian Hagenbuch, Brian Requarth e outros): Avalia o founder primeiro, não o negócio. 12 pilares: Founder First, Evidence over Enthusiasm, Cap Table Limpo, Smart Money > Big Money, Timing é Tudo, Velocidade de Aprendizado, Rede como Ativo, Unit Economics, Primeiro Cheque é Sinal, Skin in the Game, Saída Precisa Existir, Brasil Exige Adaptação. Pergunta: "se eu colocar R$200k agora, o que você vai fazer nos próximos 90 dias que vai provar que esse dinheiro foi bem investido?"'}
+];
+
+const LENTES=[
+  {av:'🔍',nome:'Lente do Problema',desc:'O problema é real e urgente?'},
+  {av:'👤',nome:'Lente do Cliente',desc:'Quem paga e por quê?'},
+  {av:'📦',nome:'Lente do Produto',desc:'O produto se vende sozinho?'},
+  {av:'🎯',nome:'Lente da Marca',desc:'Tem alma e propósito?'},
+  {av:'📈',nome:'Lente da Escala',desc:'Como funciona 100x maior?'},
+  {av:'💰',nome:'Lente do Caixa',desc:'Os números fecham no unitário?'},
+  {av:'⚡',nome:'Lente da Execução',desc:'O time executa ou só planeja?'},
+  {av:'📡',nome:'Lente da Distribuição',desc:'Como chega ao cliente?'},
+  {av:'🌎',nome:'Lente do Mercado',desc:'O mercado sustenta o negócio?'},
+  {av:'⚔️',nome:'Lente da Concorrência',desc:'Quem perde quando você cresce?'},
+  {av:'⚠️',nome:'Lente do Risco',desc:'O que pode matar o negócio?'},
+  {av:'🏷',nome:'Lente da Precificação',desc:'O preço está certo?'},
+  {av:'🏭',nome:'Lente da Operação',desc:'A operação escala sem implodir?'},
+  {av:'🧠',nome:'Lente do Fundador',desc:'Você tem o que precisa para executar?'},
+  {av:'👼',nome:'Lente do Investidor Anjo',desc:'Vale o cheque? O founder convence?'},
+  {av:'🏦',nome:'Lente do Capital',desc:'Estruturado para captar?'},
+  {av:'⏱',nome:'Lente do Timing',desc:'O mercado está pronto agora?'},
+  {av:'🚀',nome:'Lente do Crescimento',desc:'Qual canal traz os primeiros 1.000 clientes?'},
+  {av:'💻',nome:'Lente do SaaS',desc:'O modelo recorrente fecha?'},
+  {av:'💳',nome:'Lente da Fintech',desc:'O modelo financeiro é defensável?'},
+  {av:'⚖️',nome:'Lente Jurídica',desc:'Está construindo em terreno firme?'},
+  {av:'🛒',nome:'Lente do Varejo',desc:'O produto se vende na frente do cliente?'},
+  {av:'🏗',nome:'Lente Imobiliária',desc:'O modelo funciona no ciclo do setor?'},
+  {av:'💎',nome:'Lente do Alto Padrão',desc:'O produto justifica o preço premium?'},
+  {av:'📋',nome:'Lente Regulatória',desc:'O negócio sobrevive a uma mudança de lei?'},
+  {av:'🌍',nome:'Lente do Impacto',desc:'Quantas vidas isso muda?'},
+  {av:'🔗',nome:'Lente da Plataforma',desc:'O modelo cria dependência positiva?'},
+  {av:'🔥',nome:'Lente dos Primeiros Princípios',desc:'Por que esse problema ainda não foi resolvido?'},
+  {av:'🏛',nome:'Lente do Mercado de Capitais',desc:'Pronto para capital institucional?'},
+  {av:'✨',nome:'Lente Anjo',desc:'O que o ecossistema de investimento diz?'}
 ];
 
 function renderDNA(){
   const g=document.getElementById('dna-grid');
   if(!g)return;
-  g.innerHTML=DNA.map(p=>`<div class="dna-card"><div class="dna-av">${p.av}</div><div class="dna-name">${p.name}</div><div class="dna-co">${p.co}</div><div class="dna-sk">${p.sk}</div></div>`).join('');
+  g.innerHTML=LENTES.map(l=>`<div class="dna-card"><div class="dna-av">${l.av}</div><div class="dna-name" style="font-size:10px">${l.nome}</div><div class="dna-sk">${l.desc}</div></div>`).join('');
   const pd=document.getElementById('proc-dna');
   if(pd)pd.innerHTML=DNA.map(p=>`<span class="proc-chip">${p.av} ${p.name.split(' ')[0]}</span>`).join('');
 }
@@ -989,6 +1031,42 @@ async function generateQuestions(){
     // Update screen header
     document.getElementById('q-screen-title').textContent=`${parsed.questions?.length||0} perguntas para ${biz}`;
     document.getElementById('q-screen-desc').textContent=parsed.intro||'Responda com profundidade. A qualidade do relatório depende das suas respostas.';
+
+    // Render IMI + veredito preliminar + providências + manual
+    const imiEl=document.getElementById('imi-section');
+    if(imiEl && parsed.imi){
+      const imi=parsed.imi;
+      const total=imi.total||imi.score||0;
+      const nivelMap={'Semente':'🌱','Germinando':'🌿','Crescendo':'🌳','Pronta':'🚀'};
+      const vp=parsed.veredito_preliminar;
+      const vpCor=vp?.resultado==='MERCADO SUSTENTA'?'var(--accent)':vp?.resultado==='MERCADO INCERTO'?'var(--amber)':'var(--red)';
+      const prov=parsed.providencias;
+      const manual=parsed.manual;
+      imiEl.style.display='block';
+      imiEl.innerHTML=`
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">📊 IMI — Índice de Maturidade da Ideia</div><div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">${total}/100 · ${nivelMap[imi.nivel]||''} ${imi.nivel||''}</div></div>
+          <div class="card-body">
+            <div style="background:var(--s2);border-radius:4px;height:8px;margin-bottom:16px;overflow:hidden"><div style="height:100%;width:${total}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;transition:width 1s ease"></div></div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+              ${['problema','solucao','mercado','founder','tracao'].map(k=>{const d=imi[k];const nota=typeof d==='object'?d.nota:d;const conceito=typeof d==='object'?d.conceito:'';return`<div style="text-align:center;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);padding:12px 6px"><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent)">${nota||0}</div><div style="font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;margin-top:2px">${k}</div>${conceito?`<div style="font-size:8px;color:var(--t3);margin-top:2px">${conceito}</div>`:''}</div>`}).join('')}
+            </div>
+          </div>
+        </div>
+        ${vp?`<div class="card" style="margin-bottom:16px;border-color:${vpCor}20">
+          <div class="card-head"><div class="card-title">🎯 Veredito Preliminar</div><div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:${vpCor}">${vp.resultado}</div></div>
+          <div class="card-body"><p style="color:var(--t2);font-size:13px;line-height:1.7">${vp.justificativa}</p></div>
+        </div>`:''}
+        ${prov?`<div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">⚡ ${prov.titulo||'Próximas 48h'}</div></div>
+          <div class="card-body"><div style="display:flex;flex-direction:column;gap:8px">${(prov.itens||[]).map((it,i)=>`<div style="display:flex;gap:10px;align-items:flex-start;font-size:13px"><div style="min-width:22px;height:22px;background:var(--accent-dim);border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--accent)">${i+1}</div><span style="color:var(--text);line-height:1.6">${it}</span></div>`).join('')}</div></div>
+        </div>`:''}
+        ${manual?`<div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">📖 ${manual.titulo||'Como Fazer'}</div></div>
+          <div class="card-body"><div style="display:flex;flex-direction:column;gap:10px">${(manual.passos||[]).map((p,i)=>`<div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px"><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:2px;margin-bottom:5px">PASSO ${i+1} · ${p.passo||''}</div><div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:6px">${p.como||''}</div>${p.ferramenta?`<div style="font-size:10px;color:var(--purple)">🔧 ${p.ferramenta}</div>`:''}</div>`).join('')}</div></div>
+        </div>`:''}
+      `;
+    }
 
   }catch(err){
     setProc(false);
@@ -1407,7 +1485,7 @@ function buildQA(){
 // ══════════════════════════════════════════════════════════════
 function renderAnalysis(d){
   document.getElementById('ana-title').textContent=`RELATÓRIO — ${(S.session?.biz||d.biz||'ANÁLISE').toUpperCase()}`;
-  document.getElementById('ana-meta').textContent=`${new Date().toLocaleDateString('pt-BR',{dateStyle:'full'})} · Empreendedor: ${S.session?.name||'—'} · DNA Board 26 mentores`;
+  document.getElementById('ana-meta').textContent=`${new Date().toLocaleDateString('pt-BR',{dateStyle:'full'})} · Empreendedor: ${S.session?.name||'—'} · DNA Board 30 Lentes`;
 
   const vc=d.verdict==='APROVADO'?'ok':d.verdict==='REPROVADO'?'no':'rev';
   const vi=d.verdict==='APROVADO'?'✅':d.verdict==='REPROVADO'?'❌':'⚠️';
@@ -1415,7 +1493,7 @@ function renderAnalysis(d){
     <div class="verdict-wrap ${vc}">
       <div>
         <div class="verdict-v">${vi} ${d.verdict}</div>
-        <div class="verdict-sub">VEREDITO DO DNA BOARD · 26 MENTORES</div>
+        <div class="verdict-sub">VEREDITO DO DNA BOARD · 30 LENTES</div>
         <div class="verdict-chips">${DNA.map(p=>`<span class="vchip">${p.av} ${p.name.split(' ')[0]}</span>`).join('')}</div>
       </div>
       <div class="verdict-resumo">"${d.resumo||''}"</div>
@@ -1515,9 +1593,9 @@ async function callClaude(messages, maxTokens=4000){
 // ═══════════════════════════════════════════════
 // SYSTEM PROMPT — AS 4 CAMADAS
 // ═══════════════════════════════════════════════
-const SYSTEM_PROMPT=`Você é o VentureCheck DNA Board — fusão de 26 dos maiores empreendedores e investidores do Brasil e do mundo numa inteligência única de análise de negócios.
+const SYSTEM_PROMPT=`Você é o VentureCheck DNA Board — fusão de 30 lentes analíticas — os arquétipos dos maiores empreendedores e investidores do Brasil e do mundo numa inteligência única de análise de negócios.
 
-DNA DOS 26 MENTORES:
+DNA DAS 30 LENTES ANALÍTICAS:
 ${DNA.map(p=>p.dna).join('\n')}
 
 ═══ CAMADA 1 — IDENTIDADE ═══
@@ -1569,23 +1647,46 @@ Gere perguntas que NENHUM formulário genérico faria. Perguntas específicas pa
 
 Responda SOMENTE com este JSON:
 {
-  "intro": "frase de 1-2 linhas contextualizando o que você identificou na descrição e o que vai explorar nas perguntas",
+  "intro": "frase de 1-2 linhas contextualizando o que você identificou",
   "imi": {
-    "score": 0-100,
+    "total": 0-100,
     "nivel": "Semente|Germinando|Crescendo|Pronta",
-    "problema": 0-20,
-    "solucao": 0-20,
-    "mercado": 0-20,
-    "founder": 0-20,
-    "tracao": 0-20
+    "problema": {"nota": 0-20, "conceito": "Embrionário|Em desenvolvimento|Comprovado", "obs": "1 linha"},
+    "solucao":  {"nota": 0-20, "conceito": "Vaga|Definida|Validada", "obs": "1 linha"},
+    "mercado":  {"nota": 0-20, "conceito": "Desconhecido|Mapeado|Dominado", "obs": "1 linha"},
+    "founder":  {"nota": 0-20, "conceito": "Curiosidade|Motivação|Obsessão", "obs": "1 linha"},
+    "tracao":   {"nota": 0-20, "conceito": "Zero|Sinal|Validada", "obs": "1 linha"}
+  },
+  "mercado_analise": {
+    "tamanho": "TAM estimado com premissa em 1 linha",
+    "crescimento": "% ao ano",
+    "maturidade": "Emergente|Em crescimento|Maduro|Saturado",
+    "players_diretos": ["player 1", "player 2"],
+    "gap_identificado": "oportunidade específica em 1 linha",
+    "timing": "Sim|Não|Quase — justificativa em 1 linha"
+  },
+  "veredito_preliminar": {
+    "resultado": "MERCADO SUSTENTA|MERCADO INCERTO|MERCADO NÃO SUSTENTA",
+    "justificativa": "2 linhas diretas",
+    "vale_continuar": true
+  },
+  "providencias": {
+    "titulo": "O que fazer nas próximas 48h",
+    "itens": ["ação concreta 1", "ação concreta 2", "ação concreta 3", "ação concreta 4"]
+  },
+  "manual": {
+    "titulo": "Como fazer",
+    "passos": [
+      {"passo": "nome do passo", "como": "instrução direta", "ferramenta": "ferramenta gratuita específica"}
+    ]
   },
   "questions": [
     {
       "question": "a pergunta completa e específica",
-      "block": número de 1 a 7 (1=Problema, 2=Cliente, 3=Solução, 4=Modelo, 5=Mercado, 6=Time, 7=Capital),
-      "critical": true ou false (true para as 3 mais importantes),
-      "why": "por que essa pergunta é essencial para esse negócio específico",
-      "placeholder": "exemplo de como uma boa resposta começa"
+      "block": 1-7,
+      "critical": true,
+      "why": "por que essencial para esse negócio",
+      "placeholder": "como começa uma boa resposta"
     }
   ]
 }
@@ -1623,7 +1724,7 @@ Máximo 4 perguntas complementares se necessário.`}];
 }
 
 function finalPrompt(qa){
-  return[{role:'user',content:`Análise completa de viabilidade — DNA Board 26 mentores.
+  return[{role:'user',content:`Análise completa de viabilidade — DNA Board 30 Lentes.
 
 ${qa}
 
