@@ -7,12 +7,16 @@ create table if not exists vc_sessions (
   name         text,
   idea         text,
   plan         text,
-  status       text default 'draft',
-  imi_score    integer,
-  veredito     text,
-  report_json  jsonb,
-  created_at   timestamptz default now(),
-  updated_at   timestamptz default now()
+  status           text default 'draft',
+  plan             text,
+  imi_score        integer,
+  veredito         text,
+  report_json      jsonb,
+  payment_id       text,
+  payment_provider text,
+  paid_at          timestamptz,
+  created_at       timestamptz default now(),
+  updated_at       timestamptz default now()
 );
 
 -- Tabela de rascunhos (auto-save durante o fluxo)

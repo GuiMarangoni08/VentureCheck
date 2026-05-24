@@ -485,12 +485,29 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
 @media print{
-  .sidebar,.topbar,.btn-row,.ana-tabs,.mode-grid{display:none}
-  .main{margin-left:0}.content{padding:16px}
+  .sidebar,.topbar,.btn-row,.ana-tabs,.mode-grid,#checkout-modal,.screen:not(#screen-report){display:none!important}
+  .main{margin-left:0!important}.content{padding:16px}
   .tab-panel{display:block!important}
-  body{background:white;color:black}
-  .verdict-wrap,.ab,.card{border:1px solid #ddd;background:white}
+  body{background:white!important;color:#111!important;font-size:12pt}
+  .verdict-wrap,.ab,.card{border:1px solid #ccc!important;background:white!important;break-inside:avoid}
+  .card{margin-bottom:16px;page-break-inside:avoid}
+  h1,h2,h3,.card-title{color:#111!important}
+  .t2,.t3{color:#555!important}
+  .accent-text{color:#2a7a20!important}
+  #screen-report{display:block!important}
+  .imi-bar-fill{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+/* Modal checkout */
+#checkout-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:10000;display:none;align-items:center;justify-content:center}
+#checkout-modal.open{display:flex}
+.checkout-box{background:var(--s2);border:1px solid var(--border3);border-radius:16px;padding:32px;width:100%;max-width:480px;text-align:center}
+.checkout-box h2{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:4px}
+.checkout-box .co-price{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--accent);letter-spacing:2px;margin:8px 0}
+.checkout-box .co-desc{font-size:12px;color:var(--t2);margin-bottom:24px;line-height:1.7}
+.checkout-btn-mp{background:#009ee3;color:white;border:none;border-radius:8px;padding:14px 32px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+.checkout-btn-mp:hover{background:#007ab8}
+.checkout-btn-mp:disabled{opacity:.6;cursor:not-allowed}
+.checkout-cancel{background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px;margin-top:8px;text-decoration:underline}
 @media(max-width:800px){
   .sidebar{display:none}.main{margin-left:0}
   .mode-grid,.blocks-track,.score-g,.mvp-2col,.matrix,.mvp-stats,.setup-grid,.deliv-grid{grid-template-columns:1fr}
@@ -641,7 +658,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
             <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">Validação</div>
             <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);letter-spacing:2px">R$149</div>
             <div style="font-size:11px;color:var(--t2);margin:12px 0;line-height:1.7">IMI · Análise de mercado · Veredito · Providências · Manual · 6 perguntas</div>
-            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startModeB()">Começar →</button>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startCheckout('validacao')">Começar →</button>
           </div>
           <div style="background:var(--s2);border:2px solid var(--accent);border-radius:var(--r2);padding:24px;text-align:center;position:relative">
             <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;font-size:9px;font-weight:700;letter-spacing:2px;padding:3px 12px;border-radius:20px">MAIS POPULAR</div>
@@ -649,14 +666,14 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
             <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">Diagnóstico</div>
             <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);letter-spacing:2px">R$497</div>
             <div style="font-size:11px;color:var(--t2);margin:12px 0;line-height:1.7">Tudo do Validação + 7 blocos profundos · Financeiro · MVP · Priorização · Roadmap · Riscos</div>
-            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startModeB()">Começar →</button>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startCheckout('diagnostico')">Começar →</button>
           </div>
           <div style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r2);padding:24px;text-align:center">
             <div style="font-size:28px;margin-bottom:8px">💎</div>
             <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">Captação</div>
             <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);letter-spacing:2px">R$999</div>
             <div style="font-size:11px;color:var(--t2);margin:12px 0;line-height:1.7">Tudo do Diagnóstico + Valuation · Data room · Pitch deck · Perfil do investidor ideal</div>
-            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startModeB()">Começar →</button>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startCheckout('captacao')">Começar →</button>
           </div>
         </div>
       </div>
@@ -814,7 +831,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
       <hr>
       <div class="btn-row">
-        <button class="btn btn-p" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
+        <button class="btn btn-p" onclick="exportPDF()">📄 Baixar PDF</button>
         <button class="btn btn-g" onclick="startModeB()">+ Novo diagnóstico</button>
         <button class="btn btn-g" onclick="showScreen('home')">Dashboard</button>
       </div>
@@ -1802,6 +1819,160 @@ startAutoSave();
 initFieldAutoSave();
 // Verificar rascunho após render da home
 setTimeout(checkDraft, 300);
+// Verificar retorno de pagamento
+checkPaymentReturn();
+</script>
+
+<!-- ══ MODAL CHECKOUT ══ -->
+<div id="checkout-modal">
+  <div class="checkout-box">
+    <div id="co-emoji" style="font-size:36px;margin-bottom:8px">🚀</div>
+    <h2 id="co-name">Diagnóstico</h2>
+    <div class="co-price" id="co-price">R$497</div>
+    <div class="co-desc" id="co-desc">Análise completa · 7 blocos · Financeiro · Roadmap</div>
+    <button class="checkout-btn-mp" id="co-btn-mp" onclick="goCheckout()">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#fff"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="#009ee3" font-weight="bold">MP</text></svg>
+      Pagar com Mercado Pago
+    </button>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Cartão · Pix · Boleto · Parcelamento</div>
+    <button class="checkout-cancel" onclick="closeCheckout()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// CHECKOUT — MERCADO PAGO / STRIPE
+// ══════════════════════════════════════════════════════════════
+const PLAN_INFO = {
+  validacao:   {emoji:'🌱',name:'Validação',   price:'R$149', desc:'IMI · Análise de mercado · Veredito · Providências · Manual'},
+  diagnostico: {emoji:'🚀',name:'Diagnóstico', price:'R$497', desc:'Tudo do Validação + 7 blocos · Financeiro · MVP · Roadmap · Riscos'},
+  captacao:    {emoji:'💎',name:'Captação',     price:'R$999', desc:'Tudo do Diagnóstico + Valuation · Data room · Pitch deck'},
+};
+
+let _checkoutPlan = null;
+
+function startCheckout(plan) {
+  _checkoutPlan = plan;
+  const info = PLAN_INFO[plan];
+  document.getElementById('co-emoji').textContent = info.emoji;
+  document.getElementById('co-name').textContent  = info.name;
+  document.getElementById('co-price').textContent = info.price;
+  document.getElementById('co-desc').textContent  = info.desc;
+  document.getElementById('checkout-modal').classList.add('open');
+}
+
+function closeCheckout() {
+  document.getElementById('checkout-modal').classList.remove('open');
+  _checkoutPlan = null;
+}
+
+async function goCheckout() {
+  const btn = document.getElementById('co-btn-mp');
+  btn.disabled = true;
+  btn.textContent = 'Aguarde...';
+
+  // gera sessionId se ainda não existe
+  if (!S.session?.id) {
+    S.session = S.session || {};
+    S.session.id = 'vc_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+  }
+
+  try {
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({plan: _checkoutPlan, sessionId: S.session.id}),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // Salva plano no estado local antes de redirecionar
+    S.plan = _checkoutPlan;
+    localStorage.setItem('vc_pending_plan', _checkoutPlan);
+    localStorage.setItem('vc_pending_session', S.session.id);
+
+    // Redireciona para o checkout
+    window.location.href = data.checkout_url || data.sandbox_url;
+  } catch(e) {
+    alert('Erro ao criar pagamento: ' + e.message + '\n\nTente novamente ou entre em contato.');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#fff"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="#009ee3" font-weight="bold">MP</text></svg> Pagar com Mercado Pago';
+  }
+}
+
+function checkPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get('payment');
+  if (!status) return;
+
+  // Limpa a URL sem recarregar
+  window.history.replaceState({}, '', window.location.pathname);
+
+  if (status === 'success') {
+    const plan      = params.get('plan') || localStorage.getItem('vc_pending_plan');
+    const sessionId = params.get('session') || localStorage.getItem('vc_pending_session');
+    localStorage.removeItem('vc_pending_plan');
+    localStorage.removeItem('vc_pending_session');
+    S.plan = plan;
+    S.session = S.session || {};
+    S.session.id = sessionId;
+    showScreen('screen-setup');
+    setTimeout(() => {
+      showToast('✅ Pagamento confirmado! Vamos começar.');
+    }, 400);
+  } else if (status === 'failure') {
+    setTimeout(() => {
+      showToast('❌ Pagamento não concluído. Tente novamente.');
+    }, 400);
+  } else if (status === 'pending') {
+    setTimeout(() => {
+      showToast('⏳ Pagamento pendente. Você receberá confirmação por e-mail.');
+    }, 400);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// PDF EXPORT — html2pdf via CDN
+// ══════════════════════════════════════════════════════════════
+function exportPDF() {
+  const btn = document.querySelector('[onclick="exportPDF()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando PDF...'; }
+
+  // Carrega html2pdf dinamicamente se não estiver disponível
+  function doExport() {
+    const el = document.getElementById('screen-report');
+    const name = (S.session?.name || 'empreendedor').replace(/\s+/g,'_').toLowerCase();
+    const idea = (S.session?.idea || 'ideia').slice(0,30).replace(/\s+/g,'_').toLowerCase();
+    const filename = `venturecheck_${name}_${idea}.pdf`;
+
+    const opt = {
+      margin:       [10, 10, 10, 10],
+      filename,
+      image:        { type: 'jpeg', quality: 0.92 },
+      html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
+    };
+
+    html2pdf().set(opt).from(el).save().then(() => {
+      if (btn) { btn.disabled = false; btn.textContent = '📄 Baixar PDF'; }
+    }).catch(e => {
+      if (btn) { btn.disabled = false; btn.textContent = '📄 Baixar PDF'; }
+      console.error('PDF error:', e);
+      window.print(); // fallback
+    });
+  }
+
+  if (typeof html2pdf !== 'undefined') {
+    doExport();
+  } else {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.onload = doExport;
+    script.onerror = () => { window.print(); };
+    document.head.appendChild(script);
+  }
+}
 </script>
 </body>
 </html>
