@@ -473,6 +473,17 @@ textarea{resize:vertical;line-height:1.7}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
 .btn-p{background:var(--accent);color:#000}
 .fb-star{background:none;border:1px solid var(--border2);border-radius:8px;font-size:22px;width:44px;height:44px;cursor:pointer;transition:all .15s}
+.ck-item{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:8px;background:var(--s2);border:1px solid var(--border);transition:border-color .3s}
+.ck-item.done{border-color:rgba(127,255,110,.3);background:rgba(127,255,110,.04)}
+.ck-item.pending{border-color:var(--border)}
+.ck-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--border3);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .3s}
+.ck-item.done .ck-check{background:var(--accent);border-color:var(--accent);color:#000}
+.ck-item.done .ck-check::after{content:'✓'}
+.ck-item.pending .ck-check::after{content:''}
+.ck-info{flex:1}
+.ck-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.ck-desc{font-size:11px;color:var(--t2);line-height:1.5}
+.ck-pts{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);flex-shrink:0;padding-top:1px}
 .fb-star:hover,.fb-star.active{background:var(--s3);border-color:var(--accent);transform:scale(1.15)}
 .btn-p:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(127,255,110,.2)}
 .btn-p:disabled{background:var(--s3);color:var(--t3);cursor:not-allowed;transform:none;box-shadow:none}
@@ -736,6 +747,24 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
             <div class="upload-hint">Fotos, protótipos, pesquisas, planilhas, apresentações</div>
           </div>
           <div class="file-list" id="setup-files-list"></div>
+        </div>
+      </div>
+
+      <!-- ══ CHECKLIST DE COMPLETUDE ══ -->
+      <div class="card" id="completude-card" style="border:1px solid var(--border2)">
+        <div class="card-head">
+          <div class="card-title">📋 Checklist de completude</div>
+          <div id="completude-pct" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">0%</div>
+        </div>
+        <div class="card-body">
+          <div style="background:var(--s2);border-radius:4px;height:8px;margin-bottom:6px;overflow:hidden">
+            <div id="completude-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;transition:width .4s ease"></div>
+          </div>
+          <div id="completude-label" style="font-size:11px;color:var(--t2);margin-bottom:16px">Preencha os campos abaixo para aumentar a qualidade da análise.</div>
+          <div id="completude-items" style="display:flex;flex-direction:column;gap:8px"></div>
+          <div id="completude-warn" style="display:none;margin-top:14px;padding:10px 14px;background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.25);border-radius:8px;font-size:12px;color:var(--amber)">
+            ⚠ Recomendamos completar pelo menos <strong id="completude-min-label">60%</strong> antes de gerar a análise para garantir uma entrega de qualidade.
+          </div>
         </div>
       </div>
 
@@ -1101,7 +1130,9 @@ function startModeB(){
   ['inp-name','inp-email','inp-biz','inp-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
   document.getElementById('inp-sector').value='';
   document.getElementById('setup-files-list').innerHTML='';
+  window._completudeFilesCount = 0;
   showScreen('setup');
+  setTimeout(initCompletude, 50);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2384,6 +2415,7 @@ function checkPaymentReturn() {
     showScreen('screen-setup');
     setTimeout(() => {
       showToast('✅ Pagamento confirmado! Vamos começar.');
+      initCompletude();
     }, 400);
   } else if (status === 'failure') {
     setTimeout(() => {
@@ -2437,6 +2469,96 @@ function exportPDF() {
     script.onerror = () => { window.print(); };
     document.head.appendChild(script);
   }
+}
+
+// ══════════════════════════════════════════════════════════════
+// CHECKLIST DE COMPLETUDE
+// ══════════════════════════════════════════════════════════════
+
+const COMPLETUDE_ITEMS = {
+  validacao: [
+    { id: 'ck-name',    label: 'Seu nome',           desc: 'Identifica quem está por trás da ideia.',              pct: 10, check: () => !!document.getElementById('inp-name')?.value.trim() },
+    { id: 'ck-biz',     label: 'Nome do negócio',    desc: 'Como você chama o que quer construir.',                pct: 10, check: () => !!document.getElementById('inp-biz')?.value.trim() },
+    { id: 'ck-sector',  label: 'Setor de atuação',   desc: 'Direciona as lentes do DNA Board certas para o mercado.', pct: 10, check: () => !!document.getElementById('inp-sector')?.value },
+    { id: 'ck-desc',    label: 'Descrição da ideia', desc: 'Quanto mais detalhe (problema, público, modelo), melhor o IMI.', pct: 40, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 30 },
+    { id: 'ck-desc-q',  label: 'Descrição aprofundada', desc: 'Descreva com 80+ palavras: já testou? tem experiência no setor? por que você?', pct: 30, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 80 },
+  ],
+  diagnostico: [
+    { id: 'ck-name',    label: 'Seu nome',              desc: 'Identifica o fundador na análise.',                     pct: 5,  check: () => !!document.getElementById('inp-name')?.value.trim() },
+    { id: 'ck-biz',     label: 'Nome do negócio',       desc: 'Base para benchmarks e busca de concorrentes.',         pct: 5,  check: () => !!document.getElementById('inp-biz')?.value.trim() },
+    { id: 'ck-sector',  label: 'Setor de atuação',      desc: 'Garante lentes especializadas para o seu mercado.',     pct: 10, check: () => !!document.getElementById('inp-sector')?.value },
+    { id: 'ck-desc',    label: 'Descrição da ideia',    desc: 'Contexto mínimo para análise de mercado e produto.',    pct: 15, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 30 },
+    { id: 'ck-desc-m',  label: 'Modelo de negócio descrito', desc: 'Como vai ganhar dinheiro? Receita recorrente, transacional, B2B, B2C?', pct: 20, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 100 },
+    { id: 'ck-desc-t',  label: 'Tração mencionada',     desc: 'Inclua qualquer sinal: entrevistas, pré-vendas, clientes, parceiros, MVP.', pct: 25, check: () => /trac|cliente|vend|pilot|mvp|test|entrev|parceiro/i.test(document.getElementById('inp-desc')?.value || '') },
+    { id: 'ck-files',   label: 'Material de apoio enviado', desc: 'Planilha, deck, pesquisa ou protótipo aumentam a profundidade dos 7 blocos.', pct: 20, check: () => (window._completudeFilesCount || 0) > 0 },
+  ],
+  captacao: [
+    { id: 'ck-name',    label: 'Seu nome',                 desc: 'Identifica o fundador.',                                pct: 5,  check: () => !!document.getElementById('inp-name')?.value.trim() },
+    { id: 'ck-biz',     label: 'Nome do negócio',          desc: 'Base para valuation e comparáveis de mercado.',          pct: 5,  check: () => !!document.getElementById('inp-biz')?.value.trim() },
+    { id: 'ck-sector',  label: 'Setor de atuação',         desc: 'Lentes e múltiplos corretos para o seu segmento.',       pct: 5,  check: () => !!document.getElementById('inp-sector')?.value },
+    { id: 'ck-desc',    label: 'Descrição completa',       desc: 'Problema, solução, público e modelo de negócio (100+ palavras).', pct: 15, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 100 },
+    { id: 'ck-tracao',  label: 'Tração descrita',          desc: 'Receita, usuários, MRR, NPS, parceiros — qualquer número real.', pct: 20, check: () => /trac|cliente|vend|pilot|mvp|test|entrev|parceiro|receita|mrr|arr|r\$|usuário/i.test(document.getElementById('inp-desc')?.value || '') },
+    { id: 'ck-time',    label: 'Time mencionado',          desc: 'Quem está construindo? Experiência do fundador é critério chave para investidor.', pct: 15, check: () => /sócio|cto|coo|cofund|co-fund|time|equipe|parceiro|tecn/i.test(document.getElementById('inp-desc')?.value || '') },
+    { id: 'ck-captacao-num', label: 'Valor da captação mencionado', desc: 'Quanto quer captar e para quê? Ex: "buscamos R$800k para 18 meses de runway".', pct: 15, check: () => /capt|inves|aport|round|seed|angel|série|r\$\s*\d|k\s+de|milhão/i.test(document.getElementById('inp-desc')?.value || '') },
+    { id: 'ck-files',   label: 'Material financeiro enviado', desc: 'Planilha de unit economics, modelo financeiro ou deck aumenta a precisão do valuation.', pct: 20, check: () => (window._completudeFilesCount || 0) > 0 },
+  ],
+};
+
+function updateCompletude() {
+  const plan = S?.plan || window._checkoutPlan || 'diagnostico';
+  const items = COMPLETUDE_ITEMS[plan] || COMPLETUDE_ITEMS.diagnostico;
+
+  let totalPct = 0;
+  const itemsEl = document.getElementById('completude-items');
+  if (!itemsEl) return;
+
+  itemsEl.innerHTML = '';
+  items.forEach(item => {
+    const done = item.check();
+    if (done) totalPct += item.pct;
+
+    const el = document.createElement('div');
+    el.className = `ck-item ${done ? 'done' : 'pending'}`;
+    el.innerHTML = `
+      <div class="ck-check"></div>
+      <div class="ck-info">
+        <div class="ck-title">${item.label}</div>
+        <div class="ck-desc">${item.desc}</div>
+      </div>
+      <div class="ck-pts">+${item.pct}%</div>`;
+    itemsEl.appendChild(el);
+  });
+
+  const bar  = document.getElementById('completude-bar');
+  const pct  = document.getElementById('completude-pct');
+  const lbl  = document.getElementById('completude-label');
+  const warn = document.getElementById('completude-warn');
+  if (bar)  bar.style.width  = totalPct + '%';
+  if (bar)  bar.style.background = totalPct >= 80 ? 'linear-gradient(90deg,#7fff6e,#40e060)' : totalPct >= 60 ? 'linear-gradient(90deg,var(--accent),var(--accent2))' : 'linear-gradient(90deg,var(--amber),#ff9900)';
+  if (pct)  pct.textContent  = totalPct + '%';
+  if (lbl)  lbl.textContent  = totalPct >= 80 ? '✅ Excelente! A análise terá máxima precisão.' : totalPct >= 60 ? '👍 Bom nível. Adicione mais detalhes para garantir 80%+.' : '⚠ Preencha mais campos para uma entrega de qualidade.';
+  if (warn) warn.style.display = totalPct < 60 ? 'block' : 'none';
+
+  const planNames = { validacao: 'Validação', diagnostico: 'Diagnóstico', captacao: 'Captação' };
+  const hdr = document.querySelector('#completude-card .card-title');
+  if (hdr) hdr.textContent = `📋 Checklist de completude — ${planNames[plan] || plan}`;
+}
+
+function initCompletude() {
+  updateCompletude();
+  // listeners nos campos de texto
+  ['inp-name','inp-email','inp-biz','inp-desc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateCompletude);
+  });
+  const sel = document.getElementById('inp-sector');
+  if (sel) sel.addEventListener('change', updateCompletude);
+  // files
+  const files = document.getElementById('setup-files');
+  if (files) files.addEventListener('change', e => {
+    window._completudeFilesCount = (window._completudeFilesCount || 0) + e.target.files.length;
+    updateCompletude();
+  });
 }
 
 // ══════════════════════════════════════════════════════════════
