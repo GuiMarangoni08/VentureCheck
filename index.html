@@ -802,11 +802,12 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
       <div class="ana-tabs" id="ana-tabs">
         <div class="ana-tab active" onclick="switchTab('viability')">📊 Viabilidade</div>
-        <div class="ana-tab" onclick="switchTab('financial')">💰 Financeiro</div>
-        <div class="ana-tab" onclick="switchTab('mvp')">🚀 MVP</div>
-        <div class="ana-tab" onclick="switchTab('matrix')">⚡ Priorização</div>
-        <div class="ana-tab" onclick="switchTab('roadmap')">🗺 Roadmap</div>
-        <div class="ana-tab" onclick="switchTab('risks')">⚠ Riscos</div>
+        <div class="ana-tab tab-financial-btn" onclick="switchTab('financial')">💰 Financeiro</div>
+        <div class="ana-tab tab-mvp-btn" onclick="switchTab('mvp')">🚀 MVP</div>
+        <div class="ana-tab tab-matrix-btn" onclick="switchTab('matrix')">⚡ Priorização</div>
+        <div class="ana-tab tab-roadmap-btn" onclick="switchTab('roadmap')">🗺 Roadmap</div>
+        <div class="ana-tab tab-risks-btn" onclick="switchTab('risks')">⚠ Riscos</div>
+        <div class="ana-tab tab-captacao-btn" onclick="switchTab('captacao')" style="display:none">💎 Captação</div>
       </div>
 
       <div class="tab-panel active" id="tab-viability">
@@ -828,6 +829,12 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
       <div class="tab-panel" id="tab-risks">
         <div class="card"><div class="card-head"><div class="card-title">⚠ Riscos Críticos</div></div><div class="card-body"><div class="risk-list" id="risks-body"></div></div></div>
       </div>
+      <div class="tab-panel" id="tab-captacao">
+        <div id="captacao-body"></div>
+      </div>
+
+      <!-- Seção Próximos Passos — aparece em todos os planos -->
+      <div id="proximos-passos-section" style="display:none;margin-top:32px"></div>
 
       <hr>
       <div class="btn-row">
@@ -1455,7 +1462,7 @@ async function submitAnswers(){
     }else{
       // Ready for final analysis
       setProc(true,'Gerando relatório completo...');
-      const finalRes=await callClaude(finalPrompt(qa), 8000);
+      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 8000);
       let finalParsed;
       try{finalParsed=parseJSON(finalRes)}
       catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório final.')}
@@ -1504,8 +1511,23 @@ function buildQA(){
 // RENDER ANALYSIS
 // ══════════════════════════════════════════════════════════════
 function renderAnalysis(d){
+  const plan = S.plan || 'diagnostico';
   document.getElementById('ana-title').textContent=`RELATÓRIO — ${(S.session?.biz||d.biz||'ANÁLISE').toUpperCase()}`;
   document.getElementById('ana-meta').textContent=`${new Date().toLocaleDateString('pt-BR',{dateStyle:'full'})} · Empreendedor: ${S.session?.name||'—'} · DNA Board 30 Lentes`;
+
+  // Controla visibilidade das tabs por plano
+  const tabsConfig = {
+    validacao:   {financial:false, mvp:false, matrix:false, roadmap:false, risks:false, captacao:false},
+    diagnostico: {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  captacao:false},
+    captacao:    {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  captacao:true},
+  };
+  const tc = tabsConfig[plan] || tabsConfig.diagnostico;
+  document.querySelector('.tab-financial-btn').style.display = tc.financial ? '' : 'none';
+  document.querySelector('.tab-mvp-btn').style.display      = tc.mvp      ? '' : 'none';
+  document.querySelector('.tab-matrix-btn').style.display   = tc.matrix   ? '' : 'none';
+  document.querySelector('.tab-roadmap-btn').style.display  = tc.roadmap  ? '' : 'none';
+  document.querySelector('.tab-risks-btn').style.display    = tc.risks    ? '' : 'none';
+  document.querySelector('.tab-captacao-btn').style.display = tc.captacao ? '' : 'none';
 
   const vc=d.verdict==='APROVADO'?'ok':d.verdict==='REPROVADO'?'no':'rev';
   const vi=d.verdict==='APROVADO'?'✅':d.verdict==='REPROVADO'?'❌':'⚠️';
@@ -1574,6 +1596,76 @@ function renderAnalysis(d){
   // Risks
   const rsb=document.getElementById('risks-body');rsb.innerHTML='';
   if(d.riscos?.length){d.riscos.forEach((r,i)=>{rsb.innerHTML+=`<div class="risk-i"><div class="risk-n">${i+1}</div><div>${typeof r==='string'?r:r.descricao||JSON.stringify(r)}</div></div>`})}
+
+  // Tab Captação (plano captacao)
+  const capb = document.getElementById('captacao-body');
+  if(plan==='captacao' && capb){
+    capb.innerHTML='';
+    if(d.valuation){
+      capb.innerHTML+=`<div class="card"><div class="card-head"><div class="card-title">💰 Valuation</div></div><div class="card-body">
+        <div class="fin-num" style="font-size:20px;margin-bottom:8px">${d.valuation.range||'—'}</div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:4px"><strong>Método:</strong> ${d.valuation.metodo||'—'}</div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:4px">${d.valuation.justificativa||''}</div>
+        <div style="font-size:12px;color:var(--accent)">Diluição saudável: ${d.valuation.dilucao_saudavel||'—'}</div>
+      </div></div>`;
+    }
+    if(d.perfil_investidor){
+      capb.innerHTML+=`<div class="card"><div class="card-head"><div class="card-title">🎯 Perfil do Investidor Ideal</div></div><div class="card-body">
+        <div style="margin-bottom:12px"><strong style="color:var(--accent)">Perfil ideal:</strong><br><span style="font-size:13px;color:var(--t2)">${d.perfil_investidor.ideal||'—'}</span></div>
+        <div style="margin-bottom:12px"><strong style="color:var(--accent)">Onde buscar:</strong><br><span style="font-size:13px;color:var(--t2)">${d.perfil_investidor.onde_buscar||'—'}</span></div>
+        <div><strong style="color:var(--red)">Evitar:</strong><br><span style="font-size:13px;color:var(--t2)">${d.perfil_investidor.evitar||'—'}</span></div>
+      </div></div>`;
+    }
+    if(d.data_room?.length){
+      capb.innerHTML+=`<div class="card"><div class="card-head"><div class="card-title">📁 Data Room — Checklist</div></div><div class="card-body">
+        ${d.data_room.map((item,i)=>`<div class="risk-i"><div class="risk-n">${i+1}</div><div style="font-size:13px">${item}</div></div>`).join('')}
+      </div></div>`;
+    }
+    if(d.pitch_narrativa){
+      const pn=d.pitch_narrativa;
+      capb.innerHTML+=`<div class="card"><div class="card-head"><div class="card-title">🎤 Estrutura do Pitch</div></div><div class="card-body">
+        ${pn.gancho?`<div style="margin-bottom:16px"><div class="mvp-col-title">🪝 Gancho de abertura</div><div class="msg msg-ok">${pn.gancho}</div></div>`:''}
+        ${pn.problema?`<div style="margin-bottom:12px"><strong style="font-size:12px;color:var(--t2);letter-spacing:.3px">PROBLEMA (30s)</strong><br><span style="font-size:13px">${pn.problema}</span></div>`:''}
+        ${pn.solucao?`<div style="margin-bottom:12px"><strong style="font-size:12px;color:var(--t2);letter-spacing:.3px">SOLUÇÃO (30s)</strong><br><span style="font-size:13px">${pn.solucao}</span></div>`:''}
+        ${pn.tese?`<div style="margin-bottom:12px"><strong style="font-size:12px;color:var(--t2);letter-spacing:.3px">TESE DE INVESTIMENTO</strong><br><span style="font-size:13px">${pn.tese}</span></div>`:''}
+        ${pn.pergunta_dificil?`<div class="ab" style="margin-top:16px"><div class="ab-head"><span class="ab-title">❓ Pergunta mais difícil do investidor</span></div><div class="ab-body">${pn.pergunta_dificil}</div></div>`:''}
+      </div></div>`;
+    }
+    if(d.criterio_pronto){
+      capb.innerHTML+=`<div class="msg msg-ok" style="margin-top:16px">🏁 <strong>Critério de pronto para captar:</strong> ${d.criterio_pronto}</div>`;
+    }
+  }
+
+  // Próximos Passos — todos os planos
+  const ppsec = document.getElementById('proximos-passos-section');
+  if(ppsec && d.proximos_passos?.length){
+    const planLabels = {validacao:'Diagnóstico (R$497)', diagnostico:'Captação (R$999)', captacao:'Série A'};
+    const nextLabel = planLabels[plan] || 'próximo nível';
+    const nextPlan  = {validacao:'diagnostico', diagnostico:'captacao'}[plan];
+    ppsec.style.display = 'block';
+    ppsec.innerHTML = `
+      <div class="card" style="border:1px solid var(--accent);background:var(--s2)">
+        <div class="card-head">
+          <div class="card-title" style="color:var(--accent)">→ PRÓXIMOS PASSOS — Como avançar para ${nextLabel}</div>
+        </div>
+        <div class="card-body">
+          ${d.proximos_passos.map((p,i)=>`
+            <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+              <div style="width:20px;height:20px;border:2px solid var(--border3);border-radius:4px;flex-shrink:0;margin-top:2px"></div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">${p.check}</div>
+                <div style="font-size:12px;color:var(--t2)">${p.motivo}</div>
+              </div>
+            </div>`).join('')}
+          ${d.proximo_modulo||d.criterio_pronto?`<div style="font-size:12px;color:var(--accent);margin-top:8px;padding-top:12px;border-top:1px solid var(--border3)">
+            ${d.proximo_modulo||d.criterio_pronto}
+          </div>`:''}
+          ${nextPlan?`<button class="btn btn-p" style="margin-top:16px;width:100%;justify-content:center" onclick="startCheckout('${nextPlan}')">Avançar para ${nextLabel} →</button>`:''}
+        </div>
+      </div>`;
+  } else if(ppsec){
+    ppsec.style.display = 'none';
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1743,21 +1835,171 @@ Se needs_complement for false, complement_questions pode ser [].
 Máximo 4 perguntas complementares se necessário.`}];
 }
 
-function finalPrompt(qa){
-  return[{role:'user',content:`Análise completa de viabilidade — DNA Board 30 Lentes.
-
-${qa}
-
-REGRAS DE OUTPUT:
+function finalPrompt(qa, plan){
+  const rules=`REGRAS DE OUTPUT:
 - Cada campo de texto: máximo 5 linhas, direto, sem repetições
 - Números com premissas claras
 - Afirmação direta + evidência + implicação + ação
 - NUNCA: "é importante considerar", "pode ser uma boa ideia"
+- Responda SOMENTE com JSON válido. Sem markdown. Sem texto fora do JSON.`;
+
+  // ── PLANO VALIDAÇÃO ──────────────────────────────────────────
+  if(plan==='validacao'){
+    return[{role:'user',content:`Análise de viabilidade inicial — DNA Board 30 Lentes — Plano Validação.
+Responda UMA ÚNICA pergunta: esta ideia vale continuar?
+
+${qa}
+
+${rules}
+
+JSON (sem markdown):
+{
+  "verdict":"APROVADO|REPROVADO|REQUER AJUSTES",
+  "resumo":"3 linhas diretas — veredito com justificativa",
+  "imi_score":0-100,
+  "imi_nivel":"Semente|Germinando|Crescendo|Pronta",
+  "imi_justificativa":"2 linhas explicando o score",
+  "problema":"análise da dor — máx 3 linhas","problema_score":1-5,
+  "solucao":"análise da solução — máx 3 linhas","solucao_score":1-5,
+  "mercado":"TAM Brasil em 1 número + 1 linha de contexto + 3 concorrentes principais com fraqueza","mercado_score":1-5,
+  "modelo":"viabilidade do modelo de negócio — máx 3 linhas","modelo_score":1-5,
+  "providencias":[
+    {"acao":"ação concreta 1 específica para este negócio","impacto":"impacto esperado em 1 linha"},
+    {"acao":"ação 2","impacto":"impacto 2"},
+    {"acao":"ação 3","impacto":"impacto 3"},
+    {"acao":"ação 4","impacto":"impacto 4"}
+  ],
+  "manual":"parágrafo direto para o founder — máx 5 linhas — o que fazer, o que evitar, próximo passo mais importante",
+  "proximos_passos":[
+    {"check":"ação específica 1","motivo":"por que isso é pré-requisito para o Diagnóstico"},
+    {"check":"ação 2","motivo":"motivo 2"},
+    {"check":"ação 3","motivo":"motivo 3"},
+    {"check":"ação 4","motivo":"motivo 4"},
+    {"check":"ação 5","motivo":"motivo 5"},
+    {"check":"ação 6","motivo":"motivo 6"}
+  ],
+  "proximo_modulo":"1 linha sobre o que o Módulo Diagnóstico entrega de diferente"
+}`}];
+  }
+
+  // ── PLANO CAPTAÇÃO ───────────────────────────────────────────
+  if(plan==='captacao'){
+    return[{role:'user',content:`Análise completa para captação de investimento — DNA Board 30 Lentes — Plano Captação.
+Este founder já validou o negócio. Responda: como estruturar para levantar capital?
+
+${qa}
+
+${rules}
+
+JSON (sem markdown):
+{
+  "verdict":"PRONTO PARA CAPTAR|QUASE PRONTO|NÃO ESTÁ PRONTO",
+  "resumo":"3 linhas — avaliação de investibilidade com justificativa",
+  "problema":"análise Tallis+Musk+Rony — máx 4 linhas","problema_score":1-5,
+  "solucao":"análise Zuck+Bloisi+Orosco — máx 4 linhas","solucao_score":1-5,
+  "mercado":"TAM/SAM/SOM com números — Stelleo+Benchimol — máx 4 linhas","mercado_score":1-5,
+  "modelo":"análise Soares+Nardon+Allan+Leandro com unit economics — máx 4 linhas","modelo_score":1-5,
+  "competicao":"análise Musk+Zuck+Benchimol — máx 4 linhas","competicao_score":1-5,
+  "time":"análise Nardon+Rony+Tallis+Napoli+Adibe — máx 4 linhas","time_score":1-5,
+  "capital":"análise Allan+Leandro+L.C.Fernandes+Benchimol — máx 4 linhas","capital_score":1-5,
+  "financeiro":"tese financeira em 2 linhas",
+  "financeiro_table":[
+    {"metrica":"Valuation pré-money sugerido","valor":"R$ X","obs":"metodologia usada"},
+    {"metrica":"Captação recomendada","valor":"R$ X","obs":"para X meses de runway"},
+    {"metrica":"Equity a ceder","valor":"X%","obs":"faixa saudável para este estágio"},
+    {"metrica":"CAC atual","valor":"R$ X","obs":"canal principal"},
+    {"metrica":"LTV estimado","valor":"R$ X","obs":""},
+    {"metrica":"LTV/CAC","valor":"Xx","obs":"saudável >3x"},
+    {"metrica":"MRR atual ou projetado M6","valor":"R$ X","obs":""},
+    {"metrica":"ARR run rate","valor":"R$ X","obs":""},
+    {"metrica":"Margem contribuição","valor":"X%","obs":""},
+    {"metrica":"Runway atual","valor":"X meses","obs":"sem captação"},
+    {"metrica":"Break-even","valor":"X meses","obs":"pós-captação"}
+  ],
+  "mvp":{
+    "descricao":"estado atual do produto — 2 linhas",
+    "entra":["feature prioritária 1","feature 2","feature 3"],
+    "fora":["o que não construir antes de captar 1","2"],
+    "custo":"R$ X",
+    "tempo":"X semanas até produto investível",
+    "stack":"stack atual + gaps",
+    "criterios":"métricas de produto que validam o investimento"
+  },
+  "matriz":{
+    "quick_wins":["ação pré-captação 1 com prazo","2","3"],
+    "apostas":["aposta estratégica 1","2"],
+    "tarefas":["tarefa operacional 1","2"],
+    "descartar":["o que não fazer durante captação 1","2"],
+    "primeiro_passo":"ação CONCRETA que acontece AMANHÃ para preparar captação"
+  },
+  "roadmap":[
+    {"title":"Pré-captação","period":"0-60 dias","actions":"o que resolver antes de falar com investidor"},
+    {"title":"Processo de captação","period":"Mês 2-4","actions":"como conduzir o fundraising"},
+    {"title":"Pós-investimento","period":"Mês 5-12","actions":"como usar o capital para crescer"},
+    {"title":"Próxima rodada","period":"Ano 2","actions":"preparação para série A"}
+  ],
+  "riscos":[
+    "Risco 1: [nome] — impacto no fundraising + mitigação",
+    "Risco 2: [nome] — impacto + mitigação",
+    "Risco 3: [nome] — impacto + mitigação"
+  ],
+  "valuation":{
+    "metodo":"método de valuation usado (Berkus / múltiplos / DCF simplificado)",
+    "range":"R$ X – R$ Y (pré-money)",
+    "justificativa":"3 fatores que sustentam esse range",
+    "dilucao_saudavel":"X–Y% para este estágio"
+  },
+  "perfil_investidor":{
+    "ideal":"perfil do investidor certo — tipo, tese, ticket médio",
+    "onde_buscar":"3 canais específicos para encontrar no Brasil",
+    "evitar":"perfil de investidor errado para este estágio e por quê"
+  },
+  "data_room":[
+    "documento 1 — por que o investidor vai pedir",
+    "documento 2","documento 3","documento 4","documento 5",
+    "documento 6","documento 7","documento 8"
+  ],
+  "pitch_narrativa":{
+    "gancho":"frase de abertura — 1 linha que prende a atenção",
+    "problema":"como apresentar o problema em 30 segundos",
+    "solucao":"como apresentar a solução em 30 segundos",
+    "tese":"por que agora, por que esse founder, por que esse mercado",
+    "pergunta_dificil":"a pergunta mais difícil que o investidor vai fazer e a resposta correta"
+  },
+  "proximos_passos":[
+    {"check":"ação específica 1","motivo":"por que isso é pré-requisito para fechar o investimento"},
+    {"check":"ação 2","motivo":"motivo 2"},
+    {"check":"ação 3","motivo":"motivo 3"},
+    {"check":"ação 4","motivo":"motivo 4"},
+    {"check":"ação 5","motivo":"motivo 5"},
+    {"check":"ação 6","motivo":"motivo 6"},
+    {"check":"ação 7","motivo":"motivo 7"},
+    {"check":"ação 8","motivo":"motivo 8"}
+  ],
+  "criterio_pronto":"frase completa — quando o founder pode dizer que está pronto para captar"
+}`}];
+  }
+
+  // ── PLANO DIAGNÓSTICO (default) ──────────────────────────────
+  return[{role:'user',content:`Análise completa de viabilidade — DNA Board 30 Lentes — Plano Diagnóstico.
+
+${qa}
+
+${rules}
 
 JSON COMPLETO (sem markdown, sem texto fora do JSON):
 {
   "verdict":"APROVADO|REPROVADO|REQUER AJUSTES",
   "resumo":"3 linhas diretas — veredito com justificativa integrada DNA Board",
+  "imi_score":0-100,
+  "imi_nivel":"Semente|Germinando|Crescendo|Pronta",
+  "imi_dimensoes":{
+    "problema":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
+    "solucao":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
+    "mercado":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
+    "founder":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
+    "tracao":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"}
+  },
   "problema":"análise Tallis+Musk+Rony — máx 4 linhas","problema_score":1-5,
   "solucao":"análise Zuck+Bloisi+Orosco — máx 4 linhas","solucao_score":1-5,
   "mercado":"TAM/SAM/SOM com números — Stelleo+Benchimol — máx 4 linhas","mercado_score":1-5,
@@ -1806,7 +2048,18 @@ JSON COMPLETO (sem markdown, sem texto fora do JSON):
     "Risco 1: [nome] — consequência + mitigação concreta",
     "Risco 2: [nome] — consequência + mitigação",
     "Risco 3: [nome] — consequência + mitigação"
-  ]
+  ],
+  "proximos_passos":[
+    {"check":"ação específica 1","motivo":"por que isso é pré-requisito para o Módulo Captação"},
+    {"check":"ação 2","motivo":"motivo 2"},
+    {"check":"ação 3","motivo":"motivo 3"},
+    {"check":"ação 4","motivo":"motivo 4"},
+    {"check":"ação 5","motivo":"motivo 5"},
+    {"check":"ação 6","motivo":"motivo 6"},
+    {"check":"ação 7","motivo":"motivo 7"},
+    {"check":"ação 8","motivo":"motivo 8"}
+  ],
+  "proximo_modulo":"1 linha sobre o que o Módulo Captação entrega de diferente"
 }`}];
 }
 
