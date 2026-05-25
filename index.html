@@ -807,6 +807,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
         <div class="ana-tab tab-matrix-btn" onclick="switchTab('matrix')">⚡ Priorização</div>
         <div class="ana-tab tab-roadmap-btn" onclick="switchTab('roadmap')">🗺 Roadmap</div>
         <div class="ana-tab tab-risks-btn" onclick="switchTab('risks')">⚠ Riscos</div>
+        <div class="ana-tab tab-benchmarks-btn" onclick="switchTab('benchmarks')" style="display:none">🌎 Benchmarks</div>
         <div class="ana-tab tab-captacao-btn" onclick="switchTab('captacao')" style="display:none">💎 Captação</div>
       </div>
 
@@ -828,6 +829,9 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
       </div>
       <div class="tab-panel" id="tab-risks">
         <div class="card"><div class="card-head"><div class="card-title">⚠ Riscos Críticos</div></div><div class="card-body"><div class="risk-list" id="risks-body"></div></div></div>
+      </div>
+      <div class="tab-panel" id="tab-benchmarks">
+        <div id="benchmarks-body"></div>
       </div>
       <div class="tab-panel" id="tab-captacao">
         <div id="captacao-body"></div>
@@ -1517,17 +1521,18 @@ function renderAnalysis(d){
 
   // Controla visibilidade das tabs por plano
   const tabsConfig = {
-    validacao:   {financial:false, mvp:false, matrix:false, roadmap:false, risks:false, captacao:false},
-    diagnostico: {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  captacao:false},
-    captacao:    {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  captacao:true},
+    validacao:   {financial:false, mvp:false, matrix:false, roadmap:false, risks:false, benchmarks:false, captacao:false},
+    diagnostico: {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:false},
+    captacao:    {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:true},
   };
   const tc = tabsConfig[plan] || tabsConfig.diagnostico;
-  document.querySelector('.tab-financial-btn').style.display = tc.financial ? '' : 'none';
-  document.querySelector('.tab-mvp-btn').style.display      = tc.mvp      ? '' : 'none';
-  document.querySelector('.tab-matrix-btn').style.display   = tc.matrix   ? '' : 'none';
-  document.querySelector('.tab-roadmap-btn').style.display  = tc.roadmap  ? '' : 'none';
-  document.querySelector('.tab-risks-btn').style.display    = tc.risks    ? '' : 'none';
-  document.querySelector('.tab-captacao-btn').style.display = tc.captacao ? '' : 'none';
+  document.querySelector('.tab-financial-btn').style.display   = tc.financial   ? '' : 'none';
+  document.querySelector('.tab-mvp-btn').style.display         = tc.mvp         ? '' : 'none';
+  document.querySelector('.tab-matrix-btn').style.display      = tc.matrix      ? '' : 'none';
+  document.querySelector('.tab-roadmap-btn').style.display     = tc.roadmap     ? '' : 'none';
+  document.querySelector('.tab-risks-btn').style.display       = tc.risks       ? '' : 'none';
+  document.querySelector('.tab-benchmarks-btn').style.display  = tc.benchmarks  ? '' : 'none';
+  document.querySelector('.tab-captacao-btn').style.display    = tc.captacao    ? '' : 'none';
 
   const vc=d.verdict==='APROVADO'?'ok':d.verdict==='REPROVADO'?'no':'rev';
   const vi=d.verdict==='APROVADO'?'✅':d.verdict==='REPROVADO'?'❌':'⚠️';
@@ -1622,6 +1627,50 @@ function renderAnalysis(d){
   // Risks
   const rsb=document.getElementById('risks-body');rsb.innerHTML='';
   if(d.riscos?.length){d.riscos.forEach((r,i)=>{rsb.innerHTML+=`<div class="risk-i"><div class="risk-n">${i+1}</div><div>${typeof r==='string'?r:r.descricao||JSON.stringify(r)}</div></div>`})}
+
+  // Tab Benchmarks (diagnóstico + captação)
+  const bmb = document.getElementById('benchmarks-body');
+  if(bmb && d.benchmarks){
+    const bm = d.benchmarks;
+    const raioLabel={'local':'Local','estadual':'Estadual','nacional':'Nacional','global':'Global'};
+    const raioIcon={'local':'📍','estadual':'🗺','nacional':'🇧🇷','global':'🌎'};
+    const renderBmGrupo=(titulo,icon,lista)=>{
+      if(!lista?.length)return'';
+      return`<div class="card" style="margin-bottom:16px"><div class="card-head"><div class="card-title">${icon} Referências ${titulo}</div></div><div class="card-body">
+        ${lista.map(b=>`<div style="padding:12px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+            <span style="font-size:13px;font-weight:600">${b.nome||'—'}</span>
+            ${b.metricas?`<span style="font-size:11px;color:var(--accent);background:var(--accent-dim);padding:2px 8px;border-radius:20px">${b.metricas}</span>`:''}
+          </div>
+          ${b.aprendizado?`<div style="font-size:12px;color:var(--t2)">💡 ${b.aprendizado}</div>`:''}
+        </div>`).join('')}
+      </div></div>`;
+    };
+    bmb.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:12px;color:var(--t2)">
+        <span>Raio de referência:</span>
+        <span style="background:var(--accent-dim);color:var(--accent);padding:3px 12px;border-radius:20px;font-weight:600">${raioIcon[bm.abrangencia]||'📍'} ${raioLabel[bm.abrangencia]||'Local'}</span>
+      </div>
+      ${renderBmGrupo('Locais','📍',bm.local)}
+      ${renderBmGrupo('Estaduais','🗺',bm.estadual)}
+      ${renderBmGrupo('Nacionais','🇧🇷',bm.nacional)}
+      ${renderBmGrupo('Internacionais','🌎',bm.internacional)}
+      ${bm.cases_sucesso?.length?`<div class="card" style="margin-bottom:16px;border-color:rgba(127,255,110,.2)"><div class="card-head"><div class="card-title" style="color:var(--accent)">✅ Cases de Sucesso</div></div><div class="card-body">
+        ${bm.cases_sucesso.map(c=>`<div style="padding:12px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">${c.nome||'—'} <span style="font-size:11px;color:var(--t3);font-weight:400">${c.contexto||''}</span></div>
+          ${c.resultado?`<div style="font-size:12px;color:var(--t2);margin-bottom:4px">📈 ${c.resultado}</div>`:''}
+          ${c.licao?`<div class="msg msg-ok" style="padding:6px 10px;margin:0">💡 ${c.licao}</div>`:''}
+        </div>`).join('')}
+      </div></div>`:''}
+      ${bm.cases_fracasso?.length?`<div class="card" style="margin-bottom:16px;border-color:rgba(255,107,107,.2)"><div class="card-head"><div class="card-title" style="color:var(--red)">⚠ Cases de Fracasso — O que Evitar</div></div><div class="card-body">
+        ${bm.cases_fracasso.map(c=>`<div style="padding:12px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">${c.nome||'—'} <span style="font-size:11px;color:var(--t3);font-weight:400">${c.contexto||''}</span></div>
+          ${c.motivo?`<div style="font-size:12px;color:var(--t2);margin-bottom:4px">💥 Causa: ${c.motivo}</div>`:''}
+          ${c.licao?`<div class="msg msg-warn" style="padding:6px 10px;margin:0">🚫 ${c.licao}</div>`:''}
+        </div>`).join('')}
+      </div></div>`:''}
+    `;
+  }
 
   // Tab Captação (plano captacao)
   const capb = document.getElementById('captacao-body');
@@ -2089,6 +2138,27 @@ JSON COMPLETO (sem markdown, sem texto fora do JSON):
     "Risco 2: [nome] — consequência + mitigação",
     "Risco 3: [nome] — consequência + mitigação"
   ],
+  "benchmarks":{
+    "abrangencia":"local|estadual|nacional|global — raio real de referência para este negócio",
+    "local":[
+      {"nome":"nome de referência local ou perfil típico","metricas":"1-2 métricas-chave (faturamento, volume, clientes)","aprendizado":"o que esse benchmark ensina para este negócio"}
+    ],
+    "estadual":[
+      {"nome":"referência estadual","metricas":"métricas relevantes","aprendizado":"aprendizado aplicável"}
+    ],
+    "nacional":[
+      {"nome":"referência nacional","metricas":"métricas relevantes","aprendizado":"aprendizado aplicável"}
+    ],
+    "internacional":[
+      {"nome":"referência internacional — país ou empresa","metricas":"métricas relevantes","aprendizado":"o que o Brasil pode aprender ou adaptar"}
+    ],
+    "cases_sucesso":[
+      {"nome":"nome do case","contexto":"onde/quando surgiu","resultado":"resultado alcançado em 1 linha","licao":"lição principal aplicável a este negócio"}
+    ],
+    "cases_fracasso":[
+      {"nome":"nome do case ou perfil","contexto":"onde/quando","motivo":"por que falhou em 1 linha","licao":"o que este founder deve evitar"}
+    ]
+  },
   "proximos_passos":[
     {"check":"ação específica 1","motivo":"por que isso é pré-requisito para o Módulo Captação"},
     {"check":"ação 2","motivo":"motivo 2"},
