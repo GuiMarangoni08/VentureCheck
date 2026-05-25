@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VentureCheck — Diagnóstico de Negócio</title>
+<title>VentureCheck — Diagnóstico Preciso Para Sua Ideia</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap');
 
 :root {
-  --bg:#060608;--s1:#0e0e12;--s2:#16161c;--s3:#1e1e26;
-  --border:#ffffff0f;--border2:#ffffff1a;--border3:#ffffff28;
-  --accent:#7fff6e;--accent2:#5fdf4e;--accent-dim:rgba(127,255,110,.12);
-  --amber:#ffb347;--amber-dim:rgba(255,179,71,.1);
-  --red:#ff4d6d;--red-dim:rgba(255,77,109,.08);
-  --blue:#4d9eff;--purple:#a78bfa;--teal:#2dd4bf;
-  --text:#f2f2f4;--t2:#9090a0;--t3:#55555f;--t4:#333340;
+  --bg:#05050a;--s1:#0c0c14;--s2:#13131e;--s3:#1a1a28;
+  --border:#ffffff0d;--border2:#ffffff18;--border3:#ffffff26;
+  --accent:#7fff6e;--accent2:#5fdf4e;--accent-dim:rgba(127,255,110,.1);
+  --amber:#ffd166;--amber-dim:rgba(255,209,102,.1);
+  --red:#ff6b6b;--red-dim:rgba(255,107,107,.08);
+  --blue:#6eb8ff;--purple:#c084fc;--teal:#2dd4bf;
+  --text:#f0f0f8;--t2:#8888a8;--t3:#44445a;--t4:#2a2a3a;
   --r:8px;--r2:12px;
 }
 
@@ -472,6 +472,8 @@ textarea{resize:vertical;line-height:1.7}
 /* Buttons */
 .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
 .btn-p{background:var(--accent);color:#000}
+.fb-star{background:none;border:1px solid var(--border2);border-radius:8px;font-size:22px;width:44px;height:44px;cursor:pointer;transition:all .15s}
+.fb-star:hover,.fb-star.active{background:var(--s3);border-color:var(--accent);transform:scale(1.15)}
 .btn-p:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(127,255,110,.2)}
 .btn-p:disabled{background:var(--s3);color:var(--t3);cursor:not-allowed;transform:none;box-shadow:none}
 .btn-g{background:transparent;color:var(--t2);border:1px solid var(--border2)}
@@ -485,12 +487,29 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
 @media print{
-  .sidebar,.topbar,.btn-row,.ana-tabs,.mode-grid{display:none}
-  .main{margin-left:0}.content{padding:16px}
+  .sidebar,.topbar,.btn-row,.ana-tabs,.mode-grid,#checkout-modal,.screen:not(#screen-report){display:none!important}
+  .main{margin-left:0!important}.content{padding:16px}
   .tab-panel{display:block!important}
-  body{background:white;color:black}
-  .verdict-wrap,.ab,.card{border:1px solid #ddd;background:white}
+  body{background:white!important;color:#111!important;font-size:12pt}
+  .verdict-wrap,.ab,.card{border:1px solid #ccc!important;background:white!important;break-inside:avoid}
+  .card{margin-bottom:16px;page-break-inside:avoid}
+  h1,h2,h3,.card-title{color:#111!important}
+  .t2,.t3{color:#555!important}
+  .accent-text{color:#2a7a20!important}
+  #screen-report{display:block!important}
+  .imi-bar-fill{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+/* Modal checkout */
+#checkout-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:10000;display:none;align-items:center;justify-content:center}
+#checkout-modal.open{display:flex}
+.checkout-box{background:var(--s2);border:1px solid var(--border3);border-radius:16px;padding:32px;width:100%;max-width:480px;text-align:center}
+.checkout-box h2{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:4px}
+.checkout-box .co-price{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--accent);letter-spacing:2px;margin:8px 0}
+.checkout-box .co-desc{font-size:12px;color:var(--t2);margin-bottom:24px;line-height:1.7}
+.checkout-btn-mp{background:#009ee3;color:white;border:none;border-radius:8px;padding:14px 32px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+.checkout-btn-mp:hover{background:#007ab8}
+.checkout-btn-mp:disabled{opacity:.6;cursor:not-allowed}
+.checkout-cancel{background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px;margin-top:8px;text-decoration:underline}
 @media(max-width:800px){
   .sidebar{display:none}.main{margin-left:0}
   .mode-grid,.blocks-track,.score-g,.mvp-2col,.matrix,.mvp-stats,.setup-grid,.deliv-grid{grid-template-columns:1fr}
@@ -506,17 +525,20 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 <div class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">Venture<span>Check</span></div>
-    <div class="logo-tag">v0.5 · Diagnóstico de Negócio</div>
+    <div class="logo-tag">v0.6 · Diagnóstico Preciso Para Sua Ideia</div>
   </div>
 
   <div class="dna-badge">
-    <div class="dna-badge-label">⚡ DNA Board · 18 mentes</div>
+    <div class="dna-badge-label">⚡ DNA Board · 30 Lentes</div>
     <div class="dna-badge-names">
-      Tallis · Nardon · Soares · Rony<br>
-      Benchimol · Bloisi · Stelleo<br>
-      Zuck · Musk · Orosco<br>
-      Allan · Denis · Henry · Leandro<br>
-      <em>Napoli · Adibe · L.C.F · Zanetti</em>
+      Problema · Cliente · Produto · Marca<br>
+      Escala · Caixa · Execução · Distribuição<br>
+      Mercado · Concorrência · Risco · Precificação<br>
+      Operação · Fundador · Anjo · Capital<br>
+      <em>Timing · Crescimento · SaaS · Fintech</em><br>
+      <em>Jurídica · Varejo · Imobiliária · Alto Padrão</em><br>
+      <em>Regulatória · Impacto · Plataforma · Princípios</em><br>
+      <em>Capitais · MR Angel · BR Builder · MR Lean · MR Turnaround</em>
     </div>
   </div>
 
@@ -548,7 +570,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
         <span id="save-text" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:1px">SALVO</span>
       </div>
       <div class="pulse"></div>
-      <span class="status-text">18 MENTORES · SISTEMA ATIVO</span>
+      <span class="status-text">30 LENTES · SISTEMA ATIVO</span>
     </div>
   </div>
 
@@ -568,15 +590,16 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
         </div>
       </div>
       <div class="hero">
-        <h1>DIAGNÓSTICO<br><em>DE NEGÓCIO</em><br>EM 30 MINUTOS</h1>
-        <p>14 dos maiores empreendedores do Brasil analisam sua ideia. Sem reunião. Sem espera. Relatório completo com viabilidade, financeiro, MVP, priorização e roadmap.</p>
-        <button class="btn btn-p" style="font-size:14px;padding:14px 32px" onclick="startModeB()">▶ Iniciar diagnóstico gratuito</button>
+        <h1>SUA IDEIA<br><em>DIAGNÓSTICO</em><br>PRECISO</h1>
+        <p style="font-family:'Instrument Serif',serif;font-size:16px;font-style:italic;color:var(--t2);margin-bottom:8px;line-height:1.6">"Toda boa ideia sobrevive a qualquer lente. O DNA Board testa a sua por todas elas — antes que o mercado faça isso do jeito difícil."</p>
+        <p>30 lentes analíticas. Análise completa em 30 minutos. Sem reunião. Sem espera.</p>
+        <button class="btn btn-p" style="font-size:14px;padding:14px 32px" onclick="startModeB()">▶ Diagnóstico agora</button>
         <div class="hero-meta">
           <div class="hero-stat"><div class="hero-stat-num" id="h-total">0</div><div class="hero-stat-label">Diagnósticos</div></div>
           <div class="hero-divider"></div>
           <div class="hero-stat"><div class="hero-stat-num" id="h-approved">0</div><div class="hero-stat-label">Aprovados</div></div>
           <div class="hero-divider"></div>
-          <div class="hero-stat"><div class="hero-stat-num">18</div><div class="hero-stat-label">Mentores</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">30</div><div class="hero-stat-label">Lentes</div></div>
           <div class="hero-divider"></div>
           <div class="hero-stat"><div class="hero-stat-num">6</div><div class="hero-stat-label">Módulos</div></div>
         </div>
@@ -623,8 +646,38 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
       <!-- DNA Board -->
       <div class="dna-section">
-        <div class="section-title">⚡ DNA BOARD — 14 MENTES ANALISANDO SUA IDEIA</div>
+        <div class="section-title">⚡ DNA BOARD — 30 LENTES ANALISANDO SUA IDEIA</div>
+        <p style="font-size:12px;color:var(--t2);margin-bottom:18px;line-height:1.7"><em style="font-family:'Instrument Serif',serif;font-style:italic">Sua ideia vista por lentes que sabem onde olhar. Múltiplos ângulos. Uma análise completa.</em></p>
         <div class="dna-grid" id="dna-grid"></div>
+      </div>
+
+      <!-- Planos -->
+      <div class="dna-section" style="padding:22px;margin-bottom:0">
+        <div class="section-title">💎 ESCOLHA SEU PLANO</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+          <div style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r2);padding:24px;text-align:center">
+            <div style="font-size:28px;margin-bottom:8px">🌱</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">Validação</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);letter-spacing:2px">R$149</div>
+            <div style="font-size:11px;color:var(--t2);margin:12px 0;line-height:1.7">IMI · Análise de mercado · Veredito · Providências · Manual · 6 perguntas</div>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startCheckout('validacao')">Começar →</button>
+          </div>
+          <div style="background:var(--s2);border:2px solid var(--accent);border-radius:var(--r2);padding:24px;text-align:center;position:relative">
+            <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;font-size:9px;font-weight:700;letter-spacing:2px;padding:3px 12px;border-radius:20px">MAIS POPULAR</div>
+            <div style="font-size:28px;margin-bottom:8px">🚀</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">Diagnóstico</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);letter-spacing:2px">R$497</div>
+            <div style="font-size:11px;color:var(--t2);margin:12px 0;line-height:1.7">Tudo do Validação + 7 blocos profundos · Financeiro · MVP · Priorização · Roadmap · Riscos</div>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startCheckout('diagnostico')">Começar →</button>
+          </div>
+          <div style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r2);padding:24px;text-align:center">
+            <div style="font-size:28px;margin-bottom:8px">💎</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">Captação</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);letter-spacing:2px">R$999</div>
+            <div style="font-size:11px;color:var(--t2);margin:12px 0;line-height:1.7">Tudo do Diagnóstico + Valuation · Data room · Pitch deck · Perfil do investidor ideal</div>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startCheckout('captacao')">Começar →</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -703,6 +756,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
       <div class="prog-wrap"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
 
+      <div id="imi-section" style="display:none;margin-bottom:24px"></div>
       <div class="blocks-track" id="blocks-track">
         <div class="bc on" id="bc-1"><span class="bcn">01</span><span class="bcl">Problema</span></div>
         <div class="bc" id="bc-2"><span class="bcn">02</span><span class="bcl">Cliente</span></div>
@@ -750,11 +804,13 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
       <div class="ana-tabs" id="ana-tabs">
         <div class="ana-tab active" onclick="switchTab('viability')">📊 Viabilidade</div>
-        <div class="ana-tab" onclick="switchTab('financial')">💰 Financeiro</div>
-        <div class="ana-tab" onclick="switchTab('mvp')">🚀 MVP</div>
-        <div class="ana-tab" onclick="switchTab('matrix')">⚡ Priorização</div>
-        <div class="ana-tab" onclick="switchTab('roadmap')">🗺 Roadmap</div>
-        <div class="ana-tab" onclick="switchTab('risks')">⚠ Riscos</div>
+        <div class="ana-tab tab-financial-btn" onclick="switchTab('financial')">💰 Financeiro</div>
+        <div class="ana-tab tab-mvp-btn" onclick="switchTab('mvp')">🚀 MVP</div>
+        <div class="ana-tab tab-matrix-btn" onclick="switchTab('matrix')">⚡ Priorização</div>
+        <div class="ana-tab tab-roadmap-btn" onclick="switchTab('roadmap')">🗺 Roadmap</div>
+        <div class="ana-tab tab-risks-btn" onclick="switchTab('risks')">⚠ Riscos</div>
+        <div class="ana-tab tab-benchmarks-btn" onclick="switchTab('benchmarks')" style="display:none">🌎 Benchmarks</div>
+        <div class="ana-tab tab-captacao-btn" onclick="switchTab('captacao')" style="display:none">💎 Captação</div>
       </div>
 
       <div class="tab-panel active" id="tab-viability">
@@ -776,10 +832,106 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
       <div class="tab-panel" id="tab-risks">
         <div class="card"><div class="card-head"><div class="card-title">⚠ Riscos Críticos</div></div><div class="card-body"><div class="risk-list" id="risks-body"></div></div></div>
       </div>
+      <div class="tab-panel" id="tab-benchmarks">
+        <div id="benchmarks-body"></div>
+      </div>
+      <div class="tab-panel" id="tab-captacao">
+        <div id="captacao-body"></div>
+      </div>
+
+      <!-- Seção Próximos Passos — aparece em todos os planos -->
+      <div id="proximos-passos-section" style="display:none;margin-top:32px"></div>
+
+      <!-- Janela de Feedback 1 — Sobre a Análise -->
+      <div id="feedback-section" style="display:none;margin-top:32px">
+        <div id="fb-card-1" class="card" style="border:1px solid var(--border2)">
+          <div class="card-head"><div class="card-title">💬 O que você achou desta análise?</div></div>
+          <div class="card-body">
+            <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Sua opinião melhora o DNA Board. Seja direto — elogios e críticas são igualmente bem-vindos.</p>
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+              <button class="fb-star" data-fb="1" onclick="setFeedbackRating(1,1)" title="Muito ruim">😤</button>
+              <button class="fb-star" data-fb="1" onclick="setFeedbackRating(1,2)" title="Ruim">😕</button>
+              <button class="fb-star" data-fb="1" onclick="setFeedbackRating(1,3)" title="Ok">😐</button>
+              <button class="fb-star" data-fb="1" onclick="setFeedbackRating(1,4)" title="Bom">😊</button>
+              <button class="fb-star" data-fb="1" onclick="setFeedbackRating(1,5)" title="Excelente">🤩</button>
+            </div>
+            <textarea id="fb-text-1" placeholder="O que foi mais útil? O que faltou? Algum ponto que discordou?" style="width:100%;min-height:80px;background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+            <button class="btn btn-p" style="margin-top:10px" onclick="submitFeedback(1)">Enviar →</button>
+          </div>
+        </div>
+
+        <!-- Janela de Feedback 2 — Sobre o Produto VentureCheck -->
+        <div id="fb-card-2" class="card" style="border:1px solid var(--border2);margin-top:16px">
+          <div class="card-head"><div class="card-title">⚡ Como foi sua experiência com o VentureCheck?</div></div>
+          <div class="card-body">
+            <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Avalie a plataforma — tempo de resposta, clareza, usabilidade. Isso vai direto para o time de produto.</p>
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+              <button class="fb-star" data-fb="2" onclick="setFeedbackRating(2,1)" title="Muito ruim">😤</button>
+              <button class="fb-star" data-fb="2" onclick="setFeedbackRating(2,2)" title="Ruim">😕</button>
+              <button class="fb-star" data-fb="2" onclick="setFeedbackRating(2,3)" title="Ok">😐</button>
+              <button class="fb-star" data-fb="2" onclick="setFeedbackRating(2,4)" title="Bom">😊</button>
+              <button class="fb-star" data-fb="2" onclick="setFeedbackRating(2,5)" title="Excelente">🤩</button>
+            </div>
+            <textarea id="fb-text-2" placeholder="O fluxo foi claro? O tempo de espera foi aceitável? O que mudaria?" style="width:100%;min-height:80px;background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+            <button class="btn btn-p" style="margin-top:10px" onclick="submitFeedback(2)">Enviar →</button>
+          </div>
+        </div>
+
+        <!-- Janela de Feedback 3 — Exclusiva Diagnóstico/Captação: profundidade da análise -->
+        <div id="fb-card-3" class="card" style="border:1px solid var(--border2);margin-top:16px;display:none">
+          <div class="card-head"><div class="card-title">🔬 A profundidade do diagnóstico atendeu sua expectativa?</div></div>
+          <div class="card-body">
+            <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Financeiro, roadmap, riscos, benchmarks — o que foi mais valioso? O que você esperava e não encontrou?</p>
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+              <button class="fb-star" data-fb="3" onclick="setFeedbackRating(3,1)" title="Muito ruim">😤</button>
+              <button class="fb-star" data-fb="3" onclick="setFeedbackRating(3,2)" title="Ruim">😕</button>
+              <button class="fb-star" data-fb="3" onclick="setFeedbackRating(3,3)" title="Ok">😐</button>
+              <button class="fb-star" data-fb="3" onclick="setFeedbackRating(3,4)" title="Bom">😊</button>
+              <button class="fb-star" data-fb="3" onclick="setFeedbackRating(3,5)" title="Excelente">🤩</button>
+            </div>
+            <textarea id="fb-text-3" placeholder="O que foi mais valioso? O que faltou nos 7 blocos? Alguma seção que surpreendeu?" style="width:100%;min-height:80px;background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+            <button class="btn btn-p" style="margin-top:10px" onclick="submitFeedback(3)">Enviar →</button>
+          </div>
+        </div>
+
+        <!-- Janela de Feedback 4 — Exclusiva Captação: valuation e data room -->
+        <div id="fb-card-4" class="card" style="border:1px solid var(--border2);margin-top:16px;display:none">
+          <div class="card-head"><div class="card-title">💰 O valuation e o data room fizeram sentido para o seu negócio?</div></div>
+          <div class="card-body">
+            <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Valuation, perfil do investidor ideal, checklist do data room — o material te deixou mais próximo de uma captação real?</p>
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+              <button class="fb-star" data-fb="4" onclick="setFeedbackRating(4,1)" title="Muito ruim">😤</button>
+              <button class="fb-star" data-fb="4" onclick="setFeedbackRating(4,2)" title="Ruim">😕</button>
+              <button class="fb-star" data-fb="4" onclick="setFeedbackRating(4,3)" title="Ok">😐</button>
+              <button class="fb-star" data-fb="4" onclick="setFeedbackRating(4,4)" title="Bom">😊</button>
+              <button class="fb-star" data-fb="4" onclick="setFeedbackRating(4,5)" title="Excelente">🤩</button>
+            </div>
+            <textarea id="fb-text-4" placeholder="O valuation foi realista? O perfil do investidor bateu com o seu mercado? O data room estava completo?" style="width:100%;min-height:80px;background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+            <button class="btn btn-p" style="margin-top:10px" onclick="submitFeedback(4)">Enviar →</button>
+          </div>
+        </div>
+
+        <!-- Janela de Feedback 5 — Exclusiva Captação: narrativa do pitch -->
+        <div id="fb-card-5" class="card" style="border:1px solid var(--border2);margin-top:16px;display:none">
+          <div class="card-head"><div class="card-title">🎯 A narrativa do pitch te representa?</div></div>
+          <div class="card-body">
+            <p style="font-size:12px;color:var(--t2);margin-bottom:12px">O pitch gerado capturou a essência do seu negócio? Você usaria esse material com um investidor amanhã?</p>
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+              <button class="fb-star" data-fb="5" onclick="setFeedbackRating(5,1)" title="Muito ruim">😤</button>
+              <button class="fb-star" data-fb="5" onclick="setFeedbackRating(5,2)" title="Ruim">😕</button>
+              <button class="fb-star" data-fb="5" onclick="setFeedbackRating(5,3)" title="Ok">😐</button>
+              <button class="fb-star" data-fb="5" onclick="setFeedbackRating(5,4)" title="Bom">😊</button>
+              <button class="fb-star" data-fb="5" onclick="setFeedbackRating(5,5)" title="Excelente">🤩</button>
+            </div>
+            <textarea id="fb-text-5" placeholder="A narrativa foi convincente? O problema/solução foi bem posicionado? O que mudaria no pitch?" style="width:100%;min-height:80px;background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+            <button class="btn btn-p" style="margin-top:10px" onclick="submitFeedback(5)">Enviar →</button>
+          </div>
+        </div>
+      </div>
 
       <hr>
       <div class="btn-row">
-        <button class="btn btn-p" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
+        <button class="btn btn-p" onclick="exportPDF()">📄 Baixar PDF</button>
         <button class="btn btn-g" onclick="startModeB()">+ Novo diagnóstico</button>
         <button class="btn btn-g" onclick="showScreen('home')">Dashboard</button>
       </div>
@@ -791,33 +943,82 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
 <script>
 // ══════════════════════════════════════════════════════════════
-// DNA BOARD — 14 MENTES
+// DNA BOARD — 30 LENTES
 // ══════════════════════════════════════════════════════════════
 const DNA = [
   {name:'Tallis Gomes',co:'Easy Taxi · Singu',av:'🚀',sk:'Validação · Escala global',dna:'TALLIS GOMES (Easy Taxi, Singu): Valida em 90 dias ou pivota. Pensa global desde o dia 1. Velocidade de aprendizado vale mais que perfeição. Pergunta: "em 90 dias você consegue provar que isso funciona?" Avalia urgência real do empreendedor.'},
   {name:'Bruno Nardon',co:'Rappi BR · G4',av:'⚡',sk:'Execução brutal · Dono',dna:'BRUNO NARDON (Rappi, G4): Obsessão por execução. Avalia mentalidade de dono vs funcionário. Questiona com brutalidade: "quanto vendeu essa semana?" Startup que não vende desde o dia 1 está morrendo devagar.'},
-  {name:'Alfredo Soares',co:'G4 Educação',av:'📈',sk:'Vendas · Gestão por resultado',dna:'ALFREDO SOARES (G4): Vendas é o oxigênio. Avalia se o empreendedor sabe vender. Questiona CAC real e ciclo de vendas. Pergunta: "você já vendeu para alguém que não é seu amigo?" Defende OKRs desde o início.'},
+  {name:'Alfredo Soares',co:'G4 Educação',av:'📈',sk:'Vendas · OKRs',dna:'ALFREDO SOARES (G4): Vendas é o oxigênio. Avalia se o empreendedor sabe vender. Questiona CAC real e ciclo de vendas. Pergunta: "você já vendeu para alguém que não te conhece?" Defende OKRs desde o início.'},
   {name:'Rony Meisler',co:'Reserva · Cabeça de Dono',av:'🎯',sk:'Propósito + lucro · Marca',dna:'RONY MEISLER (Reserva): Negócio sem propósito não tem longevidade. Avalia se a marca tem alma. Questiona o "porquê" visceral. Pergunta: "daqui a 10 anos, o que esse negócio transformou no mundo?"'},
   {name:'G. Benchimol',co:'XP Investimentos',av:'🏦',sk:'Longo prazo · Ecossistema',dna:'GUILHERME BENCHIMOL (XP): Pensa em décadas. Avalia paciência estratégica. Analisa potencial de ecossistema. Pergunta: "em 20 anos esse negócio pode ser referência do setor?"'},
-  {name:'F. Bloisi',co:'iFood',av:'🍔',sk:'Escala complexa · Marketplace',dna:'FABRÍCIO BLOISI (iFood): Como funciona com 100x o tamanho? Avalia gargalos operacionais. Analisa problema ovo-galinha. Pergunta: "qual seu maior custo unitário e como cai com escala?"'},
-  {name:'Stelleo Tolda',co:'Mercado Livre',av:'🌎',sk:'Plataforma · Paciência estratégica',dna:'STELLEO TOLDA (Mercado Livre): Construiu ecossistema com paciência. Avalia se pensa em plataforma não só produto. Pergunta: "como você tornará o cliente cada vez mais dependente da sua plataforma positivamente?"'},
-  {name:'Mark Zuckerberg',co:'Meta',av:'👁',sk:'Crescimento · Dados',dna:'ZUCKERBERG (Meta): Qual é a métrica norte? Avalia loops de retenção e network effects. Pergunta: "qual feature está mais correlacionada com retenção de longo prazo?" Potencial de hábito diário.'},
+  {name:'F. Bloisi',co:'iFood',av:'🍔',sk:'Escala complexa · Marketplace',dna:'FABRÍCIO BLOISI (iFood): Como funciona com 100x o tamanho? Avalia gargalos operacionais. Pergunta: "qual seu maior custo unitário e como cai com escala?"'},
+  {name:'Stelleo Tolda',co:'Mercado Livre',av:'🌎',sk:'Plataforma · Paciência estratégica',dna:'STELLEO TOLDA (Mercado Livre): Construiu ecossistema com paciência. Pergunta: "como você tornará o cliente cada vez mais dependente da sua plataforma positivamente?"'},
+  {name:'Mark Zuckerberg',co:'Meta',av:'👁',sk:'Crescimento · Dados',dna:'ZUCKERBERG (Meta): Qual é a métrica norte? Avalia loops de retenção e network effects. Pergunta: "qual feature está mais correlacionada com retenção de longo prazo?"'},
   {name:'Elon Musk',co:'Tesla · SpaceX',av:'🔥',sk:'Primeiros princípios · Missão',dna:'ELON MUSK (Tesla, SpaceX): Primeiros princípios — questiona cada premissa. Pergunta: "por que isso não foi feito antes? Qual é a barreira real?" Questiona custo de cada componente.'},
-  {name:'Thiago Orosco',co:'RD Station',av:'📊',sk:'SaaS B2B · Produto que educa',dna:'THIAGO OROSCO (RD Station): SaaS B2B no Brasil. Avalia maturidade digital do segmento. Questiona churn potencial. Pergunta: "como seu produto torna o cliente mais inteligente com o tempo?"'},
-  {name:'Allan Barros',co:'Pulsee · Acelerai',av:'💡',sk:'Capital inteligente · Aceleração',dna:'ALLAN BARROS (Pulsee, Acelerai): Cap table para capital inteligente. Questiona uso do capital. Pergunta: "qual é sua taxa de aprendizado por real investido?" Avalia maturidade para receber investimento.'},
-  {name:'Denis Wang',co:'Growth · Digital',av:'📡',sk:'Growth hacking · Aquisição digital',dna:'DENIS WANG: Growth como motor. Avalia canais de aquisição e custo por canal. Questiona loops virais. Pergunta: "qual canal vai trazer seus primeiros 1000 clientes e quanto vai custar?" Analisa métricas de ativação e retenção.'},
-  {name:'Henry Zylberstein',co:'Venture Building',av:'🏗',sk:'Inovação · Venture building',dna:'HENRY ZYLBERSTEIN: Estruturação de negócios complexos. Avalia governança e estrutura societária. Pergunta: "quem são os parceiros estratégicos que podem acelerar esse negócio e como você os atrai?"'},
-  {name:'A. Napoli',co:'Endeavor · Scale-ups',av:'🦁',sk:'Scale-up · Governança · Endeavor',dna:'ANTONIO NAPOLI (Endeavor Brasil): Especialista em scale-ups e governança de alto crescimento. Avalia se o negócio tem estrutura para crescer sem implodir. Questiona governança societária, processos e cultura antes de escalar. Pergunta: "quando você tiver 50 funcionários, o que vai quebrar primeiro na sua gestão?" Analisa se o fundador está construindo uma empresa ou um projeto pessoal.'},
-  {name:'João Adibe',co:'Gestão · Alta Performance',av:'🏆',sk:'Alta performance · Gestão de pessoas',dna:'JOÃO ADIBE (Alta Performance): Especialista em gestão de pessoas e cultura de alta performance. Avalia se o time tem os comportamentos certos para executar em velocidade de startup. Questiona ritmo de decisão, accountability e se existe cultura de feedback real. Pergunta: "quem no seu time você demitiria amanhã se pudesse ser completamente honesto — e por que ainda não fez isso?" Analisa se a liderança inspira ou apenas gerencia.'},
-  {name:'L.C. Fernandes',co:'Fundador · Investidor Serial',av:'🎖',sk:'Legado · Resiliência · Investidor',dna:'LUIZ CESAR FERNANDES (Investidor Serial): Décadas construindo e investindo em negócios relevantes no Brasil. Avalia potencial de legado e impacto de longo prazo. Questiona se o fundador tem resiliência para atravessar as crises inevitáveis dos primeiros 3 anos. Pergunta: "quando tudo der errado — e vai dar — o que vai te fazer continuar?" Analisa se o negócio tem potencial de se tornar referência geracional no setor.'},
+  {name:'Thiago Orosco',co:'RD Station',av:'📊',sk:'SaaS B2B · Produto que educa',dna:'THIAGO OROSCO (RD Station): SaaS B2B no Brasil. Avalia maturidade digital do segmento. Pergunta: "como seu produto torna o cliente mais inteligente com o tempo?"'},
+  {name:'Allan Barros',co:'Pulsee · Acelerai',av:'💡',sk:'Capital inteligente · Aceleração',dna:'ALLAN BARROS (Pulsee, Acelerai): Cap table para capital inteligente. Pergunta: "qual é sua taxa de aprendizado por real investido?"'},
+  {name:'Denis Wang',co:'Growth · Digital',av:'📡',sk:'Growth hacking · Aquisição digital',dna:'DENIS WANG: Growth como motor. Pergunta: "qual canal vai trazer seus primeiros 1000 clientes e quanto vai custar?"'},
+  {name:'Henry Zylberstein',co:'Venture Building',av:'🏗',sk:'Inovação · Venture building',dna:'HENRY ZYLBERSTEIN: Estruturação de negócios complexos. Pergunta: "quem são os parceiros estratégicos que podem acelerar esse negócio?"'},
   {name:'Leandro Farielo',co:'Finanças · Startups',av:'📉',sk:'Unit economics · Eficiência',dna:'LEANDRO FARIELO: Unit economics é a saúde real. Avalia margem de contribuição e burn rate. Pergunta: "qual é sua margem unitária hoje e qual ela precisa ser para o negócio ser sustentável?"'},
-  {name:'C. Zanetti',co:'Direito · Startups · M&A',av:'⚖️',sk:'Jurídico · Regulatório · Cap table',dna:'CRISTIANO ZANETTI (Direito Empresarial e Startups): Especialista em estruturação jurídica de startups, M&A e contratos empresariais. Avalia se o negócio tem as bases legais para crescer sem explodir. Questiona estrutura societária, cap table, acordos de sócios, proteção de propriedade intelectual e compliance regulatório. Para negócios em saúde, finanças, educação e dados — avalia conformidade com LGPD, ANVISA, Banco Central e CVM. Pergunta: "se um investidor fizer due diligence amanhã, quais são os 3 problemas jurídicos que ele vai encontrar que podem travar o deal?" Analisa se o empreendedor está construindo em terreno firme ou sobre uma bomba-relógio legal que vai explodir na hora da captação ou do exit.'}
+  {name:'A. Napoli',co:'Endeavor · Scale-ups',av:'🦁',sk:'Scale-up · Governança',dna:'ANTONIO NAPOLI (Endeavor Brasil): Especialista em scale-ups. Pergunta: "quando você tiver 50 funcionários, o que vai quebrar primeiro na sua gestão?"'},
+  {name:'João Adibe',co:'Gestão · Alta Performance',av:'🏆',sk:'Alta performance · Cultura',dna:'JOÃO ADIBE: Especialista em gestão de pessoas e cultura de alta performance. Pergunta: "quem no seu time você demitiria amanhã se pudesse ser completamente honesto?"'},
+  {name:'L.C. Fernandes',co:'Investidor Serial',av:'🎖',sk:'Legado · Resiliência',dna:'LUIZ CESAR FERNANDES: Décadas construindo e investindo no Brasil. Pergunta: "quando tudo der errado — e vai dar — o que vai te fazer continuar?"'},
+  {name:'C. Zanetti',co:'Direito · Startups · M&A',av:'⚖️',sk:'Jurídico · Cap table',dna:'CRISTIANO ZANETTI: Estruturação jurídica de startups e M&A. Pergunta: "se um investidor fizer due diligence amanhã, quais são os 3 problemas jurídicos que ele vai encontrar?"'},
+  {name:'Flávio Augusto',co:'Wise Up · Geração de Valor',av:'💪',sk:'Vendas em escala · Abundância',dna:'FLÁVIO AUGUSTO (Wise Up): Vendas como única alavanca. Pergunta: "se você saísse de férias por 30 dias amanhã, sua empresa venderia sem você?" Mentalidade de abundância vs escassez.'},
+  {name:'Rogério Romero',co:'BuscaPé',av:'⏱',sk:'Timing de mercado · E-commerce',dna:'ROGÉRIO ROMERO (BuscaPé): Pioneiro do e-commerce brasileiro. Timing de mercado é tudo. Pergunta: "qual é o comportamento que você precisa mudar no seu cliente — e quanto tempo e dinheiro vai custar?"'},
+  {name:'Luis Esteves',co:'BTG Pactual',av:'🏛',sk:'Mercado de capitais · Estrutura',dna:'LUIS ESTEVES (BTG Pactual): Visão de mercado de capitais. Pergunta: "se você fosse ao mercado captar R$50M amanhã, qual seria a primeira pergunta de um gestor de fundo?"'},
+  {name:'André Street',co:'Stone Co.',av:'⚔️',sk:'Fintech · Disrupção',dna:'ANDRÉ STREET (Stone Co.): Entrou num mercado dominado e ganhou. Pergunta: "quem perde dinheiro quando você cresce — e o que eles vão fazer para te parar?"'},
+  {name:'David Vélez',co:'Nubank',av:'💜',sk:'Produto digital · NPS',dna:'DAVID VÉLEZ (Nubank): NPS como métrica de vida ou morte. Pergunta: "qual é a feature do seu produto que faz o cliente ligar para um amigo e falar que precisa conhecer?"'},
+  {name:'Hernán Kazah',co:'Kaszek Ventures',av:'🦅',sk:'VC · Ecossistema latino',dna:'HERNÁN KAZAH (Kaszek Ventures): Maior fundo de VC da América Latina. Pergunta: "você está preparado para o que vem depois do sucesso — quando precisar se reinventar como líder?"'},
+  {name:'Nicolas Szekasy',co:'Kaszek · MercadoLivre',av:'📐',sk:'Estrutura financeira · Exit',dna:'NICOLAS SZEKASY (Kaszek, CFO MercadoLivre): Estruturou as finanças do MercadoLivre. Pergunta: "em qual cenário seu investidor multiplica o capital por 10x — e qual é a probabilidade real?"'},
+  {name:'Linda Rottenberg',co:'Endeavor Global',av:'🌍',sk:'High-impact entrepreneurship',dna:'LINDA ROTTENBERG (Endeavor Global): Criou o conceito de High-Impact Entrepreneurship. Pergunta: "se sua empresa tiver sucesso total, quantas vidas ela vai mudar diretamente?"'}
+  ,
+  {name:'Odair G. Senra',co:'MRV · Construção Civil',av:'🏗',sk:'Construção civil · Escala imobiliária',dna:'ODAIR G. SENRA (MRV): Referência em construção civil e mercado imobiliário de escala. Avalia viabilidade de modelos no setor imobiliário e de construção. Pergunta: "em qual parte do ciclo imobiliário esse negócio ganha dinheiro — e o que acontece quando o ciclo virar?"'},
+  {name:'Elie Horn',co:'Cyrela · Alto Padrão',av:'💎',sk:'Alto padrão · Marca premium',dna:'ELIE HORN (Cyrela): Construiu a maior incorporadora de alto padrão do Brasil. Avalia se o produto justifica preço premium e se a marca tem substância para sustentar o posicionamento. Pergunta: "qual é o detalhe do seu produto que o cliente que paga 3x mais vai notar — e você já colocou isso no MVP?"'},
+  {name:'João Apolinário',co:'Polishop · Varejo',av:'🛒',sk:'Varejo · Produto que se vende',dna:'JOÃO APOLINÁRIO (Polishop): Mestre em fazer produto se vender na frente do cliente. Avalia se o produto tem demo, se tem argumento de venda claro, se o consumidor entende em 30 segundos. Pergunta: "você consegue demonstrar o valor do seu produto em 30 segundos para alguém que nunca te viu?"'},
+  {name:'MR Angel',co:'Ecossistema Anjo BR',av:'👼',sk:'Investimento anjo · Cap table · Founder first',dna:'MR ANGEL (fusão de 12+ investidores anjo brasileiros — Cassio Spina, Camila Farani, João Kepler, Paulo Veras, Zen Santoro, Sergio Furio, Patrick Sigrist, Florian Hagenbuch, Brian Requarth e outros): Avalia o founder primeiro, não o negócio. 12 pilares: Founder First, Evidence over Enthusiasm, Cap Table Limpo, Smart Money > Big Money, Timing é Tudo, Velocidade de Aprendizado, Rede como Ativo, Unit Economics, Primeiro Cheque é Sinal, Skin in the Game, Saída Precisa Existir, Brasil Exige Adaptação. Pergunta: "se eu colocar R$200k agora, o que você vai fazer nos próximos 90 dias que vai provar que esse dinheiro foi bem investido?"'},
+  {name:'BR Builder',co:'Ecossistema Startup BR',av:'🔧',sk:'Execução escassa · MVP brasileiro · Jeitinho sistêmico',dna:'BR BUILDER (arquétipo do empreendedor executor brasileiro — fusão de perfis como Tallis Gomes early-stage, Eric Santos, Bernardo Srur, fundadores de Resultados Digitais, RD, Contabilizei, Nuvemshop): Constrói com o que tem. Avalia se o founder sabe executar com restrição de capital, equipe enxuta e mercado imperfeito. Não aceita desculpa de falta de recurso — aceita criatividade. Pergunta: "qual é a versão mais barata e rápida disso que você consegue colocar na mão de um cliente pagante em 2 semanas?"'},
+  {name:'MR Lean',co:'Lean Startup · MVP Global',av:'⚙️',sk:'Lean · Validação · Eliminar desperdício',dna:'MR LEAN (arquétipo metodológico — fusão de Eric Ries, Steve Blank, Ash Maurya e a cultura lean das aceleradoras globais como YC e 500 Startups): Eliminar desperdício é virtude. Valida antes de construir. Odeia feature desnecessária. Avalia se o founder testou a hipótese mais arriscada antes de investir tempo e dinheiro. Pergunta: "qual é a hipótese mais importante que o seu negócio precisa que seja verdade — e como você vai testá-la gastando menos de R$500?"'},
+  {name:'MR Turnaround',co:'Reestruturação · Recovery',av:'🔄',sk:'Diagnóstico · Crise · Recuperação de negócios',dna:'MR TURNAROUND (arquétipo do especialista em recuperação — fusão de perfis como Carlos Wizard pós-crise, consultores de reestruturação e investidores de distressed assets): Vê o que está errado antes de ver o que está certo. Avalia o negócio como se ele já estivesse em dificuldade — para identificar os pontos de ruptura antes que apareçam. Pergunta: "se você tivesse que cortar 70% do custo hoje e manter o negócio vivo, o que sobraria — e esse sobrevivente ainda seria um negócio viável?"'}
+];
+
+const LENTES=[
+  {av:'🔍',nome:'Lente do Problema',desc:'O problema é real e urgente?'},
+  {av:'👤',nome:'Lente do Cliente',desc:'Quem paga e por quê?'},
+  {av:'📦',nome:'Lente do Produto',desc:'O produto se vende sozinho?'},
+  {av:'🎯',nome:'Lente da Marca',desc:'Tem alma e propósito?'},
+  {av:'📈',nome:'Lente da Escala',desc:'Como funciona 100x maior?'},
+  {av:'💰',nome:'Lente do Caixa',desc:'Os números fecham no unitário?'},
+  {av:'⚡',nome:'Lente da Execução',desc:'O time executa ou só planeja?'},
+  {av:'📡',nome:'Lente da Distribuição',desc:'Como chega ao cliente?'},
+  {av:'🌎',nome:'Lente do Mercado',desc:'O mercado sustenta o negócio?'},
+  {av:'⚔️',nome:'Lente da Concorrência',desc:'Quem perde quando você cresce?'},
+  {av:'⚠️',nome:'Lente do Risco',desc:'O que pode matar o negócio?'},
+  {av:'🏷',nome:'Lente da Precificação',desc:'O preço está certo?'},
+  {av:'🏭',nome:'Lente da Operação',desc:'A operação escala sem implodir?'},
+  {av:'🧠',nome:'Lente do Fundador',desc:'Você tem o que precisa para executar?'},
+  {av:'👼',nome:'Lente do Investidor Anjo',desc:'Vale o cheque? O founder convence?'},
+  {av:'🏦',nome:'Lente do Capital',desc:'Estruturado para captar?'},
+  {av:'⏱',nome:'Lente do Timing',desc:'O mercado está pronto agora?'},
+  {av:'🚀',nome:'Lente do Crescimento',desc:'Qual canal traz os primeiros 1.000 clientes?'},
+  {av:'💻',nome:'Lente do SaaS',desc:'O modelo recorrente fecha?'},
+  {av:'💳',nome:'Lente da Fintech',desc:'O modelo financeiro é defensável?'},
+  {av:'⚖️',nome:'Lente Jurídica',desc:'Está construindo em terreno firme?'},
+  {av:'🛒',nome:'Lente do Varejo',desc:'O produto se vende na frente do cliente?'},
+  {av:'🏗',nome:'Lente Imobiliária',desc:'O modelo funciona no ciclo do setor?'},
+  {av:'💎',nome:'Lente do Alto Padrão',desc:'O produto justifica o preço premium?'},
+  {av:'📋',nome:'Lente Regulatória',desc:'O negócio sobrevive a uma mudança de lei?'},
+  {av:'🌍',nome:'Lente do Impacto',desc:'Quantas vidas isso muda?'},
+  {av:'🔗',nome:'Lente da Plataforma',desc:'O modelo cria dependência positiva?'},
+  {av:'🔥',nome:'Lente dos Primeiros Princípios',desc:'Por que esse problema ainda não foi resolvido?'},
+  {av:'🏛',nome:'Lente do Mercado de Capitais',desc:'Pronto para capital institucional?'},
+  {av:'✨',nome:'Lente Anjo',desc:'O que o ecossistema de investimento diz?'}
 ];
 
 function renderDNA(){
   const g=document.getElementById('dna-grid');
   if(!g)return;
-  g.innerHTML=DNA.map(p=>`<div class="dna-card"><div class="dna-av">${p.av}</div><div class="dna-name">${p.name}</div><div class="dna-co">${p.co}</div><div class="dna-sk">${p.sk}</div></div>`).join('');
+  g.innerHTML=LENTES.map(l=>`<div class="dna-card"><div class="dna-av">${l.av}</div><div class="dna-name" style="font-size:10px">${l.nome}</div><div class="dna-sk">${l.desc}</div></div>`).join('');
   const pd=document.getElementById('proc-dna');
   if(pd)pd.innerHTML=DNA.map(p=>`<span class="proc-chip">${p.av} ${p.name.split(' ')[0]}</span>`).join('');
 }
@@ -851,6 +1052,13 @@ function saveSession(data){
   saveSess(sessions);
   clearDraft(); // Limpar rascunho após análise concluída
   renderSessions();
+  // Persistir sessão completa no Supabase
+  sbUpsert('vc_sessions',{
+    id:entry.id, name:entry.name, email:entry.email||null,
+    biz:entry.biz, sector:entry.sector||null, description:entry.desc||null,
+    verdict:entry.verdict, analysis:data, rounds:S.round,
+    updated_at:entry.updatedAt
+  });
 }
 
 function renderSessions(){
@@ -943,6 +1151,42 @@ async function generateQuestions(){
     // Update screen header
     document.getElementById('q-screen-title').textContent=`${parsed.questions?.length||0} perguntas para ${biz}`;
     document.getElementById('q-screen-desc').textContent=parsed.intro||'Responda com profundidade. A qualidade do relatório depende das suas respostas.';
+
+    // Render IMI + veredito preliminar + providências + manual
+    const imiEl=document.getElementById('imi-section');
+    if(imiEl && parsed.imi){
+      const imi=parsed.imi;
+      const total=imi.total||imi.score||0;
+      const nivelMap={'Semente':'🌱','Germinando':'🌿','Crescendo':'🌳','Pronta':'🚀'};
+      const vp=parsed.veredito_preliminar;
+      const vpCor=vp?.resultado==='MERCADO SUSTENTA'?'var(--accent)':vp?.resultado==='MERCADO INCERTO'?'var(--amber)':'var(--red)';
+      const prov=parsed.providencias;
+      const manual=parsed.manual;
+      imiEl.style.display='block';
+      imiEl.innerHTML=`
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">📊 IMI — Índice de Maturidade da Ideia</div><div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">${total}/100 · ${nivelMap[imi.nivel]||''} ${imi.nivel||''}</div></div>
+          <div class="card-body">
+            <div style="background:var(--s2);border-radius:4px;height:8px;margin-bottom:16px;overflow:hidden"><div style="height:100%;width:${total}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;transition:width 1s ease"></div></div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+              ${['problema','solucao','mercado','founder','tracao'].map(k=>{const d=imi[k];const nota=typeof d==='object'?d.nota:d;const conceito=typeof d==='object'?d.conceito:'';return`<div style="text-align:center;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);padding:12px 6px"><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent)">${nota||0}</div><div style="font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;margin-top:2px">${k}</div>${conceito?`<div style="font-size:8px;color:var(--t3);margin-top:2px">${conceito}</div>`:''}</div>`}).join('')}
+            </div>
+          </div>
+        </div>
+        ${vp?`<div class="card" style="margin-bottom:16px;border-color:${vpCor}20">
+          <div class="card-head"><div class="card-title">🎯 Veredito Preliminar</div><div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:${vpCor}">${vp.resultado}</div></div>
+          <div class="card-body"><p style="color:var(--t2);font-size:13px;line-height:1.7">${vp.justificativa}</p></div>
+        </div>`:''}
+        ${prov?`<div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">⚡ ${prov.titulo||'Próximas 48h'}</div></div>
+          <div class="card-body"><div style="display:flex;flex-direction:column;gap:8px">${(prov.itens||[]).map((it,i)=>`<div style="display:flex;gap:10px;align-items:flex-start;font-size:13px"><div style="min-width:22px;height:22px;background:var(--accent-dim);border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--accent)">${i+1}</div><span style="color:var(--text);line-height:1.6">${it}</span></div>`).join('')}</div></div>
+        </div>`:''}
+        ${manual?`<div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">📖 ${manual.titulo||'Como Fazer'}</div></div>
+          <div class="card-body"><div style="display:flex;flex-direction:column;gap:10px">${(manual.passos||[]).map((p,i)=>`<div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px"><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:2px;margin-bottom:5px">PASSO ${i+1} · ${p.passo||''}</div><div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:6px">${p.como||''}</div>${p.ferramenta?`<div style="font-size:10px;color:var(--purple)">🔧 ${p.ferramenta}</div>`:''}</div>`).join('')}</div></div>
+        </div>`:''}
+      `;
+    }
 
   }catch(err){
     setProc(false);
@@ -1047,6 +1291,23 @@ function updateBlocksProgress(){
 }
 
 // ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ══════════════════════════════════════════════════════════════
+const SB_URL = 'https://ieomvpojcgokdemvyitn.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllb212cG9qY2dva2RlbXZ5aXRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNDgwMjMsImV4cCI6MjA5NDcyNDAyM30.uNaarrbiOaCqoCCgkGY65NgEbXrgUknurWUe6iAYm6E';
+
+async function sbUpsert(table, data){
+  try{
+    await fetch(`${SB_URL}/rest/v1/${table}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify(data)
+    });
+  }catch(e){console.warn('Supabase sync falhou (offline?):', e);}
+}
+
+// ══════════════════════════════════════════════════════════════
 // SISTEMA DE AUTO-SAVE — 3 CAMADAS
 // ══════════════════════════════════════════════════════════════
 const DRAFT_KEY = 'vc5_draft';
@@ -1081,6 +1342,8 @@ function saveDraft(silent=true){
 
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     showSaveIndicator(silent);
+    // Sync Supabase em background (silencioso)
+    if(S.session?.id) sbUpsert('vc_drafts',{id:S.session.id, session_data:draft, saved_at:draft.savedAt});
   } catch(e){
     console.warn('Auto-save falhou:', e);
   }
@@ -1254,6 +1517,13 @@ function clearDraft(){
   lastSavedHash = '';
   const indicator = document.getElementById('save-indicator');
   if(indicator) indicator.style.display = 'none';
+  // Remover draft do Supabase (sessão concluída)
+  if(S.session?.id){
+    fetch(`${SB_URL}/rest/v1/vc_drafts?id=eq.${S.session.id}`,{
+      method:'DELETE',
+      headers:{'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`}
+    }).catch(()=>{});
+  }
 }
 async function submitAnswers(){
   const answered=Object.values(S.answers).filter(v=>v.trim().length>20).length;
@@ -1285,7 +1555,7 @@ async function submitAnswers(){
     }else{
       // Ready for final analysis
       setProc(true,'Gerando relatório completo...');
-      const finalRes=await callClaude(finalPrompt(qa), 8000);
+      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 8000);
       let finalParsed;
       try{finalParsed=parseJSON(finalRes)}
       catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório final.')}
@@ -1334,8 +1604,24 @@ function buildQA(){
 // RENDER ANALYSIS
 // ══════════════════════════════════════════════════════════════
 function renderAnalysis(d){
+  const plan = S.plan || 'diagnostico';
   document.getElementById('ana-title').textContent=`RELATÓRIO — ${(S.session?.biz||d.biz||'ANÁLISE').toUpperCase()}`;
-  document.getElementById('ana-meta').textContent=`${new Date().toLocaleDateString('pt-BR',{dateStyle:'full'})} · Empreendedor: ${S.session?.name||'—'} · DNA Board 18 mentores`;
+  document.getElementById('ana-meta').textContent=`${new Date().toLocaleDateString('pt-BR',{dateStyle:'full'})} · Empreendedor: ${S.session?.name||'—'} · DNA Board 30 Lentes`;
+
+  // Controla visibilidade das tabs por plano
+  const tabsConfig = {
+    validacao:   {financial:false, mvp:false, matrix:false, roadmap:false, risks:false, benchmarks:false, captacao:false},
+    diagnostico: {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:false},
+    captacao:    {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:true},
+  };
+  const tc = tabsConfig[plan] || tabsConfig.diagnostico;
+  document.querySelector('.tab-financial-btn').style.display   = tc.financial   ? '' : 'none';
+  document.querySelector('.tab-mvp-btn').style.display         = tc.mvp         ? '' : 'none';
+  document.querySelector('.tab-matrix-btn').style.display      = tc.matrix      ? '' : 'none';
+  document.querySelector('.tab-roadmap-btn').style.display     = tc.roadmap     ? '' : 'none';
+  document.querySelector('.tab-risks-btn').style.display       = tc.risks       ? '' : 'none';
+  document.querySelector('.tab-benchmarks-btn').style.display  = tc.benchmarks  ? '' : 'none';
+  document.querySelector('.tab-captacao-btn').style.display    = tc.captacao    ? '' : 'none';
 
   const vc=d.verdict==='APROVADO'?'ok':d.verdict==='REPROVADO'?'no':'rev';
   const vi=d.verdict==='APROVADO'?'✅':d.verdict==='REPROVADO'?'❌':'⚠️';
@@ -1343,7 +1629,7 @@ function renderAnalysis(d){
     <div class="verdict-wrap ${vc}">
       <div>
         <div class="verdict-v">${vi} ${d.verdict}</div>
-        <div class="verdict-sub">VEREDITO DO DNA BOARD · 18 MENTORES</div>
+        <div class="verdict-sub">VEREDITO DO DNA BOARD · 30 LENTES</div>
         <div class="verdict-chips">${DNA.map(p=>`<span class="vchip">${p.av} ${p.name.split(' ')[0]}</span>`).join('')}</div>
       </div>
       <div class="verdict-resumo">"${d.resumo||''}"</div>
@@ -1358,10 +1644,36 @@ function renderAnalysis(d){
 
   // Blocks
   const ab=document.getElementById('ana-blocks');ab.innerHTML='';
-  [{n:'01',t:'Problema',k:'problema'},{n:'02',t:'Solução',k:'solucao'},{n:'03',t:'Mercado & TAM/SAM/SOM',k:'mercado'},{n:'04',t:'Modelo de Negócio',k:'modelo'},{n:'05',t:'Competição',k:'competicao'},{n:'06',t:'Time',k:'time'},{n:'07',t:'Capital & Investimento',k:'capital'}].forEach(b=>{
+  [{n:'01',t:'Problema',k:'problema'},{n:'02',t:'Solução',k:'solucao'},{n:'03',t:'Mercado & TAM',k:'mercado'},{n:'04',t:'Modelo de Negócio',k:'modelo'},{n:'05',t:'Competição',k:'competicao'},{n:'06',t:'Time',k:'time'},{n:'07',t:'Capital & Investimento',k:'capital'}].forEach(b=>{
     if(!d[b.k])return;const s=d[b.k+'_score']||0;
     ab.innerHTML+=`<div class="ab"><div class="ab-head"><span class="ab-num">${b.n}</span><span class="ab-title">${b.t}</span><span class="ab-stars">${'★'.repeat(s)}${'☆'.repeat(5-s)}</span></div><div class="ab-body">${d[b.k]}</div></div>`;
   });
+
+  // Concorrentes por abrangência (plano Validação)
+  if(plan==='validacao' && d.concorrentes){
+    const cc=d.concorrentes;
+    const raioIcon={'local':'📍','estadual':'🗺','nacional':'🇧🇷','global':'🌎'};
+    const renderGrupo=(titulo,icon,lista)=>{
+      if(!lista?.length)return'';
+      return`<div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--t2);margin-bottom:8px">${icon} ${titulo.toUpperCase()}</div>
+        ${lista.map(c=>`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div style="flex:1">
+            <span style="font-size:13px;font-weight:600">${c.nome||'—'}</span>
+            <span style="font-size:11px;color:var(--t3);margin-left:8px;background:var(--s3);padding:2px 8px;border-radius:20px">${c.tipo||''}</span>
+          </div>
+          <div style="font-size:12px;color:var(--t2);max-width:55%">${c.fraqueza||''}</div>
+        </div>`).join('')}
+      </div>`;
+    };
+    ab.innerHTML+=`<div class="ab"><div class="ab-head"><span class="ab-num">C</span><span class="ab-title">Mapa Competitivo — ${raioIcon[cc.abrangencia]||'📍'} Raio ${(cc.abrangencia||'local').charAt(0).toUpperCase()+(cc.abrangencia||'local').slice(1)}</span></div><div class="ab-body">
+      ${renderGrupo('Concorrentes locais','📍',cc.locais)}
+      ${renderGrupo('Concorrentes regionais / estaduais','🗺',cc.regionais)}
+      ${renderGrupo('Concorrentes nacionais','🇧🇷',cc.nacionais)}
+      ${cc.diferencial?`<div class="msg msg-ok" style="margin-top:12px">⚡ <strong>Seu diferencial:</strong> ${cc.diferencial}</div>`:''}
+      ${cc.alerta?`<div class="msg msg-warn" style="margin-top:8px">⚠ <strong>Alerta competitivo:</strong> ${cc.alerta}</div>`:''}
+    </div></div>`;
+  }
 
   // Financial
   const fb=document.getElementById('fin-body');
@@ -1404,6 +1716,133 @@ function renderAnalysis(d){
   // Risks
   const rsb=document.getElementById('risks-body');rsb.innerHTML='';
   if(d.riscos?.length){d.riscos.forEach((r,i)=>{rsb.innerHTML+=`<div class="risk-i"><div class="risk-n">${i+1}</div><div>${typeof r==='string'?r:r.descricao||JSON.stringify(r)}</div></div>`})}
+
+  // Tab Benchmarks (diagnóstico + captação)
+  const bmb = document.getElementById('benchmarks-body');
+  if(bmb && d.benchmarks){
+    const bm = d.benchmarks;
+    const raioLabel={'local':'Local','estadual':'Estadual','nacional':'Nacional','global':'Global'};
+    const raioIcon={'local':'📍','estadual':'🗺','nacional':'🇧🇷','global':'🌎'};
+    const renderBmGrupo=(titulo,icon,lista)=>{
+      if(!lista?.length)return'';
+      return`<div class="card" style="margin-bottom:16px"><div class="card-head"><div class="card-title">${icon} Referências ${titulo}</div></div><div class="card-body">
+        ${lista.map(b=>`<div style="padding:12px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+            <span style="font-size:13px;font-weight:600">${b.nome||'—'}</span>
+            ${b.metricas?`<span style="font-size:11px;color:var(--accent);background:var(--accent-dim);padding:2px 8px;border-radius:20px">${b.metricas}</span>`:''}
+          </div>
+          ${b.aprendizado?`<div style="font-size:12px;color:var(--t2)">💡 ${b.aprendizado}</div>`:''}
+        </div>`).join('')}
+      </div></div>`;
+    };
+    bmb.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:12px;color:var(--t2)">
+        <span>Raio de referência:</span>
+        <span style="background:var(--accent-dim);color:var(--accent);padding:3px 12px;border-radius:20px;font-weight:600">${raioIcon[bm.abrangencia]||'📍'} ${raioLabel[bm.abrangencia]||'Local'}</span>
+      </div>
+      ${renderBmGrupo('Locais','📍',bm.local)}
+      ${renderBmGrupo('Estaduais','🗺',bm.estadual)}
+      ${renderBmGrupo('Nacionais','🇧🇷',bm.nacional)}
+      ${renderBmGrupo('Internacionais','🌎',bm.internacional)}
+      ${bm.cases_sucesso?.length?`<div class="card" style="margin-bottom:16px;border-color:rgba(127,255,110,.2)"><div class="card-head"><div class="card-title" style="color:var(--accent)">✅ Cases de Sucesso</div></div><div class="card-body">
+        ${bm.cases_sucesso.map(c=>`<div style="padding:12px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">${c.nome||'—'} <span style="font-size:11px;color:var(--t3);font-weight:400">${c.contexto||''}</span></div>
+          ${c.resultado?`<div style="font-size:12px;color:var(--t2);margin-bottom:4px">📈 ${c.resultado}</div>`:''}
+          ${c.licao?`<div class="msg msg-ok" style="padding:6px 10px;margin:0">💡 ${c.licao}</div>`:''}
+        </div>`).join('')}
+      </div></div>`:''}
+      ${bm.cases_fracasso?.length?`<div class="card" style="margin-bottom:16px;border-color:rgba(255,107,107,.2)"><div class="card-head"><div class="card-title" style="color:var(--red)">⚠ Cases de Fracasso — O que Evitar</div></div><div class="card-body">
+        ${bm.cases_fracasso.map(c=>`<div style="padding:12px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">${c.nome||'—'} <span style="font-size:11px;color:var(--t3);font-weight:400">${c.contexto||''}</span></div>
+          ${c.motivo?`<div style="font-size:12px;color:var(--t2);margin-bottom:4px">💥 Causa: ${c.motivo}</div>`:''}
+          ${c.licao?`<div class="msg msg-warn" style="padding:6px 10px;margin:0">🚫 ${c.licao}</div>`:''}
+        </div>`).join('')}
+      </div></div>`:''}
+    `;
+  }
+
+  // Tab Captação (plano captacao)
+  const capb = document.getElementById('captacao-body');
+  if(plan==='captacao' && capb){
+    capb.innerHTML='';
+    if(d.valuation){
+      capb.innerHTML+=`<div class="card"><div class="card-head"><div class="card-title">💰 Valuation</div></div><div class="card-body">
+        <div class="fin-num" style="font-size:20px;margin-bottom:8px">${d.valuation.range||'—'}</div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:4px"><strong>Método:</strong> ${d.valuation.metodo||'—'}</div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:4px">${d.valuation.justificativa||''}</div>
+        <div style="font-size:12px;color:var(--accent)">Diluição saudável: ${d.valuation.dilucao_saudavel||'—'}</div>
+      </div></div>`;
+    }
+    if(d.perfil_investidor){
+      capb.innerHTML+=`<div class="card"><div class="card-head"><div class="card-title">🎯 Perfil do Investidor Ideal</div></div><div class="card-body">
+        <div style="margin-bottom:12px"><strong style="color:var(--accent)">Perfil ideal:</strong><br><span style="font-size:13px;color:var(--t2)">${d.perfil_investidor.ideal||'—'}</span></div>
+        <div style="margin-bottom:12px"><strong style="color:var(--accent)">Onde buscar:</strong><br><span style="font-size:13px;color:var(--t2)">${d.perfil_investidor.onde_buscar||'—'}</span></div>
+        <div><strong style="color:var(--red)">Evitar:</strong><br><span style="font-size:13px;color:var(--t2)">${d.perfil_investidor.evitar||'—'}</span></div>
+      </div></div>`;
+    }
+    if(d.data_room?.length){
+      capb.innerHTML+=`<div class="card"><div class="card-head"><div class="card-title">📁 Data Room — Checklist</div></div><div class="card-body">
+        ${d.data_room.map((item,i)=>`<div class="risk-i"><div class="risk-n">${i+1}</div><div style="font-size:13px">${item}</div></div>`).join('')}
+      </div></div>`;
+    }
+    if(d.pitch_narrativa){
+      const pn=d.pitch_narrativa;
+      capb.innerHTML+=`<div class="card"><div class="card-head"><div class="card-title">🎤 Estrutura do Pitch</div></div><div class="card-body">
+        ${pn.gancho?`<div style="margin-bottom:16px"><div class="mvp-col-title">🪝 Gancho de abertura</div><div class="msg msg-ok">${pn.gancho}</div></div>`:''}
+        ${pn.problema?`<div style="margin-bottom:12px"><strong style="font-size:12px;color:var(--t2);letter-spacing:.3px">PROBLEMA (30s)</strong><br><span style="font-size:13px">${pn.problema}</span></div>`:''}
+        ${pn.solucao?`<div style="margin-bottom:12px"><strong style="font-size:12px;color:var(--t2);letter-spacing:.3px">SOLUÇÃO (30s)</strong><br><span style="font-size:13px">${pn.solucao}</span></div>`:''}
+        ${pn.tese?`<div style="margin-bottom:12px"><strong style="font-size:12px;color:var(--t2);letter-spacing:.3px">TESE DE INVESTIMENTO</strong><br><span style="font-size:13px">${pn.tese}</span></div>`:''}
+        ${pn.pergunta_dificil?`<div class="ab" style="margin-top:16px"><div class="ab-head"><span class="ab-title">❓ Pergunta mais difícil do investidor</span></div><div class="ab-body">${pn.pergunta_dificil}</div></div>`:''}
+      </div></div>`;
+    }
+    if(d.criterio_pronto){
+      capb.innerHTML+=`<div class="msg msg-ok" style="margin-top:16px">🏁 <strong>Critério de pronto para captar:</strong> ${d.criterio_pronto}</div>`;
+    }
+  }
+
+  // Próximos Passos — todos os planos
+  const ppsec = document.getElementById('proximos-passos-section');
+  if(ppsec && d.proximos_passos?.length){
+    const planLabels = {validacao:'Diagnóstico (R$497)', diagnostico:'Captação (R$999)', captacao:'Série A'};
+    const nextLabel = planLabels[plan] || 'próximo nível';
+    const nextPlan  = {validacao:'diagnostico', diagnostico:'captacao'}[plan];
+    ppsec.style.display = 'block';
+    ppsec.innerHTML = `
+      <div class="card" style="border:1px solid var(--accent);background:var(--s2)">
+        <div class="card-head">
+          <div class="card-title" style="color:var(--accent)">→ PRÓXIMOS PASSOS — Como avançar para ${nextLabel}</div>
+        </div>
+        <div class="card-body">
+          ${d.proximos_passos.map((p,i)=>`
+            <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+              <div style="width:20px;height:20px;border:2px solid var(--border3);border-radius:4px;flex-shrink:0;margin-top:2px"></div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">${p.check}</div>
+                <div style="font-size:12px;color:var(--t2)">${p.motivo}</div>
+              </div>
+            </div>`).join('')}
+          ${d.proximo_modulo||d.criterio_pronto?`<div style="font-size:12px;color:var(--accent);margin-top:8px;padding-top:12px;border-top:1px solid var(--border3)">
+            ${d.proximo_modulo||d.criterio_pronto}
+          </div>`:''}
+          ${nextPlan?`<button class="btn btn-p" style="margin-top:16px;width:100%;justify-content:center" onclick="startCheckout('${nextPlan}')">Avançar para ${nextLabel} →</button>`:''}
+        </div>
+      </div>`;
+  } else if(ppsec){
+    ppsec.style.display = 'none';
+  }
+
+  // Feedback — todos os planos; janela 3 só para diagnóstico e captação
+  const fbsec = document.getElementById('feedback-section');
+  if (fbsec) {
+    fbsec.style.display = 'block';
+    for (let i = 1; i <= 5; i++) { _feedbackRatings[i] = 0; _feedbackSent[i] = false; }
+    const fb3 = document.getElementById('fb-card-3');
+    if (fb3) fb3.style.display = (plan === 'diagnostico' || plan === 'captacao') ? 'block' : 'none';
+    const fb4 = document.getElementById('fb-card-4');
+    if (fb4) fb4.style.display = plan === 'captacao' ? 'block' : 'none';
+    const fb5 = document.getElementById('fb-card-5');
+    if (fb5) fb5.style.display = plan === 'captacao' ? 'block' : 'none';
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1424,7 +1863,7 @@ function setProc(on,step){
 // CLAUDE API + PROMPTS — 4 CAMADAS
 // ══════════════════════════════════════════════════════════════
 async function callClaude(messages, maxTokens=4000){
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
+  const res=await fetch('/api/claude',{
     method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,system:SYSTEM_PROMPT,messages})
   });
@@ -1443,9 +1882,9 @@ async function callClaude(messages, maxTokens=4000){
 // ═══════════════════════════════════════════════
 // SYSTEM PROMPT — AS 4 CAMADAS
 // ═══════════════════════════════════════════════
-const SYSTEM_PROMPT=`Você é o VentureCheck DNA Board — fusão de 14 grandes empreendedores numa inteligência única de análise de negócios.
+const SYSTEM_PROMPT=`Você é o VentureCheck DNA Board — fusão de 30 lentes analíticas — os arquétipos dos maiores empreendedores e investidores do Brasil e do mundo numa inteligência única de análise de negócios.
 
-DNA DOS 14 MENTORES:
+DNA DAS 30 LENTES ANALÍTICAS:
 ${DNA.map(p=>p.dna).join('\n')}
 
 ═══ CAMADA 1 — IDENTIDADE ═══
@@ -1497,14 +1936,46 @@ Gere perguntas que NENHUM formulário genérico faria. Perguntas específicas pa
 
 Responda SOMENTE com este JSON:
 {
-  "intro": "frase de 1-2 linhas contextualizando o que você identificou na descrição e o que vai explorar nas perguntas",
+  "intro": "frase de 1-2 linhas contextualizando o que você identificou",
+  "imi": {
+    "total": 0-100,
+    "nivel": "Semente|Germinando|Crescendo|Pronta",
+    "problema": {"nota": 0-20, "conceito": "Embrionário|Em desenvolvimento|Comprovado", "obs": "1 linha"},
+    "solucao":  {"nota": 0-20, "conceito": "Vaga|Definida|Validada", "obs": "1 linha"},
+    "mercado":  {"nota": 0-20, "conceito": "Desconhecido|Mapeado|Dominado", "obs": "1 linha"},
+    "founder":  {"nota": 0-20, "conceito": "Curiosidade|Motivação|Obsessão", "obs": "1 linha"},
+    "tracao":   {"nota": 0-20, "conceito": "Zero|Sinal|Validada", "obs": "1 linha"}
+  },
+  "mercado_analise": {
+    "tamanho": "TAM estimado com premissa em 1 linha",
+    "crescimento": "% ao ano",
+    "maturidade": "Emergente|Em crescimento|Maduro|Saturado",
+    "players_diretos": ["player 1", "player 2"],
+    "gap_identificado": "oportunidade específica em 1 linha",
+    "timing": "Sim|Não|Quase — justificativa em 1 linha"
+  },
+  "veredito_preliminar": {
+    "resultado": "MERCADO SUSTENTA|MERCADO INCERTO|MERCADO NÃO SUSTENTA",
+    "justificativa": "2 linhas diretas",
+    "vale_continuar": true
+  },
+  "providencias": {
+    "titulo": "O que fazer nas próximas 48h",
+    "itens": ["ação concreta 1", "ação concreta 2", "ação concreta 3", "ação concreta 4"]
+  },
+  "manual": {
+    "titulo": "Como fazer",
+    "passos": [
+      {"passo": "nome do passo", "como": "instrução direta", "ferramenta": "ferramenta gratuita específica"}
+    ]
+  },
   "questions": [
     {
       "question": "a pergunta completa e específica",
-      "block": número de 1 a 7 (1=Problema, 2=Cliente, 3=Solução, 4=Modelo, 5=Mercado, 6=Time, 7=Capital),
-      "critical": true ou false (true para as 3 mais importantes),
-      "why": "por que essa pergunta é essencial para esse negócio específico",
-      "placeholder": "exemplo de como uma boa resposta começa"
+      "block": 1-7,
+      "critical": true,
+      "why": "por que essencial para esse negócio",
+      "placeholder": "como começa uma boa resposta"
     }
   ]
 }
@@ -1541,21 +2012,185 @@ Se needs_complement for false, complement_questions pode ser [].
 Máximo 4 perguntas complementares se necessário.`}];
 }
 
-function finalPrompt(qa){
-  return[{role:'user',content:`Análise completa de viabilidade — DNA Board 18 mentores.
-
-${qa}
-
-REGRAS DE OUTPUT:
+function finalPrompt(qa, plan){
+  const rules=`REGRAS DE OUTPUT:
 - Cada campo de texto: máximo 5 linhas, direto, sem repetições
 - Números com premissas claras
 - Afirmação direta + evidência + implicação + ação
 - NUNCA: "é importante considerar", "pode ser uma boa ideia"
+- Responda SOMENTE com JSON válido. Sem markdown. Sem texto fora do JSON.`;
+
+  // ── PLANO VALIDAÇÃO ──────────────────────────────────────────
+  if(plan==='validacao'){
+    return[{role:'user',content:`Análise de viabilidade inicial — DNA Board 30 Lentes — Plano Validação.
+Responda UMA ÚNICA pergunta: esta ideia vale continuar?
+
+${qa}
+
+${rules}
+
+JSON (sem markdown):
+{
+  "verdict":"APROVADO|REPROVADO|REQUER AJUSTES",
+  "resumo":"3 linhas diretas — veredito com justificativa",
+  "imi_score":0-100,
+  "imi_nivel":"Semente|Germinando|Crescendo|Pronta",
+  "imi_justificativa":"2 linhas explicando o score",
+  "problema":"análise da dor — máx 3 linhas","problema_score":1-5,
+  "solucao":"análise da solução — máx 3 linhas","solucao_score":1-5,
+  "mercado":"TAM Brasil em 1 número + 1 linha de contexto","mercado_score":1-5,
+  "concorrentes":{
+    "abrangencia":"local|estadual|nacional|global — qual é o raio real de competição deste negócio",
+    "locais":[
+      {"nome":"nome real ou tipo de player local","tipo":"direto|indireto","fraqueza":"fraqueza principal em 1 linha"}
+    ],
+    "regionais":[
+      {"nome":"player regional/estadual","tipo":"direto|indireto","fraqueza":"fraqueza principal em 1 linha"}
+    ],
+    "nacionais":[
+      {"nome":"player nacional","tipo":"direto|indireto","fraqueza":"fraqueza principal em 1 linha"}
+    ],
+    "diferencial":"em 1 linha: qual é o diferencial real deste negócio frente a todos eles",
+    "alerta":"risco competitivo mais importante que o founder deve monitorar"
+  },
+  "modelo":"viabilidade do modelo de negócio — máx 3 linhas","modelo_score":1-5,
+  "providencias":[
+    {"acao":"ação concreta 1 específica para este negócio","impacto":"impacto esperado em 1 linha"},
+    {"acao":"ação 2","impacto":"impacto 2"},
+    {"acao":"ação 3","impacto":"impacto 3"},
+    {"acao":"ação 4","impacto":"impacto 4"}
+  ],
+  "manual":"parágrafo direto para o founder — máx 5 linhas — o que fazer, o que evitar, próximo passo mais importante",
+  "proximos_passos":[
+    {"check":"ação específica 1","motivo":"por que isso é pré-requisito para o Diagnóstico"},
+    {"check":"ação 2","motivo":"motivo 2"},
+    {"check":"ação 3","motivo":"motivo 3"},
+    {"check":"ação 4","motivo":"motivo 4"},
+    {"check":"ação 5","motivo":"motivo 5"},
+    {"check":"ação 6","motivo":"motivo 6"}
+  ],
+  "proximo_modulo":"1 linha sobre o que o Módulo Diagnóstico entrega de diferente"
+}`}];
+  }
+
+  // ── PLANO CAPTAÇÃO ───────────────────────────────────────────
+  if(plan==='captacao'){
+    return[{role:'user',content:`Análise completa para captação de investimento — DNA Board 30 Lentes — Plano Captação.
+Este founder já validou o negócio. Responda: como estruturar para levantar capital?
+
+${qa}
+
+${rules}
+
+JSON (sem markdown):
+{
+  "verdict":"PRONTO PARA CAPTAR|QUASE PRONTO|NÃO ESTÁ PRONTO",
+  "resumo":"3 linhas — avaliação de investibilidade com justificativa",
+  "problema":"análise Tallis+Musk+Rony — máx 4 linhas","problema_score":1-5,
+  "solucao":"análise Zuck+Bloisi+Orosco — máx 4 linhas","solucao_score":1-5,
+  "mercado":"TAM/SAM/SOM com números — Stelleo+Benchimol — máx 4 linhas","mercado_score":1-5,
+  "modelo":"análise Soares+Nardon+Allan+Leandro com unit economics — máx 4 linhas","modelo_score":1-5,
+  "competicao":"análise Musk+Zuck+Benchimol — máx 4 linhas","competicao_score":1-5,
+  "time":"análise Nardon+Rony+Tallis+Napoli+Adibe — máx 4 linhas","time_score":1-5,
+  "capital":"análise Allan+Leandro+L.C.Fernandes+Benchimol — máx 4 linhas","capital_score":1-5,
+  "financeiro":"tese financeira em 2 linhas",
+  "financeiro_table":[
+    {"metrica":"Valuation pré-money sugerido","valor":"R$ X","obs":"metodologia usada"},
+    {"metrica":"Captação recomendada","valor":"R$ X","obs":"para X meses de runway"},
+    {"metrica":"Equity a ceder","valor":"X%","obs":"faixa saudável para este estágio"},
+    {"metrica":"CAC atual","valor":"R$ X","obs":"canal principal"},
+    {"metrica":"LTV estimado","valor":"R$ X","obs":""},
+    {"metrica":"LTV/CAC","valor":"Xx","obs":"saudável >3x"},
+    {"metrica":"MRR atual ou projetado M6","valor":"R$ X","obs":""},
+    {"metrica":"ARR run rate","valor":"R$ X","obs":""},
+    {"metrica":"Margem contribuição","valor":"X%","obs":""},
+    {"metrica":"Runway atual","valor":"X meses","obs":"sem captação"},
+    {"metrica":"Break-even","valor":"X meses","obs":"pós-captação"}
+  ],
+  "mvp":{
+    "descricao":"estado atual do produto — 2 linhas",
+    "entra":["feature prioritária 1","feature 2","feature 3"],
+    "fora":["o que não construir antes de captar 1","2"],
+    "custo":"R$ X",
+    "tempo":"X semanas até produto investível",
+    "stack":"stack atual + gaps",
+    "criterios":"métricas de produto que validam o investimento"
+  },
+  "matriz":{
+    "quick_wins":["ação pré-captação 1 com prazo","2","3"],
+    "apostas":["aposta estratégica 1","2"],
+    "tarefas":["tarefa operacional 1","2"],
+    "descartar":["o que não fazer durante captação 1","2"],
+    "primeiro_passo":"ação CONCRETA que acontece AMANHÃ para preparar captação"
+  },
+  "roadmap":[
+    {"title":"Pré-captação","period":"0-60 dias","actions":"o que resolver antes de falar com investidor"},
+    {"title":"Processo de captação","period":"Mês 2-4","actions":"como conduzir o fundraising"},
+    {"title":"Pós-investimento","period":"Mês 5-12","actions":"como usar o capital para crescer"},
+    {"title":"Próxima rodada","period":"Ano 2","actions":"preparação para série A"}
+  ],
+  "riscos":[
+    "Risco 1: [nome] — impacto no fundraising + mitigação",
+    "Risco 2: [nome] — impacto + mitigação",
+    "Risco 3: [nome] — impacto + mitigação"
+  ],
+  "valuation":{
+    "metodo":"método de valuation usado (Berkus / múltiplos / DCF simplificado)",
+    "range":"R$ X – R$ Y (pré-money)",
+    "justificativa":"3 fatores que sustentam esse range",
+    "dilucao_saudavel":"X–Y% para este estágio"
+  },
+  "perfil_investidor":{
+    "ideal":"perfil do investidor certo — tipo, tese, ticket médio",
+    "onde_buscar":"3 canais específicos para encontrar no Brasil",
+    "evitar":"perfil de investidor errado para este estágio e por quê"
+  },
+  "data_room":[
+    "documento 1 — por que o investidor vai pedir",
+    "documento 2","documento 3","documento 4","documento 5",
+    "documento 6","documento 7","documento 8"
+  ],
+  "pitch_narrativa":{
+    "gancho":"frase de abertura — 1 linha que prende a atenção",
+    "problema":"como apresentar o problema em 30 segundos",
+    "solucao":"como apresentar a solução em 30 segundos",
+    "tese":"por que agora, por que esse founder, por que esse mercado",
+    "pergunta_dificil":"a pergunta mais difícil que o investidor vai fazer e a resposta correta"
+  },
+  "proximos_passos":[
+    {"check":"ação específica 1","motivo":"por que isso é pré-requisito para fechar o investimento"},
+    {"check":"ação 2","motivo":"motivo 2"},
+    {"check":"ação 3","motivo":"motivo 3"},
+    {"check":"ação 4","motivo":"motivo 4"},
+    {"check":"ação 5","motivo":"motivo 5"},
+    {"check":"ação 6","motivo":"motivo 6"},
+    {"check":"ação 7","motivo":"motivo 7"},
+    {"check":"ação 8","motivo":"motivo 8"}
+  ],
+  "criterio_pronto":"frase completa — quando o founder pode dizer que está pronto para captar"
+}`}];
+  }
+
+  // ── PLANO DIAGNÓSTICO (default) ──────────────────────────────
+  return[{role:'user',content:`Análise completa de viabilidade — DNA Board 30 Lentes — Plano Diagnóstico.
+
+${qa}
+
+${rules}
 
 JSON COMPLETO (sem markdown, sem texto fora do JSON):
 {
   "verdict":"APROVADO|REPROVADO|REQUER AJUSTES",
   "resumo":"3 linhas diretas — veredito com justificativa integrada DNA Board",
+  "imi_score":0-100,
+  "imi_nivel":"Semente|Germinando|Crescendo|Pronta",
+  "imi_dimensoes":{
+    "problema":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
+    "solucao":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
+    "mercado":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
+    "founder":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
+    "tracao":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"}
+  },
   "problema":"análise Tallis+Musk+Rony — máx 4 linhas","problema_score":1-5,
   "solucao":"análise Zuck+Bloisi+Orosco — máx 4 linhas","solucao_score":1-5,
   "mercado":"TAM/SAM/SOM com números — Stelleo+Benchimol — máx 4 linhas","mercado_score":1-5,
@@ -1604,7 +2239,39 @@ JSON COMPLETO (sem markdown, sem texto fora do JSON):
     "Risco 1: [nome] — consequência + mitigação concreta",
     "Risco 2: [nome] — consequência + mitigação",
     "Risco 3: [nome] — consequência + mitigação"
-  ]
+  ],
+  "benchmarks":{
+    "abrangencia":"local|estadual|nacional|global — raio real de referência para este negócio",
+    "local":[
+      {"nome":"nome de referência local ou perfil típico","metricas":"1-2 métricas-chave (faturamento, volume, clientes)","aprendizado":"o que esse benchmark ensina para este negócio"}
+    ],
+    "estadual":[
+      {"nome":"referência estadual","metricas":"métricas relevantes","aprendizado":"aprendizado aplicável"}
+    ],
+    "nacional":[
+      {"nome":"referência nacional","metricas":"métricas relevantes","aprendizado":"aprendizado aplicável"}
+    ],
+    "internacional":[
+      {"nome":"referência internacional — país ou empresa","metricas":"métricas relevantes","aprendizado":"o que o Brasil pode aprender ou adaptar"}
+    ],
+    "cases_sucesso":[
+      {"nome":"nome do case","contexto":"onde/quando surgiu","resultado":"resultado alcançado em 1 linha","licao":"lição principal aplicável a este negócio"}
+    ],
+    "cases_fracasso":[
+      {"nome":"nome do case ou perfil","contexto":"onde/quando","motivo":"por que falhou em 1 linha","licao":"o que este founder deve evitar"}
+    ]
+  },
+  "proximos_passos":[
+    {"check":"ação específica 1","motivo":"por que isso é pré-requisito para o Módulo Captação"},
+    {"check":"ação 2","motivo":"motivo 2"},
+    {"check":"ação 3","motivo":"motivo 3"},
+    {"check":"ação 4","motivo":"motivo 4"},
+    {"check":"ação 5","motivo":"motivo 5"},
+    {"check":"ação 6","motivo":"motivo 6"},
+    {"check":"ação 7","motivo":"motivo 7"},
+    {"check":"ação 8","motivo":"motivo 8"}
+  ],
+  "proximo_modulo":"1 linha sobre o que o Módulo Captação entrega de diferente"
 }`}];
 }
 
@@ -1617,6 +2284,220 @@ startAutoSave();
 initFieldAutoSave();
 // Verificar rascunho após render da home
 setTimeout(checkDraft, 300);
+// Verificar retorno de pagamento
+checkPaymentReturn();
+</script>
+
+<!-- ══ MODAL CHECKOUT ══ -->
+<div id="checkout-modal">
+  <div class="checkout-box">
+    <div id="co-emoji" style="font-size:36px;margin-bottom:8px">🚀</div>
+    <h2 id="co-name">Diagnóstico</h2>
+    <div class="co-price" id="co-price">R$497</div>
+    <div class="co-desc" id="co-desc">Análise completa · 7 blocos · Financeiro · Roadmap</div>
+    <button class="checkout-btn-mp" id="co-btn-mp" onclick="goCheckout()">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#fff"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="#009ee3" font-weight="bold">MP</text></svg>
+      Pagar com Mercado Pago
+    </button>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Cartão · Pix · Boleto · Parcelamento</div>
+    <button class="checkout-cancel" onclick="closeCheckout()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// CHECKOUT — MERCADO PAGO / STRIPE
+// ══════════════════════════════════════════════════════════════
+const PLAN_INFO = {
+  validacao:   {emoji:'🌱',name:'Validação',   price:'R$149', desc:'IMI · Análise de mercado · Veredito · Providências · Manual'},
+  diagnostico: {emoji:'🚀',name:'Diagnóstico', price:'R$497', desc:'Tudo do Validação + 7 blocos · Financeiro · MVP · Roadmap · Riscos'},
+  captacao:    {emoji:'💎',name:'Captação',     price:'R$999', desc:'Tudo do Diagnóstico + Valuation · Data room · Pitch deck'},
+};
+
+let _checkoutPlan = null;
+
+function startCheckout(plan) {
+  _checkoutPlan = plan;
+  const info = PLAN_INFO[plan];
+  document.getElementById('co-emoji').textContent = info.emoji;
+  document.getElementById('co-name').textContent  = info.name;
+  document.getElementById('co-price').textContent = info.price;
+  document.getElementById('co-desc').textContent  = info.desc;
+  document.getElementById('checkout-modal').classList.add('open');
+}
+
+function closeCheckout() {
+  document.getElementById('checkout-modal').classList.remove('open');
+  _checkoutPlan = null;
+}
+
+async function goCheckout() {
+  const btn = document.getElementById('co-btn-mp');
+  btn.disabled = true;
+  btn.textContent = 'Aguarde...';
+
+  // gera sessionId se ainda não existe
+  if (!S.session?.id) {
+    S.session = S.session || {};
+    S.session.id = 'vc_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+  }
+
+  try {
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({plan: _checkoutPlan, sessionId: S.session.id}),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // Salva plano no estado local antes de redirecionar
+    S.plan = _checkoutPlan;
+    localStorage.setItem('vc_pending_plan', _checkoutPlan);
+    localStorage.setItem('vc_pending_session', S.session.id);
+
+    // Redireciona para o checkout
+    window.location.href = data.checkout_url || data.sandbox_url;
+  } catch(e) {
+    alert('Erro ao criar pagamento: ' + e.message + '\n\nTente novamente ou entre em contato.');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#fff"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="#009ee3" font-weight="bold">MP</text></svg> Pagar com Mercado Pago';
+  }
+}
+
+function checkPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get('payment');
+  if (!status) return;
+
+  // Limpa a URL sem recarregar
+  window.history.replaceState({}, '', window.location.pathname);
+
+  if (status === 'success') {
+    const plan      = params.get('plan') || localStorage.getItem('vc_pending_plan');
+    const sessionId = params.get('session') || localStorage.getItem('vc_pending_session');
+    localStorage.removeItem('vc_pending_plan');
+    localStorage.removeItem('vc_pending_session');
+    S.plan = plan;
+    S.session = S.session || {};
+    S.session.id = sessionId;
+    showScreen('screen-setup');
+    setTimeout(() => {
+      showToast('✅ Pagamento confirmado! Vamos começar.');
+    }, 400);
+  } else if (status === 'failure') {
+    setTimeout(() => {
+      showToast('❌ Pagamento não concluído. Tente novamente.');
+    }, 400);
+  } else if (status === 'pending') {
+    setTimeout(() => {
+      showToast('⏳ Pagamento pendente. Você receberá confirmação por e-mail.');
+    }, 400);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// PDF EXPORT — html2pdf via CDN
+// ══════════════════════════════════════════════════════════════
+function exportPDF() {
+  const btn = document.querySelector('[onclick="exportPDF()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando PDF...'; }
+
+  // Carrega html2pdf dinamicamente se não estiver disponível
+  function doExport() {
+    const el = document.getElementById('screen-report');
+    const name = (S.session?.name || 'empreendedor').replace(/\s+/g,'_').toLowerCase();
+    const idea = (S.session?.idea || 'ideia').slice(0,30).replace(/\s+/g,'_').toLowerCase();
+    const filename = `venturecheck_${name}_${idea}.pdf`;
+
+    const opt = {
+      margin:       [10, 10, 10, 10],
+      filename,
+      image:        { type: 'jpeg', quality: 0.92 },
+      html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
+    };
+
+    html2pdf().set(opt).from(el).save().then(() => {
+      if (btn) { btn.disabled = false; btn.textContent = '📄 Baixar PDF'; }
+    }).catch(e => {
+      if (btn) { btn.disabled = false; btn.textContent = '📄 Baixar PDF'; }
+      console.error('PDF error:', e);
+      window.print(); // fallback
+    });
+  }
+
+  if (typeof html2pdf !== 'undefined') {
+    doExport();
+  } else {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.onload = doExport;
+    script.onerror = () => { window.print(); };
+    document.head.appendChild(script);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// FEEDBACK
+// ══════════════════════════════════════════════════════════════
+const _feedbackRatings = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+const _feedbackSent    = { 1: false, 2: false, 3: false, 4: false, 5: false };
+
+function setFeedbackRating(win, rating) {
+  _feedbackRatings[win] = rating;
+  const btns = document.querySelectorAll(`[data-fb="${win}"]`);
+  btns.forEach((b, i) => b.classList.toggle('active', i < rating));
+}
+
+function submitFeedback(win) {
+  if (_feedbackSent[win]) return;
+  const rating  = _feedbackRatings[win];
+  const textarea = document.getElementById(`fb-text-${win}`);
+  const comment  = textarea ? textarea.value.trim() : '';
+  const questionMap = { 1: 'analise', 2: 'produto', 3: 'profundidade', 4: 'valuation', 5: 'pitch' };
+  const question = questionMap[win] || `janela_${win}`;
+
+  const payload = {
+    session_id: S.id || null,
+    plan:       S.plan || 'validacao',
+    question,
+    rating,
+    comment,
+    created_at: new Date().toISOString(),
+  };
+
+  // localStorage fallback always
+  try {
+    const key  = `vc_feedback_${S.id || 'anon'}_${win}`;
+    localStorage.setItem(key, JSON.stringify(payload));
+  } catch(_) {}
+
+  // Supabase save (best-effort, no key needed with anon policy)
+  const SB_URL = 'https://ieomvpojcgokdemvyitn.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllb212cG9qY2dva2RlbXZ5aXRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjQ1NjcsImV4cCI6MjA2MTY0MDU2N30.Y_a0Ra6fX0Z7bS4oBYNDyGRSRhbnfJU7GjvFABXBNvs';
+  fetch(`${SB_URL}/rest/v1/vc_feedback`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SB_KEY,
+      Authorization: `Bearer ${SB_KEY}`,
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
+
+  _feedbackSent[win] = true;
+  const card = document.getElementById(`fb-card-${win}`);
+  if (card) {
+    card.innerHTML = `<div style="text-align:center;padding:24px 16px">
+      <div style="font-size:32px;margin-bottom:8px">${rating >= 4 ? '🙏' : '💬'}</div>
+      <div style="font-weight:600;color:var(--accent)">Obrigado pelo feedback!</div>
+      <div style="font-size:13px;color:var(--t2);margin-top:4px">Sua opinião nos ajuda a melhorar o VentureCheck.</div>
+    </div>`;
+  }
+}
 </script>
 </body>
 </html>
