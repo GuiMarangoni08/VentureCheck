@@ -49,19 +49,9 @@ async function handleMercadoPago(req) {
 }
 
 async function handleStripe(req) {
-  const STRIPE_KEY    = Netlify.env.get('STRIPE_SECRET_KEY');
-  const STRIPE_SECRET = Netlify.env.get('STRIPE_WEBHOOK_SECRET');
-  const body          = await req.text();
-  const sig           = req.headers.get('stripe-signature');
-
-  // Stripe signature verification requires the Stripe SDK — skip in serverless edge
-  // For now, verify manually that event type is checkout.session.completed
+  const body = await req.text();
   let event;
-  try {
-    event = JSON.parse(body);
-  } catch {
-    return { ok: false, error: 'invalid body' };
-  }
+  try { event = JSON.parse(body); } catch { return { ok: false, error: 'invalid body' }; }
 
   if (event.type !== 'checkout.session.completed') return { ok: true };
 
@@ -74,9 +64,7 @@ async function handleStripe(req) {
 }
 
 export default async (req, context) => {
-  if (req.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405 });
-  }
+  if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
 
   const url      = new URL(req.url);
   const provider = url.searchParams.get('provider') || 'mp';
@@ -85,16 +73,9 @@ export default async (req, context) => {
     const result = provider === 'stripe'
       ? await handleStripe(req)
       : await handleMercadoPago(req);
-
-    return new Response(JSON.stringify(result), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(JSON.stringify(result), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 };
 

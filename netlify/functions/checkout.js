@@ -49,7 +49,7 @@ async function createMercadoPago(plan, sessionId, origin) {
   const data = await res.json();
   return {
     provider: 'mp',
-    checkout_url: data.init_point,       // produção
+    checkout_url: data.init_point,
     sandbox_url:  data.sandbox_init_point,
     preference_id: data.id,
   };

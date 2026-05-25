@@ -1,34 +1,34 @@
+// Proxy para Anthropic API — evita expor a chave no frontend
+// Rota: POST /api/claude
+
 export default async (req, context) => {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    });
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   if (req.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405 });
   }
 
-  const apiKey = Netlify.env.get('ANTHROPIC_API_KEY');
-  if (!apiKey) {
-    return new Response(JSON.stringify({ error: { message: 'API key não configurada no servidor.' } }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
+  const API_KEY = Netlify.env.get('ANTHROPIC_API_KEY');
+  if (!API_KEY) {
+    return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY não configurado' }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
   let body;
   try {
-    body = await req.json();
+    body = await req.text();
   } catch {
-    return new Response(JSON.stringify({ error: { message: 'Body inválido.' } }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({ error: 'Body inválido' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -36,20 +36,16 @@ export default async (req, context) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': apiKey,
+      'x-api-key': API_KEY,
       'anthropic-version': '2023-06-01',
     },
-    body: JSON.stringify(body),
+    body,
   });
 
-  const data = await upstream.json();
-
-  return new Response(JSON.stringify(data), {
+  const data = await upstream.text();
+  return new Response(data, {
     status: upstream.status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 };
 
