@@ -1550,10 +1550,36 @@ function renderAnalysis(d){
 
   // Blocks
   const ab=document.getElementById('ana-blocks');ab.innerHTML='';
-  [{n:'01',t:'Problema',k:'problema'},{n:'02',t:'Solução',k:'solucao'},{n:'03',t:'Mercado & TAM/SAM/SOM',k:'mercado'},{n:'04',t:'Modelo de Negócio',k:'modelo'},{n:'05',t:'Competição',k:'competicao'},{n:'06',t:'Time',k:'time'},{n:'07',t:'Capital & Investimento',k:'capital'}].forEach(b=>{
+  [{n:'01',t:'Problema',k:'problema'},{n:'02',t:'Solução',k:'solucao'},{n:'03',t:'Mercado & TAM',k:'mercado'},{n:'04',t:'Modelo de Negócio',k:'modelo'},{n:'05',t:'Competição',k:'competicao'},{n:'06',t:'Time',k:'time'},{n:'07',t:'Capital & Investimento',k:'capital'}].forEach(b=>{
     if(!d[b.k])return;const s=d[b.k+'_score']||0;
     ab.innerHTML+=`<div class="ab"><div class="ab-head"><span class="ab-num">${b.n}</span><span class="ab-title">${b.t}</span><span class="ab-stars">${'★'.repeat(s)}${'☆'.repeat(5-s)}</span></div><div class="ab-body">${d[b.k]}</div></div>`;
   });
+
+  // Concorrentes por abrangência (plano Validação)
+  if(plan==='validacao' && d.concorrentes){
+    const cc=d.concorrentes;
+    const raioIcon={'local':'📍','estadual':'🗺','nacional':'🇧🇷','global':'🌎'};
+    const renderGrupo=(titulo,icon,lista)=>{
+      if(!lista?.length)return'';
+      return`<div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--t2);margin-bottom:8px">${icon} ${titulo.toUpperCase()}</div>
+        ${lista.map(c=>`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div style="flex:1">
+            <span style="font-size:13px;font-weight:600">${c.nome||'—'}</span>
+            <span style="font-size:11px;color:var(--t3);margin-left:8px;background:var(--s3);padding:2px 8px;border-radius:20px">${c.tipo||''}</span>
+          </div>
+          <div style="font-size:12px;color:var(--t2);max-width:55%">${c.fraqueza||''}</div>
+        </div>`).join('')}
+      </div>`;
+    };
+    ab.innerHTML+=`<div class="ab"><div class="ab-head"><span class="ab-num">C</span><span class="ab-title">Mapa Competitivo — ${raioIcon[cc.abrangencia]||'📍'} Raio ${(cc.abrangencia||'local').charAt(0).toUpperCase()+(cc.abrangencia||'local').slice(1)}</span></div><div class="ab-body">
+      ${renderGrupo('Concorrentes locais','📍',cc.locais)}
+      ${renderGrupo('Concorrentes regionais / estaduais','🗺',cc.regionais)}
+      ${renderGrupo('Concorrentes nacionais','🇧🇷',cc.nacionais)}
+      ${cc.diferencial?`<div class="msg msg-ok" style="margin-top:12px">⚡ <strong>Seu diferencial:</strong> ${cc.diferencial}</div>`:''}
+      ${cc.alerta?`<div class="msg msg-warn" style="margin-top:8px">⚠ <strong>Alerta competitivo:</strong> ${cc.alerta}</div>`:''}
+    </div></div>`;
+  }
 
   // Financial
   const fb=document.getElementById('fin-body');
@@ -1861,7 +1887,21 @@ JSON (sem markdown):
   "imi_justificativa":"2 linhas explicando o score",
   "problema":"análise da dor — máx 3 linhas","problema_score":1-5,
   "solucao":"análise da solução — máx 3 linhas","solucao_score":1-5,
-  "mercado":"TAM Brasil em 1 número + 1 linha de contexto + 3 concorrentes principais com fraqueza","mercado_score":1-5,
+  "mercado":"TAM Brasil em 1 número + 1 linha de contexto","mercado_score":1-5,
+  "concorrentes":{
+    "abrangencia":"local|estadual|nacional|global — qual é o raio real de competição deste negócio",
+    "locais":[
+      {"nome":"nome real ou tipo de player local","tipo":"direto|indireto","fraqueza":"fraqueza principal em 1 linha"}
+    ],
+    "regionais":[
+      {"nome":"player regional/estadual","tipo":"direto|indireto","fraqueza":"fraqueza principal em 1 linha"}
+    ],
+    "nacionais":[
+      {"nome":"player nacional","tipo":"direto|indireto","fraqueza":"fraqueza principal em 1 linha"}
+    ],
+    "diferencial":"em 1 linha: qual é o diferencial real deste negócio frente a todos eles",
+    "alerta":"risco competitivo mais importante que o founder deve monitorar"
+  },
   "modelo":"viabilidade do modelo de negócio — máx 3 linhas","modelo_score":1-5,
   "providencias":[
     {"acao":"ação concreta 1 específica para este negócio","impacto":"impacto esperado em 1 linha"},
