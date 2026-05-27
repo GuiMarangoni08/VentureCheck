@@ -1072,7 +1072,7 @@ function renderDNA(){
   if(!g)return;
   g.innerHTML=LENTES.map(l=>`<div class="dna-card"><div class="dna-av">${l.av}</div><div class="dna-name" style="font-size:10px">${l.nome}</div><div class="dna-sk">${l.desc}</div></div>`).join('');
   const pd=document.getElementById('proc-dna');
-  if(pd)pd.innerHTML=DNA.map(p=>`<span class="proc-chip">${p.av} ${p.name.split(' ')[0]}</span>`).join('');
+  if(pd)pd.innerHTML=DNA.map(p=>`<span class="proc-chip">${p.av} ${p.sk.split(' · ')[0]}</span>`).join('');
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1716,7 +1716,7 @@ function renderAnalysis(d){
       <div>
         <div class="verdict-v">${vi} ${d.verdict}</div>
         <div class="verdict-sub">VEREDITO DO DNA BOARD · 31 LENTES</div>
-        <div class="verdict-chips">${DNA.map(p=>`<span class="vchip">${p.av} ${p.name.split(' ')[0]}</span>`).join('')}</div>
+        <div class="verdict-chips">${DNA.map(p=>`<span class="vchip">${p.av} ${p.sk.split(' · ')[0]}</span>`).join('')}</div>
       </div>
       <div class="verdict-resumo">"${d.resumo||''}"</div>
     </div>`;
