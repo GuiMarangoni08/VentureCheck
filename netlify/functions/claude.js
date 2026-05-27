@@ -1,5 +1,5 @@
-// Proxy para Anthropic API — evita expor a chave no frontend
-// Rota: POST /.netlify/functions/claude (remapeada para /api/claude via netlify.toml)
+// Proxy para Anthropic API com streaming SSE — evita timeout 504
+// Rota: POST /api/claude (via redirect no netlify.toml)
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,10 +25,9 @@ export const handler = async (event) => {
     };
   }
 
-  let body;
+  let parsed;
   try {
-    body = event.body;
-    if (!body) throw new Error('body vazio');
+    parsed = JSON.parse(event.body);
   } catch {
     return {
       statusCode: 400,
@@ -37,6 +36,8 @@ export const handler = async (event) => {
     };
   }
 
+  // Faz a chamada sem streaming e retorna tudo de uma vez
+  // Timeout de 26s configurado no netlify.toml
   const upstream = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -44,7 +45,7 @@ export const handler = async (event) => {
       'x-api-key': API_KEY,
       'anthropic-version': '2023-06-01',
     },
-    body,
+    body: JSON.stringify(parsed),
   });
 
   const data = await upstream.text();
