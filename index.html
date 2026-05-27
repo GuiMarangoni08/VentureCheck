@@ -743,6 +743,17 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
             <div style="font-size:11px;color:var(--t2);margin-bottom:6px">Liste 3 coisas que seu produto não vai fazer antes de validar. Founder que sabe o que corta tem maturidade de produto.</div>
             <textarea id="inp-nao-faz" rows="3" placeholder="1. Não vai ter app nativo — só web responsivo&#10;2. Não vai ter integração com X antes de 100 clientes&#10;3. Não vai ter painel admin completo no MVP"></textarea>
           </div>
+          <div class="fg" style="margin-bottom:16px">
+            <label>Como você usa IA no seu processo hoje?</label>
+            <div style="font-size:11px;color:var(--t2);margin-bottom:6px">Seja honesto. Não usa é resposta válida — o DNA Board avalia sua capacidade de multiplicação, não seu entusiasmo.</div>
+            <select id="inp-ia-uso">
+              <option value="">Selecione...</option>
+              <option value="nao-usa">Não uso IA no processo</option>
+              <option value="ferramenta">Uso como ferramenta pontual (ChatGPT para textos, etc.)</option>
+              <option value="sistema">Uso como sistema integrado ao fluxo de trabalho</option>
+            </select>
+            <textarea id="inp-ia-desc" rows="2" placeholder="Descreva brevemente como você usa IA — ou por que ainda não usa" style="margin-top:8px"></textarea>
+          </div>
           <div class="msg msg-ok">
             💡 <strong>Dica do DNA Board:</strong> Empreendedores que descrevem o problema antes da solução recebem análises 40% mais precisas. Foque no problema real que você quer resolver.
           </div>
@@ -1174,7 +1185,9 @@ async function generateQuestions(){
   const conv=parseInt(document.getElementById('inp-conv')?.value||'0',10)||0;
   const convDesc=document.getElementById('inp-conv-desc')?.value.trim()||'';
   const naoFaz=document.getElementById('inp-nao-faz')?.value.trim()||'';
-  S.session={id:'vc5_'+Date.now(),name,email:document.getElementById('inp-email').value.trim(),biz,sector:document.getElementById('inp-sector').value,desc,conv,convDesc,naoFaz,createdAt:new Date().toISOString(),verdict:'PENDENTE'};
+  const iaUso=document.getElementById('inp-ia-uso')?.value||'';
+  const iaDesc=document.getElementById('inp-ia-desc')?.value.trim()||'';
+  S.session={id:'vc5_'+Date.now(),name,email:document.getElementById('inp-email').value.trim(),biz,sector:document.getElementById('inp-sector').value,desc,conv,convDesc,naoFaz,iaUso,iaDesc,createdAt:new Date().toISOString(),verdict:'PENDENTE'};
   saveDraft(true);
 
   showScreen('questions');
@@ -1380,7 +1393,9 @@ function saveDraft(silent=true){
         desc: document.getElementById('inp-desc')?.value || '',
         conv: document.getElementById('inp-conv')?.value || '',
         convDesc: document.getElementById('inp-conv-desc')?.value || '',
-        naoFaz: document.getElementById('inp-nao-faz')?.value || ''
+        naoFaz: document.getElementById('inp-nao-faz')?.value || '',
+        iaUso: document.getElementById('inp-ia-uso')?.value || '',
+        iaDesc: document.getElementById('inp-ia-desc')?.value || ''
       },
       savedAt: new Date().toISOString()
     };
@@ -1447,7 +1462,9 @@ function manualSave(){
         desc: document.getElementById('inp-desc')?.value || '',
         conv: document.getElementById('inp-conv')?.value || '',
         convDesc: document.getElementById('inp-conv-desc')?.value || '',
-        naoFaz: document.getElementById('inp-nao-faz')?.value || ''
+        naoFaz: document.getElementById('inp-nao-faz')?.value || '',
+        iaUso: document.getElementById('inp-ia-uso')?.value || '',
+        iaDesc: document.getElementById('inp-ia-desc')?.value || ''
       },
       savedAt: new Date().toISOString()
     };
@@ -1531,6 +1548,8 @@ function recoverSession(){
       if(f.conv !== undefined && document.getElementById('inp-conv')) document.getElementById('inp-conv').value = f.conv;
       if(f.convDesc && document.getElementById('inp-conv-desc')) document.getElementById('inp-conv-desc').value = f.convDesc;
       if(f.naoFaz && document.getElementById('inp-nao-faz')) document.getElementById('inp-nao-faz').value = f.naoFaz;
+      if(f.iaUso && document.getElementById('inp-ia-uso')) document.getElementById('inp-ia-uso').value = f.iaUso;
+      if(f.iaDesc && document.getElementById('inp-ia-desc')) document.getElementById('inp-ia-desc').value = f.iaDesc;
     }
 
     // Esconder banner
@@ -1648,7 +1667,12 @@ function buildQA(){
   const naoFazLine=S.session.naoFaz
     ? `ESCOPO MVP — o que NÃO faz: ${S.session.naoFaz}`
     : `ESCOPO MVP: não declarado — penalizar maturidade de produto.`;
-  let text=`NEGÓCIO: ${S.session.biz}\nSETOR: ${S.session.sector}\nDESCRIÇÃO INICIAL: ${S.session.desc}\n${psfLine}\n${naoFazLine}\n\n`;
+  const iaMap={'nao-usa':'Geração 1 (não usa IA)','ferramenta':'Geração 2 (ferramenta pontual)','sistema':'Geração 3 (sistema integrado)'};
+  const iaLine=S.session.iaUso
+    ? `FOUNDER-IA: ${iaMap[S.session.iaUso]||S.session.iaUso}. ${S.session.iaDesc?'Detalhe: '+S.session.iaDesc:''}`
+    : `FOUNDER-IA: não declarado.`;
+  const benchLine=getSectorBenchmarks(S.session.sector||'');
+  let text=`NEGÓCIO: ${S.session.biz}\nSETOR: ${S.session.sector}\nDESCRIÇÃO INICIAL: ${S.session.desc}\n${psfLine}\n${naoFazLine}\n${iaLine}\n${benchLine}\n\n`;
   text+=`=== RESPOSTAS RODADA 1 ===\n`;
   S.questions.forEach((q,i)=>{
     text+=`\nPERGUNTA ${i+1} [${BLOCKS[(q.block||1)-1]}]: ${q.question}\nRESPOSTA: ${S.answers[i]||'(não respondida)'}\n`;
@@ -1869,12 +1893,98 @@ function renderAnalysis(d){
     }
   }
 
-  // Próximos Passos — todos os planos
+  // ── Seções exclusivas do Plano Validação ──────────────────────
+  if(plan==='validacao'){
+    const ppval = document.getElementById('proximos-passos-section');
+
+    // Clareza da Ideia
+    if(d.clareza_ideia){
+      const ci=d.clareza_ideia;
+      const ciEl=document.createElement('div');ciEl.style.marginTop='24px';
+      ciEl.innerHTML=`<div class="card" style="border:1px solid var(--border2)">
+        <div class="card-head"><div class="card-title">🔍 Clareza da Ideia</div></div>
+        <div class="card-body">
+          ${ci.hipotese_central?`<div class="msg msg-ok" style="margin-bottom:16px">💡 <strong>Hipótese central:</strong> ${ci.hipotese_central}</div>`:''}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--accent);margin-bottom:8px">✅ JÁ ESTÁ CLARO</div>
+              ${(ci.o_que_esta_claro||[]).map(item=>`<div style="font-size:12px;color:var(--t2);margin-bottom:6px;padding:6px 10px;background:rgba(127,255,110,.05);border-left:2px solid var(--accent);border-radius:4px">${item}</div>`).join('')}
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--amber);margin-bottom:8px">❓ PRECISA CLAREAR</div>
+              ${(ci.o_que_precisa_clarear||[]).map(item=>`<div style="font-size:12px;color:var(--t2);margin-bottom:6px;padding:6px 10px;background:rgba(255,209,102,.05);border-left:2px solid var(--amber);border-radius:4px">${item}</div>`).join('')}
+            </div>
+          </div>
+          ${ci.risco_fatal?`<div class="msg msg-warn">⚠ <strong>Risco fatal a verificar:</strong> ${ci.risco_fatal}</div>`:''}
+        </div>
+      </div>`;
+      ppval?.parentNode?.insertBefore(ciEl, ppval);
+    }
+
+    // Referências de Mercado
+    if(d.referencias_mercado?.length){
+      const refEl=document.createElement('div');refEl.style.marginTop='24px';
+      refEl.innerHTML=`<div class="card" style="border:1px solid var(--border2)">
+        <div class="card-head"><div class="card-title">📚 Cases de Referência do Mercado</div></div>
+        <div class="card-body">
+          ${d.referencias_mercado.map(r=>`<div style="padding:12px 0;border-bottom:1px solid var(--border)">
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px">${r.nome||'—'} <span style="font-size:11px;color:var(--t3);font-weight:400">${r.contexto||''}</span></div>
+            ${r.resultado?`<div style="font-size:12px;color:var(--t2);margin-bottom:6px">📊 ${r.resultado}</div>`:''}
+            ${r.licao?`<div class="msg msg-ok" style="padding:6px 10px;margin:0;font-size:12px">🎯 ${r.licao}</div>`:''}
+          </div>`).join('')}
+        </div>
+      </div>`;
+      ppval?.parentNode?.insertBefore(refEl, ppval);
+    }
+
+    // Benchmarks Alvo
+    if(d.benchmarks_alvo){
+      const baEl=document.createElement('div');baEl.style.marginTop='24px';
+      baEl.innerHTML=`<div class="card" style="border:1px solid var(--border2)">
+        <div class="card-head"><div class="card-title">🎯 Benchmarks Alvo — Onde Você Precisa Chegar</div></div>
+        <div class="card-body">
+          ${d.benchmarks_alvo.resumo?`<div style="font-size:13px;color:var(--t2);margin-bottom:16px">${d.benchmarks_alvo.resumo}</div>`:''}
+          ${d.benchmarks_alvo.metricas?.length?`<table class="fin-t"><thead><tr><th>Métrica</th><th>Alvo do Setor</th><th>Prazo Típico</th><th>Referência</th></tr></thead><tbody>
+            ${d.benchmarks_alvo.metricas.map((m,i)=>`<tr class="${i%2===0?'fin-hl':''}"><td>${m.metrica}</td><td class="fin-num">${m.alvo}</td><td style="color:var(--t2);font-size:12px">${m.prazo||'—'}</td><td style="color:var(--t3);font-size:11px">${m.fonte||'—'}</td></tr>`).join('')}
+          </tbody></table>`:''}
+        </div>
+      </div>`;
+      ppval?.parentNode?.insertBefore(baEl, ppval);
+    }
+
+    // To-do List priorizado
+    if(d.todo_list?.length){
+      const prioColors={'🔴 ESTA SEMANA':'var(--red)','🟠 PRÓXIMAS 2 SEMANAS':'var(--amber)','🟡 PRÓXIMO MÊS':'#a3e635'};
+      const tdEl=document.createElement('div');tdEl.style.marginTop='24px';
+      tdEl.innerHTML=`<div class="card" style="border:1px solid var(--accent);background:var(--s2)">
+        <div class="card-head"><div class="card-title" style="color:var(--accent)">✅ To-do List — O que fazer agora para ter um Diagnóstico preciso</div></div>
+        <div class="card-body">
+          ${d.todo_list.map((t,i)=>{
+            const col=prioColors[t.prioridade]||'var(--t2)';
+            return`<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+              <div style="width:20px;height:20px;border:2px solid var(--border3);border-radius:4px;flex-shrink:0;margin-top:2px"></div>
+              <div style="flex:1">
+                <div style="font-size:10px;font-family:'DM Mono',monospace;letter-spacing:1px;color:${col};margin-bottom:4px">${t.prioridade||''}</div>
+                <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">${t.acao}</div>
+                <div style="font-size:12px;color:var(--t2)">${t.impacto}</div>
+              </div>
+            </div>`;
+          }).join('')}
+          ${d.criterio_diagnostico?`<div class="msg msg-ok" style="margin-top:8px">🏁 <strong>Quando você está pronto para o Diagnóstico:</strong> ${d.criterio_diagnostico}</div>`:''}
+          <button class="btn btn-p" style="margin-top:16px;width:100%;justify-content:center" onclick="startCheckout('diagnostico')">Avançar para o Diagnóstico completo (R$497) →</button>
+          ${d.proximo_modulo?`<div style="font-size:12px;color:var(--accent);margin-top:10px;text-align:center">${d.proximo_modulo}</div>`:''}
+        </div>
+      </div>`;
+      ppval?.parentNode?.insertBefore(tdEl, ppval);
+    }
+  }
+
+  // Próximos Passos — diagnóstico e captação (validação usa to-do list acima)
   const ppsec = document.getElementById('proximos-passos-section');
-  if(ppsec && d.proximos_passos?.length){
-    const planLabels = {validacao:'Diagnóstico (R$497)', diagnostico:'Captação (R$999)', captacao:'Série A'};
+  if(ppsec && d.proximos_passos?.length && plan !== 'validacao'){
+    const planLabels = {diagnostico:'Captação (R$999)', captacao:'Série A'};
     const nextLabel = planLabels[plan] || 'próximo nível';
-    const nextPlan  = {validacao:'diagnostico', diagnostico:'captacao'}[plan];
+    const nextPlan  = {diagnostico:'captacao'}[plan];
     ppsec.style.display = 'block';
     ppsec.innerHTML = `
       <div class="card" style="border:1px solid var(--accent);background:var(--s2)">
@@ -1899,6 +2009,8 @@ function renderAnalysis(d){
   } else if(ppsec){
     ppsec.style.display = 'none';
   }
+  // Garantir que ppsec não apareça em validação (to-do list já substitui)
+  if(ppsec && plan==='validacao') ppsec.style.display = 'none';
 
   // Feedback — todos os planos; janela 3 só para diagnóstico e captação
   const fbsec = document.getElementById('feedback-section');
@@ -1963,19 +2075,23 @@ NUNCA: perguntas genéricas, elogios sem evidência, suavizar problemas sérios,
 SEMPRE: identificar o que não foi dito, fazer a pergunta incômoda, usar números específicos, tratar o empreendedor como adulto.
 
 ═══ CAMADA 2 — REGRAS DAS PERGUNTAS ═══
+PRINCÍPIO FUNDAMENTAL: adapte o nível de cobrança ao momento do founder.
+- No Plano Validação: o founder provavelmente NÃO tem números ainda — é normal. Perguntas devem clarificar a ideia, não punir a falta de dados. Aprofunde o problema, o cliente, a causa raiz. NUNCA peça métricas que ele ainda não pode ter.
+- No Plano Diagnóstico e Captação: cobrar evidências, números e dados medidos é obrigatório.
+
 1. ESPECIFICIDADE: impossível responder com "sim/não" ou frase genérica
    RUIM: "Quem é seu público-alvo?"
    BOM: "Descreva a última pessoa real que você imaginou usando — idade, profissão, dor específica, por que pagaria hoje"
 
-2. PRESSÃO DE REALIDADE (mín 3 perguntas):
-   RUIM: "Você já testou?" 
-   BOM: "Você já vendeu para alguém que não te conhece? Se não — o que está esperando?"
+2. PRESSÃO DE REALIDADE (mín 3 perguntas no Diagnóstico/Captação; no Validação, foco em clareza):
+   DIAGNÓSTICO: "Você já vendeu para alguém que não te conhece? Se não — o que está esperando?"
+   VALIDAÇÃO: "Qual foi a última vez que você viu alguém sofrer com esse problema? O que a pessoa fez para resolver?"
 
 3. PRIMEIROS PRINCÍPIOS (mín 1): "Por que esse problema ainda não foi resolvido? Qual a barreira real?"
 
-4. ESCALA (mín 1): "Como funciona com 100x o tamanho? O que quebra primeiro?"
+4. ESCALA (mín 1 no Diagnóstico/Captação): "Como funciona com 100x o tamanho? O que quebra primeiro?"
 
-5. NÚMEROS REAIS (mín 2): "Quanto cobra, de quem, com qual frequência, quantos clientes para pagar as contas no mês 6?"
+5. NÚMEROS REAIS (mín 2 no Diagnóstico/Captação; no Validação, aceitar estimativas qualificadas): "Quanto cobra, de quem, com qual frequência, quantos clientes para pagar as contas no mês 6?"
 
 6. PERGUNTA INCÔMODA (mín 1): "Se seu maior concorrente copiasse com 10x seu capital, o que faria?"
 
@@ -1991,6 +2107,34 @@ SEMPRE: afirmação direta + evidência/número + implicação prática + ação
 CRÍTICO: Responda SEMPRE com JSON válido. Sem markdown. Sem texto antes ou depois do JSON.`;
 
 // ══════════════════════════════════════════════════════════════
+// BENCHMARKS SETORIAIS — tabela calibrada por vertical
+// ══════════════════════════════════════════════════════════════
+const SECTOR_BENCHMARKS = {
+  'Tecnologia / SaaS':       {d7:'≥60%', d30:'≥40%', ltv_cac:'>5x', payback:'<12m', nps:'>40',  mrr_pmf:'R$30-50k', ref:'Tomasz Tunguz (Redpoint), ChartMogul State of SaaS'},
+  'E-commerce / Varejo':     {d7:'≥45%', d30:'≥25%', ltv_cac:'>3x', payback:'<6m',  nps:'>30',  mrr_pmf:'200+ pedidos/mês', ref:'Ebit|Nielsen, SBVC'},
+  'Marketplace':             {d7:'≥50%', d30:'≥30%', ltv_cac:'>4x', payback:'<9m',  nps:'>35',  mrr_pmf:'GMV R$50k/mês', ref:'A16z Marketplace 100, NFX'},
+  'Saúde / HealthTech':      {d7:'≥55%', d30:'≥35%', ltv_cac:'>6x', payback:'<18m', nps:'>50',  mrr_pmf:'50+ pacientes/mês ativos', ref:'Rock Health, Distrito HealthTech'},
+  'Educação / EdTech':       {d7:'≥40%', d30:'≥20%', ltv_cac:'>3x', payback:'<8m',  nps:'>35',  mrr_pmf:'500+ alunos pagantes', ref:'HolonIQ, Edtech Brasil'},
+  'Finanças / FinTech':      {d7:'≥65%', d30:'≥45%', ltv_cac:'>5x', payback:'<12m', nps:'>45',  mrr_pmf:'R$50k MRR ou R$1M GMV', ref:'ABFintechs, Finnovista'},
+  'Construção / ConstrTech': {d7:'≥35%', d30:'≥20%', ltv_cac:'>4x', payback:'<24m', nps:'>30',  mrr_pmf:'10+ contratos ativos', ref:'McKinsey Global Infrastructure, CBIC'},
+  'Alimentos / FoodTech':    {d7:'≥40%', d30:'≥25%', ltv_cac:'>3x', payback:'<6m',  nps:'>30',  mrr_pmf:'200+ pedidos/mês', ref:'iFood relatório anual, ABRASEL'},
+  'Logística / Mobilidade':  {d7:'≥50%', d30:'≥30%', ltv_cac:'>3x', payback:'<9m',  nps:'>35',  mrr_pmf:'1.000+ entregas/mês', ref:'NTC&Logística, Cargo.one'},
+  'Agronegócio / AgTech':    {d7:'≥40%', d30:'≥25%', ltv_cac:'>5x', payback:'<18m', nps:'>40',  mrr_pmf:'50+ produtores ativos', ref:'Embrapa, Distrito AgTech'},
+  'Serviços B2B':            {d7:'≥55%', d30:'≥40%', ltv_cac:'>5x', payback:'<12m', nps:'>40',  mrr_pmf:'R$30k MRR / 10+ clientes', ref:'SaaStr, Bain B2B Pulse'},
+  'Serviços B2C':            {d7:'≥35%', d30:'≥20%', ltv_cac:'>3x', payback:'<6m',  nps:'>30',  mrr_pmf:'1.000+ usuários ativos', ref:'Andreessen Horowitz Consumer'},
+};
+
+function getSectorBenchmarks(sector){
+  const b = SECTOR_BENCHMARKS[sector];
+  if(!b) return 'Setor não mapeado — use benchmarks gerais: D7≥40%, D30≥25%, LTV/CAC>3x, payback<12m.';
+  return `BENCHMARKS SETORIAIS — ${sector}:
+  Retenção D7: ${b.d7} | Retenção D30: ${b.d30}
+  LTV/CAC: ${b.ltv_cac} | Payback: ${b.payback} | NPS: ${b.nps}
+  Indicador de PMF: ${b.mrr_pmf}
+  Fontes de referência: ${b.ref}`;
+}
+
+// ══════════════════════════════════════════════════════════════
 // PROMPTS
 // ══════════════════════════════════════════════════════════════
 function genQPrompt(){
@@ -1998,6 +2142,9 @@ function genQPrompt(){
     ? `PSF ALERT: founder declara ZERO conversas reais com potenciais clientes. Dimensão Problema tem teto de 8/20 no IMI inicial.`
     : `PSF: founder já fez ${S.session.conv} conversa(s) real(is). ${S.session.convDesc?'Aprendizado: '+S.session.convDesc:''}`;
   const naoFazCtx=S.session.naoFaz?`ESCOPO MVP (o que NÃO faz): ${S.session.naoFaz}`:'ESCOPO MVP: founder não declarou restrições de escopo — questionar na análise.';
+  const iaMap={'nao-usa':'Geração 1 — não usa IA no processo','ferramenta':'Geração 2 — usa IA como ferramenta pontual','sistema':'Geração 3 — usa IA como sistema integrado ao fluxo'};
+  const iaCtx=S.session.iaUso?`FOUNDER-IA: ${iaMap[S.session.iaUso]||S.session.iaUso}. ${S.session.iaDesc?'Detalhe: '+S.session.iaDesc:''}`:`FOUNDER-IA: não declarado — questionar na análise.`;
+  const benchCtx=getSectorBenchmarks(S.session.sector||'');
   return[{role:'user',content:`Analise a descrição deste negócio e gere um roteiro de perguntas personalizado.
 
 EMPREENDEDOR: ${S.session.name}
@@ -2006,6 +2153,8 @@ SETOR: ${S.session.sector||'não informado'}
 DESCRIÇÃO: ${S.session.desc}
 ${psfCtx}
 ${naoFazCtx}
+${iaCtx}
+${benchCtx}
 
 Gere perguntas que NENHUM formulário genérico faria. Perguntas específicas para ESTE negócio, ESTE setor, ESTE empreendedor.
 
@@ -2097,57 +2246,67 @@ function finalPrompt(qa, plan){
 
   // ── PLANO VALIDAÇÃO ──────────────────────────────────────────
   if(plan==='validacao'){
-    return[{role:'user',content:`Análise de viabilidade inicial — DNA Board 31 Lentes — Plano Validação.
-Responda UMA ÚNICA pergunta: esta ideia vale continuar?
+    return[{role:'user',content:`Análise de clareza de ideia — DNA Board 31 Lentes — Plano Validação.
+
+FILOSOFIA DESTE PLANO: o founder provavelmente não tem números ainda — e tudo bem. Sua missão não é cobrar evidências que ele não tem. É: (1) clarificar a ideia com precisão cirúrgica, (2) mostrar o que o mercado já prova sobre ideias parecidas, (3) dar um to-do list tão preciso que o Diagnóstico vai ser muito melhor por causa do que ele vai fazer agora.
 
 ${qa}
 
-REGRA PSF GATE: se o contexto indicar "ZERO conversas reais", a nota de problema_score fica limitada a 2/5 e o campo "problema" deve mencionar explicitamente que o founder ainda não validou com clientes.
-REGRA ESCOPO: se o founder não declarou o que o MVP não faz, inclua nos proximos_passos a obrigação de definir 3 restrições explícitas de escopo.
+REGRA PSF GATE: se o contexto indicar "ZERO conversas reais", problema_score máximo 2/5 e campo "problema" deve nomear explicitamente a ausência — sem punir, mas apontando o próximo passo obrigatório.
+REGRA ESCOPO: se "o que não faz" não estiver declarado, incluir como primeiro item do to-do list.
+REGRA HIPÓTESE vs DADO: em todo número que aparecer no relatório, prefixar com [H] se for hipótese/estimativa ou [D] se for dado medido/comprovado. Se 80%+ dos números forem [H], tração_score máximo 2/5.
+REGRA FOUNDER-IA: se Geração 1 (não usa IA), adicionar item no to-do list com ferramentas específicas para este setor. Se Geração 3, aumentar founder_score em 1 ponto.
+BENCHMARKS: use os benchmarks setoriais fornecidos no contexto como régua para avaliar onde o founder está vs. onde precisa chegar.
 
 ${rules}
 
 JSON (sem markdown):
 {
-  "verdict":"APROVADO|REPROVADO|REQUER AJUSTES",
-  "resumo":"3 linhas diretas — veredito com justificativa",
+  "verdict":"IDEIA CLARA|IDEIA PROMISSORA|IDEIA PRECISA CLAREZA",
+  "resumo":"3 linhas — não é veredito de aprovação/reprovação, é clareza sobre o que a ideia é e o que falta clarificar",
   "imi_score":0-100,
   "imi_nivel":"Semente|Germinando|Crescendo|Pronta",
-  "imi_justificativa":"2 linhas explicando o score",
-  "problema":"análise da dor — máx 3 linhas","problema_score":1-5,
-  "solucao":"análise da solução — máx 3 linhas","solucao_score":1-5,
-  "mercado":"TAM Brasil em 1 número + 1 linha de contexto","mercado_score":1-5,
-  "concorrentes":{
-    "abrangencia":"local|estadual|nacional|global — qual é o raio real de competição deste negócio",
-    "locais":[
-      {"nome":"nome real ou tipo de player local","tipo":"direto|indireto","fraqueza":"fraqueza principal em 1 linha"}
-    ],
-    "regionais":[
-      {"nome":"player regional/estadual","tipo":"direto|indireto","fraqueza":"fraqueza principal em 1 linha"}
-    ],
-    "nacionais":[
-      {"nome":"player nacional","tipo":"direto|indireto","fraqueza":"fraqueza principal em 1 linha"}
-    ],
-    "diferencial":"em 1 linha: qual é o diferencial real deste negócio frente a todos eles",
-    "alerta":"risco competitivo mais importante que o founder deve monitorar"
+  "imi_justificativa":"2 linhas — explica o score sem punir a falta de números",
+  "clareza_ideia":{
+    "hipotese_central":"reescreva a hipótese central do negócio em 1 frase no formato: [persona] acredita que [mecanismo] vai resolver [problema] porque [causa raiz]",
+    "o_que_esta_claro":"3 pontos concretos que o founder já tem clareza — 1 linha cada",
+    "o_que_precisa_clarear":"3 perguntas que ele precisa responder antes do Diagnóstico — 1 linha cada",
+    "risco_fatal":"1 linha — o único risco que, se confirmado, inviabiliza tudo"
   },
-  "modelo":"viabilidade do modelo de negócio — máx 3 linhas","modelo_score":1-5,
-  "providencias":[
-    {"acao":"ação concreta 1 específica para este negócio","impacto":"impacto esperado em 1 linha"},
-    {"acao":"ação 2","impacto":"impacto 2"},
-    {"acao":"ação 3","impacto":"impacto 3"},
-    {"acao":"ação 4","impacto":"impacto 4"}
+  "problema":"análise da dor — máx 3 linhas. Não exigir números — avaliar clareza e especificidade da dor descrita","problema_score":1-5,
+  "solucao":"análise da solução — máx 3 linhas. Avaliar se a solução endereça a causa raiz ou apenas o sintoma","solucao_score":1-5,
+  "mercado":"TAM Brasil em 1 número com premissa clara — indicar se é [H] estimativa ou [D] dado de mercado + 1 linha de contexto","mercado_score":1-5,
+  "concorrentes":{
+    "abrangencia":"local|estadual|nacional|global — raio real de competição",
+    "locais":[{"nome":"player local ou perfil","tipo":"direto|indireto","fraqueza":"fraqueza em 1 linha"}],
+    "regionais":[{"nome":"player regional","tipo":"direto|indireto","fraqueza":"fraqueza em 1 linha"}],
+    "nacionais":[{"nome":"player nacional","tipo":"direto|indireto","fraqueza":"fraqueza em 1 linha"}],
+    "diferencial":"diferencial real em 1 linha",
+    "alerta":"risco competitivo principal"
+  },
+  "modelo":"análise do modelo de negócio — máx 3 linhas — avaliar lógica, não números (ele ainda não tem)","modelo_score":1-5,
+  "referencias_mercado":[
+    {"nome":"case ou empresa de referência no setor","contexto":"onde/quando surgiu — país, ano","resultado":"o que conseguiu — números reais se disponíveis","licao":"o que este founder pode aprender ou adaptar em 1 linha"},
+    {"nome":"case 2","contexto":"","resultado":"","licao":""},
+    {"nome":"case 3 — pode ser fracasso","contexto":"","resultado":"por que falhou","licao":"o que evitar"}
   ],
-  "manual":"parágrafo direto para o founder — máx 5 linhas — o que fazer, o que evitar, próximo passo mais importante",
-  "proximos_passos":[
-    {"check":"ação específica 1","motivo":"por que isso é pré-requisito para o Diagnóstico"},
-    {"check":"ação 2","motivo":"motivo 2"},
-    {"check":"ação 3","motivo":"motivo 3"},
-    {"check":"ação 4","motivo":"motivo 4"},
-    {"check":"ação 5","motivo":"motivo 5"},
-    {"check":"ação 6","motivo":"motivo 6"}
+  "benchmarks_alvo":{
+    "resumo":"em 1 linha: onde este negócio precisa chegar para ser considerado com PMF no setor",
+    "metricas":[
+      {"metrica":"nome da métrica","alvo":"valor de referência do setor","prazo":"em quanto tempo tipicamente","fonte":"fonte ou referência"}
+    ]
+  },
+  "todo_list":[
+    {"prioridade":"🔴 ESTA SEMANA","acao":"ação específica 1 com método e critério de sucesso","impacto":"o que isso vai desbloquear para o Diagnóstico"},
+    {"prioridade":"🔴 ESTA SEMANA","acao":"ação 2","impacto":"impacto 2"},
+    {"prioridade":"🟠 PRÓXIMAS 2 SEMANAS","acao":"ação 3","impacto":"impacto 3"},
+    {"prioridade":"🟠 PRÓXIMAS 2 SEMANAS","acao":"ação 4","impacto":"impacto 4"},
+    {"prioridade":"🟡 PRÓXIMO MÊS","acao":"ação 5","impacto":"impacto 5"},
+    {"prioridade":"🟡 PRÓXIMO MÊS","acao":"ação 6","impacto":"impacto 6"}
   ],
-  "proximo_modulo":"1 linha sobre o que o Módulo Diagnóstico entrega de diferente"
+  "criterio_diagnostico":"frase completa — quando o founder pode dizer que está pronto para o Diagnóstico. Ser específico: número de conversas, experimento feito, dado coletado.",
+  "manual":"parágrafo direto para o founder — máx 5 linhas — tom de mentor, não de juiz. O que fazer agora, o que evitar, qual é o próximo passo mais importante.",
+  "proximo_modulo":"1 linha — o que o Módulo Diagnóstico vai entregar que este não entrega"
 }`}];
   }
 
@@ -2161,6 +2320,9 @@ ${qa}
 REGRA PSF GATE: se o contexto indicar ZERO conversas reais, problema_score máximo é 2/5 e o campo "problema" deve alertar o investidor.
 REGRA ESCOPO: se naoFaz não estiver declarado, incluir nos proximos_passos.
 REGRA ADVERSARIAL COMPETITIVO: no campo "competicao", além da análise padrão Musk+Zuck+Benchimol, inclua obrigatoriamente um bloco "advogado do diabo" — para CADA concorrente principal, descreva em 1 linha como ele copiaria o diferencial do founder em 6-12 meses e o que o founder precisaria fazer para tornar sua vantagem incopiável.
+REGRA HIPÓTESE vs DADO: em todo número citado no relatório, prefixar com [H] se for hipótese/estimativa ou [D] se dado medido. Se 80%+ forem [H], tracao_score máximo 2/5 e incluir alerta no campo capital.
+REGRA FOUNDER-IA: se Geração 1 (não usa IA), adicionar item nos proximos_passos com ferramentas específicas para este setor. Se Geração 3, destacar no campo "time" como diferencial operacional.
+BENCHMARKS: use os benchmarks setoriais do contexto como régua explícita — compare os números do founder com os valores de referência e nomeie o gap.
 
 ${rules}
 
@@ -2261,6 +2423,9 @@ ${qa}
 REGRA PSF GATE: se o contexto indicar "ZERO conversas reais", a nota imi_dimensoes.problema fica limitada a 8/20 e o campo "problema" deve indicar explicitamente a ausência de validação com clientes reais.
 REGRA ESCOPO: se o founder não declarou o que o MVP não faz, incluir nos proximos_passos como ação obrigatória pré-Captação.
 REGRA ADVERSARIAL COMPETITIVO: no campo "competicao", após a análise Musk+Zuck+Benchimol, inclua um parágrafo "ADVOGADO DO DIABO" — para cada concorrente relevante, 1 linha descrevendo como ele poderia copiar o diferencial do founder em 6-12 meses e qual seria a resposta defensável.
+REGRA HIPÓTESE vs DADO: em todo número citado no relatório, prefixar com [H] se for hipótese/estimativa ou [D] se dado medido/comprovado. Se 80%+ forem [H], tracao score em imi_dimensoes máximo 8/20.
+REGRA FOUNDER-IA: se Geração 1, adicionar item no proximos_passos com ferramentas de IA específicas para este setor. Se Geração 3, aumentar nota de founder em 1 ponto e destacar no campo "time".
+BENCHMARKS: use os benchmarks setoriais do contexto como régua — compare métricas do founder com referência e nomeie o gap explicitamente.
 
 ${rules}
 
@@ -2538,7 +2703,8 @@ const COMPLETUDE_ITEMS = {
     { id: 'ck-desc',    label: 'Descrição da ideia',    desc: 'Quanto mais detalhe (problema, público, modelo), melhor o IMI.', pct: 30, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 30 },
     { id: 'ck-desc-q',  label: 'Descrição aprofundada', desc: 'Descreva com 80+ palavras: já testou? tem experiência no setor? por que você?', pct: 20, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 80 },
     { id: 'ck-psf',     label: 'Conversas com clientes declaradas', desc: 'Quantas conversas reais você fez? Zero é válido — mas sabemos que impacta o IMI.', pct: 10, check: () => document.getElementById('inp-conv')?.value !== '' && document.getElementById('inp-conv')?.value !== null },
-    { id: 'ck-nao-faz', label: 'O que o MVP não faz',  desc: 'Liste 3 restrições deliberadas de escopo — revela maturidade de produto.', pct: 10, check: () => (document.getElementById('inp-nao-faz')?.value.trim().length || 0) >= 20 },
+    { id: 'ck-nao-faz', label: 'O que o MVP não faz',  desc: 'Liste 3 restrições deliberadas de escopo — revela maturidade de produto.', pct: 5,  check: () => (document.getElementById('inp-nao-faz')?.value.trim().length || 0) >= 20 },
+    { id: 'ck-ia',      label: 'Uso de IA declarado',   desc: 'Founder-orquestrador de IA tem runway 3x maior com mesmo capital — impacta dimensão Founder.', pct: 5,  check: () => !!document.getElementById('inp-ia-uso')?.value },
   ],
   diagnostico: [
     { id: 'ck-name',    label: 'Seu nome',              desc: 'Identifica o fundador na análise.',                     pct: 5,  check: () => !!document.getElementById('inp-name')?.value.trim() },
@@ -2548,7 +2714,8 @@ const COMPLETUDE_ITEMS = {
     { id: 'ck-desc-m',  label: 'Modelo de negócio descrito', desc: 'Como vai ganhar dinheiro? Receita recorrente, transacional, B2B, B2C?', pct: 15, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 100 },
     { id: 'ck-desc-t',  label: 'Tração mencionada',     desc: 'Inclua qualquer sinal: entrevistas, pré-vendas, clientes, parceiros, MVP.', pct: 20, check: () => /trac|cliente|vend|pilot|mvp|test|entrev|parceiro/i.test(document.getElementById('inp-desc')?.value || '') },
     { id: 'ck-psf',     label: 'Conversas com clientes declaradas', desc: 'PSF gate: zero conversas reais limita a nota de Problema automaticamente.', pct: 15, check: () => document.getElementById('inp-conv')?.value !== '' && document.getElementById('inp-conv')?.value !== null },
-    { id: 'ck-nao-faz', label: 'O que o MVP não faz',  desc: 'Escopo explícito revela maturidade de produto e foco de execução.', pct: 10, check: () => (document.getElementById('inp-nao-faz')?.value.trim().length || 0) >= 20 },
+    { id: 'ck-nao-faz', label: 'O que o MVP não faz',  desc: 'Escopo explícito revela maturidade de produto e foco de execução.', pct: 5,  check: () => (document.getElementById('inp-nao-faz')?.value.trim().length || 0) >= 20 },
+    { id: 'ck-ia',      label: 'Uso de IA declarado',   desc: 'Classificação como founder-orquestrador impacta diretamente o roadmap e a projeção financeira.', pct: 5,  check: () => !!document.getElementById('inp-ia-uso')?.value },
     { id: 'ck-files',   label: 'Material de apoio enviado', desc: 'Planilha, deck, pesquisa ou protótipo aumentam a profundidade dos 7 blocos.', pct: 10, check: () => (window._completudeFilesCount || 0) > 0 },
   ],
   captacao: [
@@ -2560,8 +2727,9 @@ const COMPLETUDE_ITEMS = {
     { id: 'ck-time',    label: 'Time mencionado',          desc: 'Quem está construindo? Experiência do fundador é critério chave para investidor.', pct: 10, check: () => /sócio|cto|coo|cofund|co-fund|time|equipe|parceiro|tecn/i.test(document.getElementById('inp-desc')?.value || '') },
     { id: 'ck-captacao-num', label: 'Valor da captação mencionado', desc: 'Quanto quer captar e para quê? Ex: "buscamos R$800k para 18 meses de runway".', pct: 10, check: () => /capt|inves|aport|round|seed|angel|série|r\$\s*\d|k\s+de|milhão/i.test(document.getElementById('inp-desc')?.value || '') },
     { id: 'ck-psf',     label: 'Conversas com clientes declaradas', desc: 'PSF gate: número de entrevistas reais entra no score de Problema para o investidor.', pct: 15, check: () => document.getElementById('inp-conv')?.value !== '' && document.getElementById('inp-conv')?.value !== null },
-    { id: 'ck-nao-faz', label: 'O que o MVP não faz',     desc: 'Escopo deliberado de produto sinaliza disciplina de execução — critério de investidor.', pct: 10, check: () => (document.getElementById('inp-nao-faz')?.value.trim().length || 0) >= 20 },
-    { id: 'ck-files',   label: 'Material financeiro enviado', desc: 'Planilha de unit economics, modelo financeiro ou deck aumenta a precisão do valuation.', pct: 15, check: () => (window._completudeFilesCount || 0) > 0 },
+    { id: 'ck-nao-faz', label: 'O que o MVP não faz',     desc: 'Escopo deliberado de produto sinaliza disciplina de execução — critério de investidor.', pct: 5,  check: () => (document.getElementById('inp-nao-faz')?.value.trim().length || 0) >= 20 },
+    { id: 'ck-ia',      label: 'Uso de IA declarado',      desc: 'Investidor avalia runway real — founder que opera com IA como sistema tem projeção de capital diferente.', pct: 5,  check: () => !!document.getElementById('inp-ia-uso')?.value },
+    { id: 'ck-files',   label: 'Material financeiro enviado', desc: 'Planilha de unit economics, modelo financeiro ou deck aumenta a precisão do valuation.', pct: 10, check: () => (window._completudeFilesCount || 0) > 0 },
   ],
 };
 
@@ -2608,10 +2776,12 @@ function updateCompletude() {
 function initCompletude() {
   updateCompletude();
   // listeners nos campos de texto
-  ['inp-name','inp-email','inp-biz','inp-desc','inp-conv','inp-conv-desc','inp-nao-faz'].forEach(id => {
+  ['inp-name','inp-email','inp-biz','inp-desc','inp-conv','inp-conv-desc','inp-nao-faz','inp-ia-uso','inp-ia-desc'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', updateCompletude);
   });
+  const iaUsoSel = document.getElementById('inp-ia-uso');
+  if (iaUsoSel) iaUsoSel.addEventListener('change', updateCompletude);
   const sel = document.getElementById('inp-sector');
   if (sel) sel.addEventListener('change', updateCompletude);
   // files
