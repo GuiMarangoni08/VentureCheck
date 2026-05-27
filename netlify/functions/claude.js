@@ -1,35 +1,40 @@
 // Proxy para Anthropic API — evita expor a chave no frontend
-// Rota: POST /api/claude
+// Rota: POST /.netlify/functions/claude (remapeada para /api/claude via netlify.toml)
 
-export default async (req, context) => {
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  };
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
 
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: corsHeaders });
+export const handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
-  if (req.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405 });
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, headers: corsHeaders, body: 'Method Not Allowed' };
   }
 
-  const API_KEY = Netlify.env.get('ANTHROPIC_API_KEY');
+  const API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!API_KEY) {
-    return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY não configurado' }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return {
+      statusCode: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'ANTHROPIC_API_KEY não configurado' }),
+    };
   }
 
   let body;
   try {
-    body = await req.text();
+    body = event.body;
+    if (!body) throw new Error('body vazio');
   } catch {
-    return new Response(JSON.stringify({ error: 'Body inválido' }), {
-      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return {
+      statusCode: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Body inválido' }),
+    };
   }
 
   const upstream = await fetch('https://api.anthropic.com/v1/messages', {
@@ -43,10 +48,9 @@ export default async (req, context) => {
   });
 
   const data = await upstream.text();
-  return new Response(data, {
-    status: upstream.status,
+  return {
+    statusCode: upstream.status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
+    body: data,
+  };
 };
-
-export const config = { path: '/api/claude' };
