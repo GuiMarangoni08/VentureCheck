@@ -2254,9 +2254,10 @@ ${qa}
 
 REGRA PSF GATE: se o contexto indicar "ZERO conversas reais", problema_score máximo 2/5 e campo "problema" deve nomear explicitamente a ausência — sem punir, mas apontando o próximo passo obrigatório.
 REGRA ESCOPO: se "o que não faz" não estiver declarado, incluir como primeiro item do to-do list.
-REGRA HIPÓTESE vs DADO: em todo número que aparecer no relatório, prefixar com [H] se for hipótese/estimativa ou [D] se for dado medido/comprovado. Se 80%+ dos números forem [H], tração_score máximo 2/5.
-REGRA FOUNDER-IA: se Geração 1 (não usa IA), adicionar item no to-do list com ferramentas específicas para este setor. Se Geração 3, aumentar founder_score em 1 ponto.
-BENCHMARKS: use os benchmarks setoriais fornecidos no contexto como régua para avaliar onde o founder está vs. onde precisa chegar.
+REGRA HIPÓTESE vs DADO: em todo número que aparecer no relatório, prefixar com [H] se for hipótese/estimativa ou [D] se for dado medido/comprovado. Se 80%+ dos números forem [H]: (1) tração_score máximo 2/5 E (2) mercado_score máximo 3/5 — o mercado não pode receber nota alta se o TAM e toda premissa financeira forem hipótese sem dado externo comprovado.
+REGRA FOUNDER-IA: se Geração 1 (não usa IA), adicionar item no to-do list com ferramentas específicas para este setor. Se Geração 3, aumentar founder_score em 1 ponto e mencionar explicitamente como diferencial de runway.
+BENCHMARKS: use os benchmarks setoriais fornecidos no contexto como régua explícita — compare onde o founder está vs. onde precisa chegar e nomeie o gap em número: ex. "retenção D30 estimada de X% vs benchmark de ≥40%".
+REGRA ADVERSARIAL (concorrentes): para cada concorrente identificado, inclua no campo "alerta" um parágrafo estruturado em 2 partes: (A) "Como me copia em 6 meses: [mecanismo específico]" e (B) "O que eu precisaria fazer para tornar isso incopiável: [ação defensável]". Se não conseguir construir uma defesa real, marcar como "VULNERABILIDADE ABERTA".
 
 ${rules}
 
@@ -2275,14 +2276,14 @@ JSON (sem markdown):
   },
   "problema":"análise da dor — máx 3 linhas. Não exigir números — avaliar clareza e especificidade da dor descrita","problema_score":1-5,
   "solucao":"análise da solução — máx 3 linhas. Avaliar se a solução endereça a causa raiz ou apenas o sintoma","solucao_score":1-5,
-  "mercado":"TAM Brasil em 1 número com premissa clara — indicar se é [H] estimativa ou [D] dado de mercado + 1 linha de contexto","mercado_score":1-5,
+  "mercado":"TAM Brasil em 1 número com premissa clara — prefixar [H] ou [D]. Se TAM for hipótese sem dado externo, mercado_score máximo 3/5","mercado_score":1-5,
   "concorrentes":{
     "abrangencia":"local|estadual|nacional|global — raio real de competição",
     "locais":[{"nome":"player local ou perfil","tipo":"direto|indireto","fraqueza":"fraqueza em 1 linha"}],
     "regionais":[{"nome":"player regional","tipo":"direto|indireto","fraqueza":"fraqueza em 1 linha"}],
     "nacionais":[{"nome":"player nacional","tipo":"direto|indireto","fraqueza":"fraqueza em 1 linha"}],
     "diferencial":"diferencial real em 1 linha",
-    "alerta":"risco competitivo principal"
+    "alerta":"ADVOGADO DO DIABO — para cada concorrente principal: (A) Como me copia em 6 meses: [mecanismo]. (B) Defesa possível: [ação] — ou VULNERABILIDADE ABERTA se não houver defesa real"
   },
   "modelo":"análise do modelo de negócio — máx 3 linhas — avaliar lógica, não números (ele ainda não tem)","modelo_score":1-5,
   "referencias_mercado":[
@@ -2319,10 +2320,10 @@ ${qa}
 
 REGRA PSF GATE: se o contexto indicar ZERO conversas reais, problema_score máximo é 2/5 e o campo "problema" deve alertar o investidor.
 REGRA ESCOPO: se naoFaz não estiver declarado, incluir nos proximos_passos.
-REGRA ADVERSARIAL COMPETITIVO: no campo "competicao", além da análise padrão Musk+Zuck+Benchimol, inclua obrigatoriamente um bloco "advogado do diabo" — para CADA concorrente principal, descreva em 1 linha como ele copiaria o diferencial do founder em 6-12 meses e o que o founder precisaria fazer para tornar sua vantagem incopiável.
-REGRA HIPÓTESE vs DADO: em todo número citado no relatório, prefixar com [H] se for hipótese/estimativa ou [D] se dado medido. Se 80%+ forem [H], tracao_score máximo 2/5 e incluir alerta no campo capital.
-REGRA FOUNDER-IA: se Geração 1 (não usa IA), adicionar item nos proximos_passos com ferramentas específicas para este setor. Se Geração 3, destacar no campo "time" como diferencial operacional.
-BENCHMARKS: use os benchmarks setoriais do contexto como régua explícita — compare os números do founder com os valores de referência e nomeie o gap.
+REGRA ADVERSARIAL COMPETITIVO: no campo "competicao", OBRIGATORIAMENTE após a análise Musk+Zuck+Benchimol, inclua um bloco "ADVOGADO DO DIABO" para cada concorrente principal com 2 partes: (A) "Como me copia em 6 meses: [mecanismo específico e realista]" e (B) "Defesa possível: [ação concreta que torna incopiável]". Se não existir defesa real, marcar "VULNERABILIDADE ABERTA". O objetivo é destruir o posicionamento — se sobreviver, merece nota alta.
+REGRA HIPÓTESE vs DADO: em todo número citado no relatório, prefixar com [H] se for hipótese/estimativa ou [D] se dado medido. Se 80%+ forem [H]: tracao_score máximo 2/5 E mercado_score máximo 3/5. Incluir alerta explícito no campo capital.
+REGRA FOUNDER-IA: se Geração 1, adicionar item nos proximos_passos com ferramentas de IA específicas para este setor. Se Geração 3, destacar no campo "time" como diferencial de runway e eficiência operacional.
+BENCHMARKS: use os benchmarks setoriais do contexto como régua — nomeie o gap em número: ex. "retenção D30 de [H]X% vs benchmark de ≥40% para este setor".
 
 ${rules}
 
@@ -2422,10 +2423,10 @@ ${qa}
 
 REGRA PSF GATE: se o contexto indicar "ZERO conversas reais", a nota imi_dimensoes.problema fica limitada a 8/20 e o campo "problema" deve indicar explicitamente a ausência de validação com clientes reais.
 REGRA ESCOPO: se o founder não declarou o que o MVP não faz, incluir nos proximos_passos como ação obrigatória pré-Captação.
-REGRA ADVERSARIAL COMPETITIVO: no campo "competicao", após a análise Musk+Zuck+Benchimol, inclua um parágrafo "ADVOGADO DO DIABO" — para cada concorrente relevante, 1 linha descrevendo como ele poderia copiar o diferencial do founder em 6-12 meses e qual seria a resposta defensável.
-REGRA HIPÓTESE vs DADO: em todo número citado no relatório, prefixar com [H] se for hipótese/estimativa ou [D] se dado medido/comprovado. Se 80%+ forem [H], tracao score em imi_dimensoes máximo 8/20.
-REGRA FOUNDER-IA: se Geração 1, adicionar item no proximos_passos com ferramentas de IA específicas para este setor. Se Geração 3, aumentar nota de founder em 1 ponto e destacar no campo "time".
-BENCHMARKS: use os benchmarks setoriais do contexto como régua — compare métricas do founder com referência e nomeie o gap explicitamente.
+REGRA ADVERSARIAL COMPETITIVO: no campo "competicao", após a análise Musk+Zuck+Benchimol, inclua obrigatoriamente um bloco "ADVOGADO DO DIABO" para cada concorrente principal com 2 partes: (A) "Como me copia em 6 meses: [mecanismo específico e realista]" e (B) "Defesa possível: [ação concreta]". Se não houver defesa real, marcar "VULNERABILIDADE ABERTA". O objetivo é destruir o posicionamento do founder — se a ideia sobreviver ao ataque, mereceu a nota.
+REGRA HIPÓTESE vs DADO: em todo número citado no relatório, prefixar com [H] se for hipótese/estimativa ou [D] se dado medido/comprovado. Se 80%+ forem [H]: (1) tracao score em imi_dimensoes máximo 8/20 E (2) mercado score em imi_dimensoes máximo 12/20 — mercado sem dado externo validado não pode receber nota cheia.
+REGRA FOUNDER-IA: se Geração 1, adicionar item no proximos_passos com ferramentas de IA específicas para este setor. Se Geração 3, aumentar nota de founder em 1 ponto e destacar no campo "time" como vantagem de execução.
+BENCHMARKS: use os benchmarks setoriais do contexto como régua — nomeie o gap em número: ex. "retenção D30 estimada [H]X% vs benchmark ≥40%".
 
 ${rules}
 
