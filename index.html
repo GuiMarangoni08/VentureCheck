@@ -732,6 +732,17 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
             <label>Descrição do negócio *</label>
             <textarea id="inp-desc" rows="6" placeholder="Descreva sua ideia com detalhes. O que você quer fazer? Qual problema resolve? Para quem? Como pretende ganhar dinheiro? Já testou de alguma forma? Qual é sua experiência no setor?"></textarea>
           </div>
+          <div class="fg" style="margin-bottom:16px">
+            <label>Conversas reais com potenciais clientes</label>
+            <div style="font-size:11px;color:var(--t2);margin-bottom:6px">Quantas conversas você já teve com pessoas que pagariam pelo seu produto? (zero é válido — seja honesto)</div>
+            <input type="number" id="inp-conv" min="0" placeholder="Ex: 0, 5, 12, 30..." style="max-width:200px">
+            <textarea id="inp-conv-desc" rows="2" placeholder="Descreva brevemente o que aprendeu nessas conversas (ou por que ainda não fez)" style="margin-top:8px"></textarea>
+          </div>
+          <div class="fg" style="margin-bottom:16px" id="fg-nao-faz">
+            <label>O que seu MVP deliberadamente <em>não</em> faz</label>
+            <div style="font-size:11px;color:var(--t2);margin-bottom:6px">Liste 3 coisas que seu produto não vai fazer antes de validar. Founder que sabe o que corta tem maturidade de produto.</div>
+            <textarea id="inp-nao-faz" rows="3" placeholder="1. Não vai ter app nativo — só web responsivo&#10;2. Não vai ter integração com X antes de 100 clientes&#10;3. Não vai ter painel admin completo no MVP"></textarea>
+          </div>
           <div class="msg msg-ok">
             💡 <strong>Dica do DNA Board:</strong> Empreendedores que descrevem o problema antes da solução recebem análises 40% mais precisas. Foque no problema real que você quer resolver.
           </div>
@@ -1160,7 +1171,10 @@ async function generateQuestions(){
   const desc=document.getElementById('inp-desc').value.trim();
   if(!name||!biz||!desc){alert('Preencha nome, nome do negócio e a descrição.');return}
 
-  S.session={id:'vc5_'+Date.now(),name,email:document.getElementById('inp-email').value.trim(),biz,sector:document.getElementById('inp-sector').value,desc,createdAt:new Date().toISOString(),verdict:'PENDENTE'};
+  const conv=parseInt(document.getElementById('inp-conv')?.value||'0',10)||0;
+  const convDesc=document.getElementById('inp-conv-desc')?.value.trim()||'';
+  const naoFaz=document.getElementById('inp-nao-faz')?.value.trim()||'';
+  S.session={id:'vc5_'+Date.now(),name,email:document.getElementById('inp-email').value.trim(),biz,sector:document.getElementById('inp-sector').value,desc,conv,convDesc,naoFaz,createdAt:new Date().toISOString(),verdict:'PENDENTE'};
   saveDraft(true);
 
   showScreen('questions');
@@ -1363,7 +1377,10 @@ function saveDraft(silent=true){
         email: document.getElementById('inp-email')?.value || '',
         biz: document.getElementById('inp-biz')?.value || '',
         sector: document.getElementById('inp-sector')?.value || '',
-        desc: document.getElementById('inp-desc')?.value || ''
+        desc: document.getElementById('inp-desc')?.value || '',
+        conv: document.getElementById('inp-conv')?.value || '',
+        convDesc: document.getElementById('inp-conv-desc')?.value || '',
+        naoFaz: document.getElementById('inp-nao-faz')?.value || ''
       },
       savedAt: new Date().toISOString()
     };
@@ -1427,7 +1444,10 @@ function manualSave(){
         email: document.getElementById('inp-email')?.value || '',
         biz: document.getElementById('inp-biz')?.value || '',
         sector: document.getElementById('inp-sector')?.value || '',
-        desc: document.getElementById('inp-desc')?.value || ''
+        desc: document.getElementById('inp-desc')?.value || '',
+        conv: document.getElementById('inp-conv')?.value || '',
+        convDesc: document.getElementById('inp-conv-desc')?.value || '',
+        naoFaz: document.getElementById('inp-nao-faz')?.value || ''
       },
       savedAt: new Date().toISOString()
     };
@@ -1508,6 +1528,9 @@ function recoverSession(){
       if(f.biz) document.getElementById('inp-biz').value = f.biz;
       if(f.sector) document.getElementById('inp-sector').value = f.sector;
       if(f.desc) document.getElementById('inp-desc').value = f.desc;
+      if(f.conv !== undefined && document.getElementById('inp-conv')) document.getElementById('inp-conv').value = f.conv;
+      if(f.convDesc && document.getElementById('inp-conv-desc')) document.getElementById('inp-conv-desc').value = f.convDesc;
+      if(f.naoFaz && document.getElementById('inp-nao-faz')) document.getElementById('inp-nao-faz').value = f.naoFaz;
     }
 
     // Esconder banner
@@ -1618,7 +1641,14 @@ function parseJSON(raw){
 }
 
 function buildQA(){
-  let text=`NEGÓCIO: ${S.session.biz}\nSETOR: ${S.session.sector}\nDESCRIÇÃO INICIAL: ${S.session.desc}\n\n`;
+  const conv=S.session.conv??0;
+  const psfLine=conv===0
+    ? `⚠ PSF GATE: founder declarou ZERO conversas reais com clientes. Dimensão Problema: teto de 8/20.`
+    : `PSF: ${conv} conversa(s) real(is) com potenciais clientes. ${S.session.convDesc?'Aprendizado: '+S.session.convDesc:''}`;
+  const naoFazLine=S.session.naoFaz
+    ? `ESCOPO MVP — o que NÃO faz: ${S.session.naoFaz}`
+    : `ESCOPO MVP: não declarado — penalizar maturidade de produto.`;
+  let text=`NEGÓCIO: ${S.session.biz}\nSETOR: ${S.session.sector}\nDESCRIÇÃO INICIAL: ${S.session.desc}\n${psfLine}\n${naoFazLine}\n\n`;
   text+=`=== RESPOSTAS RODADA 1 ===\n`;
   S.questions.forEach((q,i)=>{
     text+=`\nPERGUNTA ${i+1} [${BLOCKS[(q.block||1)-1]}]: ${q.question}\nRESPOSTA: ${S.answers[i]||'(não respondida)'}\n`;
@@ -1674,11 +1704,18 @@ function renderAnalysis(d){
     sg.innerHTML+=`<div class="si"><div class="si-label">${x.l} <strong>${s}/5</strong></div><div class="si-bar"><div class="si-fill" style="width:${s/5*100}%;background:${c}"></div></div></div>`;
   });
 
+  // PSF gate banner
+  const convNum = S.session?.conv ?? null;
+  const psfBanner = (convNum !== null && parseInt(convNum,10) === 0)
+    ? `<div class="msg msg-warn" style="margin-bottom:12px">⚠ <strong>PSF Gate:</strong> Zero conversas reais com clientes declaradas — nota de Problema limitada automaticamente. Tallis Gomes: <em>"Isso não é diferencial, é correção de bug no produto."</em></div>`
+    : '';
+
   // Blocks
   const ab=document.getElementById('ana-blocks');ab.innerHTML='';
   [{n:'01',t:'Problema',k:'problema'},{n:'02',t:'Solução',k:'solucao'},{n:'03',t:'Mercado & TAM',k:'mercado'},{n:'04',t:'Modelo de Negócio',k:'modelo'},{n:'05',t:'Competição',k:'competicao'},{n:'06',t:'Time',k:'time'},{n:'07',t:'Capital & Investimento',k:'capital'}].forEach(b=>{
     if(!d[b.k])return;const s=d[b.k+'_score']||0;
-    ab.innerHTML+=`<div class="ab"><div class="ab-head"><span class="ab-num">${b.n}</span><span class="ab-title">${b.t}</span><span class="ab-stars">${'★'.repeat(s)}${'☆'.repeat(5-s)}</span></div><div class="ab-body">${d[b.k]}</div></div>`;
+    const extraBanner = (b.k==='problema' && psfBanner) ? psfBanner : '';
+    ab.innerHTML+=`<div class="ab"><div class="ab-head"><span class="ab-num">${b.n}</span><span class="ab-title">${b.t}</span><span class="ab-stars">${'★'.repeat(s)}${'☆'.repeat(5-s)}</span></div><div class="ab-body">${extraBanner}${d[b.k]}</div></div>`;
   });
 
   // Concorrentes por abrangência (plano Validação)
@@ -1957,12 +1994,18 @@ CRÍTICO: Responda SEMPRE com JSON válido. Sem markdown. Sem texto antes ou dep
 // PROMPTS
 // ══════════════════════════════════════════════════════════════
 function genQPrompt(){
+  const psfCtx=S.session.conv===0
+    ? `PSF ALERT: founder declara ZERO conversas reais com potenciais clientes. Dimensão Problema tem teto de 8/20 no IMI inicial.`
+    : `PSF: founder já fez ${S.session.conv} conversa(s) real(is). ${S.session.convDesc?'Aprendizado: '+S.session.convDesc:''}`;
+  const naoFazCtx=S.session.naoFaz?`ESCOPO MVP (o que NÃO faz): ${S.session.naoFaz}`:'ESCOPO MVP: founder não declarou restrições de escopo — questionar na análise.';
   return[{role:'user',content:`Analise a descrição deste negócio e gere um roteiro de perguntas personalizado.
 
 EMPREENDEDOR: ${S.session.name}
 NEGÓCIO: ${S.session.biz}
 SETOR: ${S.session.sector||'não informado'}
 DESCRIÇÃO: ${S.session.desc}
+${psfCtx}
+${naoFazCtx}
 
 Gere perguntas que NENHUM formulário genérico faria. Perguntas específicas para ESTE negócio, ESTE setor, ESTE empreendedor.
 
@@ -2054,10 +2097,13 @@ function finalPrompt(qa, plan){
 
   // ── PLANO VALIDAÇÃO ──────────────────────────────────────────
   if(plan==='validacao'){
-    return[{role:'user',content:`Análise de viabilidade inicial — DNA Board 30 Lentes — Plano Validação.
+    return[{role:'user',content:`Análise de viabilidade inicial — DNA Board 31 Lentes — Plano Validação.
 Responda UMA ÚNICA pergunta: esta ideia vale continuar?
 
 ${qa}
+
+REGRA PSF GATE: se o contexto indicar "ZERO conversas reais", a nota de problema_score fica limitada a 2/5 e o campo "problema" deve mencionar explicitamente que o founder ainda não validou com clientes.
+REGRA ESCOPO: se o founder não declarou o que o MVP não faz, inclua nos proximos_passos a obrigação de definir 3 restrições explícitas de escopo.
 
 ${rules}
 
@@ -2107,10 +2153,14 @@ JSON (sem markdown):
 
   // ── PLANO CAPTAÇÃO ───────────────────────────────────────────
   if(plan==='captacao'){
-    return[{role:'user',content:`Análise completa para captação de investimento — DNA Board 30 Lentes — Plano Captação.
+    return[{role:'user',content:`Análise completa para captação de investimento — DNA Board 31 Lentes — Plano Captação.
 Este founder já validou o negócio. Responda: como estruturar para levantar capital?
 
 ${qa}
+
+REGRA PSF GATE: se o contexto indicar ZERO conversas reais, problema_score máximo é 2/5 e o campo "problema" deve alertar o investidor.
+REGRA ESCOPO: se naoFaz não estiver declarado, incluir nos proximos_passos.
+REGRA ADVERSARIAL COMPETITIVO: no campo "competicao", além da análise padrão Musk+Zuck+Benchimol, inclua obrigatoriamente um bloco "advogado do diabo" — para CADA concorrente principal, descreva em 1 linha como ele copiaria o diferencial do founder em 6-12 meses e o que o founder precisaria fazer para tornar sua vantagem incopiável.
 
 ${rules}
 
@@ -2204,9 +2254,13 @@ JSON (sem markdown):
   }
 
   // ── PLANO DIAGNÓSTICO (default) ──────────────────────────────
-  return[{role:'user',content:`Análise completa de viabilidade — DNA Board 30 Lentes — Plano Diagnóstico.
+  return[{role:'user',content:`Análise completa de viabilidade — DNA Board 31 Lentes — Plano Diagnóstico.
 
 ${qa}
+
+REGRA PSF GATE: se o contexto indicar "ZERO conversas reais", a nota imi_dimensoes.problema fica limitada a 8/20 e o campo "problema" deve indicar explicitamente a ausência de validação com clientes reais.
+REGRA ESCOPO: se o founder não declarou o que o MVP não faz, incluir nos proximos_passos como ação obrigatória pré-Captação.
+REGRA ADVERSARIAL COMPETITIVO: no campo "competicao", após a análise Musk+Zuck+Benchimol, inclua um parágrafo "ADVOGADO DO DIABO" — para cada concorrente relevante, 1 linha descrevendo como ele poderia copiar o diferencial do founder em 6-12 meses e qual seria a resposta defensável.
 
 ${rules}
 
@@ -2478,30 +2532,36 @@ function exportPDF() {
 
 const COMPLETUDE_ITEMS = {
   validacao: [
-    { id: 'ck-name',    label: 'Seu nome',           desc: 'Identifica quem está por trás da ideia.',              pct: 10, check: () => !!document.getElementById('inp-name')?.value.trim() },
-    { id: 'ck-biz',     label: 'Nome do negócio',    desc: 'Como você chama o que quer construir.',                pct: 10, check: () => !!document.getElementById('inp-biz')?.value.trim() },
-    { id: 'ck-sector',  label: 'Setor de atuação',   desc: 'Direciona as lentes do DNA Board certas para o mercado.', pct: 10, check: () => !!document.getElementById('inp-sector')?.value },
-    { id: 'ck-desc',    label: 'Descrição da ideia', desc: 'Quanto mais detalhe (problema, público, modelo), melhor o IMI.', pct: 40, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 30 },
-    { id: 'ck-desc-q',  label: 'Descrição aprofundada', desc: 'Descreva com 80+ palavras: já testou? tem experiência no setor? por que você?', pct: 30, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 80 },
+    { id: 'ck-name',    label: 'Seu nome',              desc: 'Identifica quem está por trás da ideia.',              pct: 10, check: () => !!document.getElementById('inp-name')?.value.trim() },
+    { id: 'ck-biz',     label: 'Nome do negócio',       desc: 'Como você chama o que quer construir.',                pct: 10, check: () => !!document.getElementById('inp-biz')?.value.trim() },
+    { id: 'ck-sector',  label: 'Setor de atuação',      desc: 'Direciona as lentes do DNA Board certas para o mercado.', pct: 10, check: () => !!document.getElementById('inp-sector')?.value },
+    { id: 'ck-desc',    label: 'Descrição da ideia',    desc: 'Quanto mais detalhe (problema, público, modelo), melhor o IMI.', pct: 30, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 30 },
+    { id: 'ck-desc-q',  label: 'Descrição aprofundada', desc: 'Descreva com 80+ palavras: já testou? tem experiência no setor? por que você?', pct: 20, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 80 },
+    { id: 'ck-psf',     label: 'Conversas com clientes declaradas', desc: 'Quantas conversas reais você fez? Zero é válido — mas sabemos que impacta o IMI.', pct: 10, check: () => document.getElementById('inp-conv')?.value !== '' && document.getElementById('inp-conv')?.value !== null },
+    { id: 'ck-nao-faz', label: 'O que o MVP não faz',  desc: 'Liste 3 restrições deliberadas de escopo — revela maturidade de produto.', pct: 10, check: () => (document.getElementById('inp-nao-faz')?.value.trim().length || 0) >= 20 },
   ],
   diagnostico: [
     { id: 'ck-name',    label: 'Seu nome',              desc: 'Identifica o fundador na análise.',                     pct: 5,  check: () => !!document.getElementById('inp-name')?.value.trim() },
     { id: 'ck-biz',     label: 'Nome do negócio',       desc: 'Base para benchmarks e busca de concorrentes.',         pct: 5,  check: () => !!document.getElementById('inp-biz')?.value.trim() },
     { id: 'ck-sector',  label: 'Setor de atuação',      desc: 'Garante lentes especializadas para o seu mercado.',     pct: 10, check: () => !!document.getElementById('inp-sector')?.value },
-    { id: 'ck-desc',    label: 'Descrição da ideia',    desc: 'Contexto mínimo para análise de mercado e produto.',    pct: 15, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 30 },
-    { id: 'ck-desc-m',  label: 'Modelo de negócio descrito', desc: 'Como vai ganhar dinheiro? Receita recorrente, transacional, B2B, B2C?', pct: 20, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 100 },
-    { id: 'ck-desc-t',  label: 'Tração mencionada',     desc: 'Inclua qualquer sinal: entrevistas, pré-vendas, clientes, parceiros, MVP.', pct: 25, check: () => /trac|cliente|vend|pilot|mvp|test|entrev|parceiro/i.test(document.getElementById('inp-desc')?.value || '') },
-    { id: 'ck-files',   label: 'Material de apoio enviado', desc: 'Planilha, deck, pesquisa ou protótipo aumentam a profundidade dos 7 blocos.', pct: 20, check: () => (window._completudeFilesCount || 0) > 0 },
+    { id: 'ck-desc',    label: 'Descrição da ideia',    desc: 'Contexto mínimo para análise de mercado e produto.',    pct: 10, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 30 },
+    { id: 'ck-desc-m',  label: 'Modelo de negócio descrito', desc: 'Como vai ganhar dinheiro? Receita recorrente, transacional, B2B, B2C?', pct: 15, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 100 },
+    { id: 'ck-desc-t',  label: 'Tração mencionada',     desc: 'Inclua qualquer sinal: entrevistas, pré-vendas, clientes, parceiros, MVP.', pct: 20, check: () => /trac|cliente|vend|pilot|mvp|test|entrev|parceiro/i.test(document.getElementById('inp-desc')?.value || '') },
+    { id: 'ck-psf',     label: 'Conversas com clientes declaradas', desc: 'PSF gate: zero conversas reais limita a nota de Problema automaticamente.', pct: 15, check: () => document.getElementById('inp-conv')?.value !== '' && document.getElementById('inp-conv')?.value !== null },
+    { id: 'ck-nao-faz', label: 'O que o MVP não faz',  desc: 'Escopo explícito revela maturidade de produto e foco de execução.', pct: 10, check: () => (document.getElementById('inp-nao-faz')?.value.trim().length || 0) >= 20 },
+    { id: 'ck-files',   label: 'Material de apoio enviado', desc: 'Planilha, deck, pesquisa ou protótipo aumentam a profundidade dos 7 blocos.', pct: 10, check: () => (window._completudeFilesCount || 0) > 0 },
   ],
   captacao: [
     { id: 'ck-name',    label: 'Seu nome',                 desc: 'Identifica o fundador.',                                pct: 5,  check: () => !!document.getElementById('inp-name')?.value.trim() },
     { id: 'ck-biz',     label: 'Nome do negócio',          desc: 'Base para valuation e comparáveis de mercado.',          pct: 5,  check: () => !!document.getElementById('inp-biz')?.value.trim() },
     { id: 'ck-sector',  label: 'Setor de atuação',         desc: 'Lentes e múltiplos corretos para o seu segmento.',       pct: 5,  check: () => !!document.getElementById('inp-sector')?.value },
-    { id: 'ck-desc',    label: 'Descrição completa',       desc: 'Problema, solução, público e modelo de negócio (100+ palavras).', pct: 15, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 100 },
-    { id: 'ck-tracao',  label: 'Tração descrita',          desc: 'Receita, usuários, MRR, NPS, parceiros — qualquer número real.', pct: 20, check: () => /trac|cliente|vend|pilot|mvp|test|entrev|parceiro|receita|mrr|arr|r\$|usuário/i.test(document.getElementById('inp-desc')?.value || '') },
-    { id: 'ck-time',    label: 'Time mencionado',          desc: 'Quem está construindo? Experiência do fundador é critério chave para investidor.', pct: 15, check: () => /sócio|cto|coo|cofund|co-fund|time|equipe|parceiro|tecn/i.test(document.getElementById('inp-desc')?.value || '') },
-    { id: 'ck-captacao-num', label: 'Valor da captação mencionado', desc: 'Quanto quer captar e para quê? Ex: "buscamos R$800k para 18 meses de runway".', pct: 15, check: () => /capt|inves|aport|round|seed|angel|série|r\$\s*\d|k\s+de|milhão/i.test(document.getElementById('inp-desc')?.value || '') },
-    { id: 'ck-files',   label: 'Material financeiro enviado', desc: 'Planilha de unit economics, modelo financeiro ou deck aumenta a precisão do valuation.', pct: 20, check: () => (window._completudeFilesCount || 0) > 0 },
+    { id: 'ck-desc',    label: 'Descrição completa',       desc: 'Problema, solução, público e modelo de negócio (100+ palavras).', pct: 10, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 100 },
+    { id: 'ck-tracao',  label: 'Tração descrita',          desc: 'Receita, usuários, MRR, NPS, parceiros — qualquer número real.', pct: 15, check: () => /trac|cliente|vend|pilot|mvp|test|entrev|parceiro|receita|mrr|arr|r\$|usuário/i.test(document.getElementById('inp-desc')?.value || '') },
+    { id: 'ck-time',    label: 'Time mencionado',          desc: 'Quem está construindo? Experiência do fundador é critério chave para investidor.', pct: 10, check: () => /sócio|cto|coo|cofund|co-fund|time|equipe|parceiro|tecn/i.test(document.getElementById('inp-desc')?.value || '') },
+    { id: 'ck-captacao-num', label: 'Valor da captação mencionado', desc: 'Quanto quer captar e para quê? Ex: "buscamos R$800k para 18 meses de runway".', pct: 10, check: () => /capt|inves|aport|round|seed|angel|série|r\$\s*\d|k\s+de|milhão/i.test(document.getElementById('inp-desc')?.value || '') },
+    { id: 'ck-psf',     label: 'Conversas com clientes declaradas', desc: 'PSF gate: número de entrevistas reais entra no score de Problema para o investidor.', pct: 15, check: () => document.getElementById('inp-conv')?.value !== '' && document.getElementById('inp-conv')?.value !== null },
+    { id: 'ck-nao-faz', label: 'O que o MVP não faz',     desc: 'Escopo deliberado de produto sinaliza disciplina de execução — critério de investidor.', pct: 10, check: () => (document.getElementById('inp-nao-faz')?.value.trim().length || 0) >= 20 },
+    { id: 'ck-files',   label: 'Material financeiro enviado', desc: 'Planilha de unit economics, modelo financeiro ou deck aumenta a precisão do valuation.', pct: 15, check: () => (window._completudeFilesCount || 0) > 0 },
   ],
 };
 
@@ -2548,7 +2608,7 @@ function updateCompletude() {
 function initCompletude() {
   updateCompletude();
   // listeners nos campos de texto
-  ['inp-name','inp-email','inp-biz','inp-desc'].forEach(id => {
+  ['inp-name','inp-email','inp-biz','inp-desc','inp-conv','inp-conv-desc','inp-nao-faz'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', updateCompletude);
   });
