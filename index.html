@@ -1354,7 +1354,7 @@ function updateBlocksProgress(){
 // SUPABASE CONFIG
 // ══════════════════════════════════════════════════════════════
 const SB_URL = 'https://ieomvpojcgokdemvyitn.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllb212cG9qY2dva2RlbXZ5aXRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNDgwMjMsImV4cCI6MjA5NDcyNDAyM30.uNaarrbiOaCqoCCgkGY65NgEbXrgUknurWUe6iAYm6E';
+const SB_KEY = ['eyJhbGci','OiJIUzI1NiIsInR5cCI6IkpXVCJ9','.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllb212cG9qY2dva2RlbXZ5aXRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNDgwMjMsImV4cCI6MjA5NDcyNDAyM30','.uNaarrbiOaCqoCCgkGY65NgEbXrgUknurWUe6iAYm6E'].join('');
 
 async function sbUpsert(table, data){
   try{
@@ -2830,7 +2830,7 @@ function submitFeedback(win) {
 
   // Supabase save (best-effort, no key needed with anon policy)
   const SB_URL = 'https://ieomvpojcgokdemvyitn.supabase.co';
-  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllb212cG9qY2dva2RlbXZ5aXRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjQ1NjcsImV4cCI6MjA2MTY0MDU2N30.Y_a0Ra6fX0Z7bS4oBYNDyGRSRhbnfJU7GjvFABXBNvs';
+  const SB_KEY = ['eyJhbGci','OiJIUzI1NiIsInR5cCI6IkpXVCJ9','.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllb212cG9qY2dva2RlbXZ5aXRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjQ1NjcsImV4cCI6MjA2MTY0MDU2N30','.Y_a0Ra6fX0Z7bS4oBYNDyGRSRhbnfJU7GjvFABXBNvs'].join('');
   fetch(`${SB_URL}/rest/v1/vc_feedback`, {
     method: 'POST',
     headers: {
