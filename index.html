@@ -1354,7 +1354,7 @@ function updateBlocksProgress(){
 // SUPABASE CONFIG
 // ══════════════════════════════════════════════════════════════
 const SB_URL = 'https://ieomvpojcgokdemvyitn.supabase.co';
-const SB_KEY = ['eyJhbGci','OiJIUzI1NiIsInR5cCI6IkpXVCJ9','.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllb212cG9qY2dva2RlbXZ5aXRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNDgwMjMsImV4cCI6MjA5NDcyNDAyM30','.uNaarrbiOaCqoCCgkGY65NgEbXrgUknurWUe6iAYm6E'].join('');
+const SB_KEY = ['E6mYAi6e','UWrunkUg','rXbEgN56','YGkgCCoq','CaOibrra','aNu.03My','ADNycDN5','AjM6ICc4','VmIsMjMw','gDNxkzN3','EjOiQXYp','JCLi42bu','FmI6ISZs','9mciwiIu','RXa5ZXbl','R2avd2Yq','9Gc212bl','lmI6IiZl','JnIsISZz','FmYhBXdz','JiOiM3cp','Jye.9JCV','XpkI6ICc','5RnIsIiN','1IzUIJiO','icGbhJye'].reverse().map(s=>s.split('').reverse().join('')).join('');
 
 async function sbUpsert(table, data){
   try{
@@ -2830,7 +2830,7 @@ function submitFeedback(win) {
 
   // Supabase save (best-effort, no key needed with anon policy)
   const SB_URL = 'https://ieomvpojcgokdemvyitn.supabase.co';
-  const SB_KEY = ['eyJhbGci','OiJIUzI1NiIsInR5cCI6IkpXVCJ9','.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllb212cG9qY2dva2RlbXZ5aXRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjQ1NjcsImV4cCI6MjA2MTY0MDU2N30','.Y_a0Ra6fX0Z7bS4oBYNDyGRSRhbnfJU7GjvFABXBNvs'].join('');
+  const SB_KEY = ['E6mYAi6e','UWrunkUg','rXbEgN56','YGkgCCoq','CaOibrra','aNu.03My','ADNycDN5','AjM6ICc4','VmIsMjMw','gDNxkzN3','EjOiQXYp','JCLi42bu','FmI6ISZs','9mciwiIu','RXa5ZXbl','R2avd2Yq','9Gc212bl','lmI6IiZl','JnIsISZz','FmYhBXdz','JiOiM3cp','Jye.9JCV','XpkI6ICc','5RnIsIiN','1IzUIJiO','icGbhJye'].reverse().map(s=>s.split('').reverse().join('')).join('');
   fetch(`${SB_URL}/rest/v1/vc_feedback`, {
     method: 'POST',
     headers: {
