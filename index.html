@@ -2588,10 +2588,23 @@ async function goCheckout() {
   btn.disabled = true;
   btn.textContent = 'Aguarde...';
 
-  // gera sessionId se ainda não existe
   if (!S.session?.id) {
     S.session = S.session || {};
     S.session.id = 'vc_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+  }
+
+  // Plano validacao: acesso direto (pagamento combinado fora)
+  if (_checkoutPlan === 'validacao') {
+    S.plan = 'validacao';
+    localStorage.setItem('vc_pending_plan', 'validacao');
+    localStorage.setItem('vc_pending_session', S.session.id);
+    closeCheckout();
+    showScreen('screen-setup');
+    setTimeout(() => {
+      showToast('Acesso liberado! Vamos comecar.');
+      initCompletude();
+    }, 400);
+    return;
   }
 
   try {
@@ -2602,16 +2615,12 @@ async function goCheckout() {
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-
-    // Salva plano no estado local antes de redirecionar
     S.plan = _checkoutPlan;
     localStorage.setItem('vc_pending_plan', _checkoutPlan);
     localStorage.setItem('vc_pending_session', S.session.id);
-
-    // Redireciona para o checkout
     window.location.href = data.checkout_url || data.sandbox_url;
   } catch(e) {
-    alert('Erro ao criar pagamento: ' + e.message + '\n\nTente novamente ou entre em contato.');
+    alert('Erro ao criar pagamento: ' + e.message);
     btn.disabled = false;
     btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#fff"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="#009ee3" font-weight="bold">MP</text></svg> Pagar com Mercado Pago';
   }
