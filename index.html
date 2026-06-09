@@ -1197,7 +1197,7 @@ async function generateQuestions(){
   document.getElementById('questions-list').innerHTML='';
 
   try{
-    const res=await callClaude(genQPrompt(), 3000);
+    const res=await callClaude(genQPrompt(), 2000);
     let parsed;
     try{parsed=parseJSON(res)}
     catch(e){console.error('JSON parse error:',e,'\nRaw:',res);throw new Error('Erro ao interpretar perguntas. Tente novamente.')}
@@ -1613,7 +1613,7 @@ async function submitAnswers(){
 
   try{
     const qa=buildQA();
-    const res=await callClaude(evalPrompt(qa), 2000);
+    const res=await callClaude(evalPrompt(qa), 1500);
     let parsed;
     try{parsed=parseJSON(res)}
     catch(e){console.error('Eval parse error:',e,'\nRaw:',res);throw new Error('Erro ao avaliar respostas.')}
@@ -2043,7 +2043,7 @@ function setProc(on,step){
 // ══════════════════════════════════════════════════════════════
 // CLAUDE API + PROMPTS — 4 CAMADAS
 // ══════════════════════════════════════════════════════════════
-async function callClaude(messages, maxTokens=4000, model='claude-sonnet-4-6'){
+async function callClaude(messages, maxTokens=4000, model='claude-haiku-4-5-20251001'){
   const res=await fetch('/api/claude',{
     method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model,max_tokens:maxTokens,system:SYSTEM_PROMPT,messages})
