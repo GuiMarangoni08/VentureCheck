@@ -695,6 +695,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
     <!-- ══ SETUP ══ -->
     <div class="screen" id="screen-setup">
       <div class="flow-header">
+        <button class="btn btn-g" style="margin-bottom:12px;font-size:12px;padding:6px 14px" onclick="manualSave();showScreen('home')">← Início</button>
         <div class="flow-step-label">// passo 1 de 3</div>
         <div class="flow-title">Quem é você<br>e qual é a ideia?</div>
         <div class="flow-desc">Preencha seus dados e descreva o negócio com o máximo de detalhes possível. Quanto mais contexto você der, mais precisas serão as perguntas do DNA Board.</div>
@@ -793,7 +794,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
       <div class="btn-row">
         <button class="btn btn-p" onclick="generateQuestions()">Gerar perguntas do DNA Board →</button>
         <button class="btn btn-g" onclick="manualSave()">💾 Salvar rascunho</button>
-        <button class="btn btn-g" onclick="showScreen('home')">Cancelar</button>
+
       </div>
     </div>
 
@@ -839,7 +840,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
           ⚡ Enviar para análise do DNA Board
         </button>
         <button class="btn btn-g" onclick="manualSave()">💾 Salvar progresso</button>
-        <button class="btn btn-g" onclick="showScreen('setup')">Voltar</button>
+        <button class="btn btn-g" onclick="manualSave();showScreen('setup')">← Voltar</button>
       </div>
     </div>
 
