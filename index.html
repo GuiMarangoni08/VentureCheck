@@ -1198,10 +1198,13 @@ async function generateQuestions(){
   document.getElementById('questions-list').innerHTML='';
 
   try{
-    const res=await callClaude(genQPrompt(), 2500);
+    let res=await callClaude(genQPrompt(), 3500);
     let parsed;
     try{parsed=parseJSON(res)}
-    catch(e){console.error('JSON parse error:',e,'\nRaw:',res);throw new Error('Erro ao interpretar perguntas. Tente novamente.')}
+    catch(e){
+      try{setProc(true,'Reprocessando...');res=await callClaude(genQPrompt(),4000);parsed=parseJSON(res);}
+      catch(e2){throw new Error('Erro ao interpretar perguntas. Tente novamente.')}
+    }
 
     S.questions=parsed.questions||[];
     saveDraft(true); // Salvar perguntas geradas
