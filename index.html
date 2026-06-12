@@ -1198,11 +1198,11 @@ async function generateQuestions(){
   document.getElementById('questions-list').innerHTML='';
 
   try{
-    let res=await callClaude(genQPrompt(), 3500);
+    let res=await callClaude(genQPrompt(), 1500);
     let parsed;
     try{parsed=parseJSON(res)}
     catch(e){
-      try{setProc(true,'Reprocessando...');res=await callClaude(genQPrompt(),4000);parsed=parseJSON(res);}
+      try{setProc(true,'Reprocessando...');res=await callClaude(genQPrompt(),1800);parsed=parseJSON(res);}
       catch(e2){throw new Error('Erro ao interpretar perguntas. Tente novamente.')}
     }
 
@@ -2162,55 +2162,24 @@ ${benchCtx}
 
 Gere perguntas que NENHUM formulário genérico faria. Perguntas específicas para ESTE negócio, ESTE setor, ESTE empreendedor.
 
-Responda SOMENTE com este JSON:
+Responda SOMENTE com este JSON (sem mais nada):
 {
-  "intro": "frase de 1-2 linhas contextualizando o que você identificou",
+  "intro": "1 frase identificando o principal desafio deste negócio",
   "imi": {
     "total": 0-100,
     "nivel": "Semente|Germinando|Crescendo|Pronta",
-    "problema": {"nota": 0-20, "conceito": "Embrionário|Em desenvolvimento|Comprovado", "obs": "1 linha"},
-    "solucao":  {"nota": 0-20, "conceito": "Vaga|Definida|Validada", "obs": "1 linha"},
-    "mercado":  {"nota": 0-20, "conceito": "Desconhecido|Mapeado|Dominado", "obs": "1 linha"},
-    "founder":  {"nota": 0-20, "conceito": "Curiosidade|Motivação|Obsessão", "obs": "1 linha"},
-    "tracao":   {"nota": 0-20, "conceito": "Zero|Sinal|Validada", "obs": "1 linha"}
-  },
-  "mercado_analise": {
-    "tamanho": "TAM estimado com premissa em 1 linha",
-    "crescimento": "% ao ano",
-    "maturidade": "Emergente|Em crescimento|Maduro|Saturado",
-    "players_diretos": ["player 1", "player 2"],
-    "gap_identificado": "oportunidade específica em 1 linha",
-    "timing": "Sim|Não|Quase — justificativa em 1 linha"
-  },
-  "veredito_preliminar": {
-    "resultado": "MERCADO SUSTENTA|MERCADO INCERTO|MERCADO NÃO SUSTENTA",
-    "justificativa": "2 linhas diretas",
-    "vale_continuar": true
-  },
-  "providencias": {
-    "titulo": "O que fazer nas próximas 48h",
-    "itens": ["ação concreta 1", "ação concreta 2", "ação concreta 3", "ação concreta 4"]
-  },
-  "manual": {
-    "titulo": "Como fazer",
-    "passos": [
-      {"passo": "nome do passo", "como": "instrução direta", "ferramenta": "ferramenta gratuita específica"}
-    ]
+    "problema": {"nota": 0-20},
+    "solucao":  {"nota": 0-20},
+    "mercado":  {"nota": 0-20},
+    "founder":  {"nota": 0-20},
+    "tracao":   {"nota": 0-20}
   },
   "questions": [
-    {
-      "question": "a pergunta completa e específica",
-      "block": 1-7,
-      "critical": true,
-      "why": "por que essencial para esse negócio",
-      "placeholder": "como começa uma boa resposta"
-    }
+    {"question": "pergunta específica para ESTE negócio","block": 1-7,"critical": true,"why": "1 linha","placeholder": "como começar a resposta"}
   ]
 }
 
-Gere exatamente 6 perguntas — não mais. Qualidade acima de quantidade. Pelo menos 3 devem ser "critical":true. Cubra os 7 blocos priorizando os mais críticos. Cada pergunta deve ser precisa e específica para ESTE negócio. Siga TODAS as regras de qualidade do seu DNA.
-
-IMPORTANTE: Mantenha cada campo de texto conciso — máximo 3 linhas por campo — para garantir que o JSON completo caiba na resposta.`}];
+Gere exatamente 6 perguntas — não mais. Pelo menos 3 devem ser "critical":true. Cubra os 7 blocos priorizando os mais críticos. Cada pergunta deve ser única e específica para ESTE negócio.
 }
 function evalPrompt(qa){
   return[{role:'user',content:`Avalie a qualidade das respostas e decida se precisa de perguntas complementares.
