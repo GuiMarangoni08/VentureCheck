@@ -521,6 +521,19 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 .checkout-btn-mp:hover{background:#007ab8}
 .checkout-btn-mp:disabled{opacity:.6;cursor:not-allowed}
 .checkout-cancel{background:none;border:none;color:var(--t3);cursor:pointer;font-size:13px;margin-top:8px;text-decoration:underline}
+
+/* ── AUTH SCREEN ── */
+#screen-auth .auth-card{max-width:440px;margin:0 auto;padding:32px}
+.auth-tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:2px solid var(--border2)}
+.auth-tab{flex:1;padding:10px;background:none;border:none;color:var(--t2);font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.5px;transition:color .2s}
+.auth-tab.active{color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px}
+.auth-pane{display:none}.auth-pane.active{display:block}
+.auth-pane .fg{margin-bottom:16px}
+.auth-pane .fg label{display:block;font-size:11px;letter-spacing:1px;color:var(--t2);margin-bottom:6px;text-transform:uppercase}
+.auth-pane .fg input{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 14px;color:var(--text);font-size:14px;box-sizing:border-box}
+.auth-pane .fg input:focus{outline:none;border-color:var(--accent)}
+.auth-error{color:var(--red);font-size:13px;margin-bottom:12px;display:none}
+.auth-hint{font-size:12px;color:var(--t3);margin-top:8px;text-align:center}
 @media(max-width:800px){
   .sidebar{display:none}.main{margin-left:0}
   .mode-grid,.blocks-track,.score-g,.mvp-2col,.matrix,.mvp-stats,.setup-grid,.deliv-grid{grid-template-columns:1fr}
@@ -689,6 +702,40 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
             <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startCheckout('captacao')">Começar →</button>
           </div>
         </div>
+      </div>
+    </div>
+
+
+    <!-- ══ AUTH ══ -->
+    <div class="screen" id="screen-auth">
+      <div class="card auth-card">
+        <div style="text-align:center;margin-bottom:20px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--t3);margin-bottom:8px">// ACESSO</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px">Bem-vindo ao VentureCheck</div>
+          <div style="font-size:13px;color:var(--t2);margin-top:6px">Crie sua conta ou entre para começar o diagnóstico</div>
+        </div>
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchAuthTab('login')">Entrar</button>
+          <button class="auth-tab" onclick="switchAuthTab('signup')">Criar conta</button>
+        </div>
+        <!-- Login pane -->
+        <div class="auth-pane active" id="auth-pane-login">
+          <div class="auth-error" id="auth-err-login"></div>
+          <div class="fg"><label>Email</label><input type="email" id="auth-login-email" placeholder="seu@email.com" autocomplete="email"></div>
+          <div class="fg"><label>Senha</label><input type="password" id="auth-login-pass" placeholder="Sua senha" autocomplete="current-password"></div>
+          <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:8px" onclick="doLogin()">Entrar →</button>
+          <div class="auth-hint">Não tem conta? <a href="#" onclick="switchAuthTab('signup');return false" style="color:var(--accent)">Criar conta</a></div>
+        </div>
+        <!-- Signup pane -->
+        <div class="auth-pane" id="auth-pane-signup">
+          <div class="auth-error" id="auth-err-signup"></div>
+          <div class="fg"><label>Nome completo</label><input type="text" id="auth-signup-name" placeholder="João Silva" autocomplete="name"></div>
+          <div class="fg"><label>Email</label><input type="email" id="auth-signup-email" placeholder="seu@email.com" autocomplete="email"></div>
+          <div class="fg"><label>Senha (mín. 8 caracteres)</label><input type="password" id="auth-signup-pass" placeholder="Crie uma senha forte" autocomplete="new-password"></div>
+          <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:8px" onclick="doSignup()">Criar conta →</button>
+          <div class="auth-hint">Já tem conta? <a href="#" onclick="switchAuthTab('login');return false" style="color:var(--accent)">Entrar</a></div>
+        </div>
+        <button class="btn btn-g" style="width:100%;justify-content:center;margin-top:16px;font-size:12px" onclick="showScreen('home')">← Voltar</button>
       </div>
     </div>
 
@@ -1156,6 +1203,7 @@ function startModeB(){
   document.getElementById('setup-files-list').innerHTML='';
   window._completudeFilesCount = 0;
   showScreen('setup');
+  var _u = checkExistingAuth(); if (_u) prefillUserData(_u);
   setTimeout(initCompletude, 50);
 }
 
@@ -2531,6 +2579,105 @@ checkPaymentReturn();
 
 <script>
 // ══════════════════════════════════════════════════════════════
+// AUTH — SUPABASE
+// ══════════════════════════════════════════════════════════════
+
+function checkExistingAuth() {
+  try {
+    var stored = localStorage.getItem('vc_user');
+    if (!stored) return null;
+    var user = JSON.parse(stored);
+    if (!user || !user.access_token) return null;
+    return user;
+  } catch(e) { return null; }
+}
+
+function logoutUser() {
+  localStorage.removeItem('vc_user');
+  showScreen('home');
+  showToast('Sessao encerrada.');
+}
+
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(function(t, i) {
+    var names = ['login', 'signup'];
+    t.classList.toggle('active', names[i] === tab);
+  });
+  document.getElementById('auth-pane-login').classList.toggle('active', tab === 'login');
+  document.getElementById('auth-pane-signup').classList.toggle('active', tab === 'signup');
+}
+
+function setAuthError(pane, msg) {
+  var el = document.getElementById('auth-err-' + pane);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+async function doLogin() {
+  var email = document.getElementById('auth-login-email').value.trim();
+  var pass  = document.getElementById('auth-login-pass').value;
+  setAuthError('login', '');
+  if (!email || !pass) { setAuthError('login', 'Preencha email e senha.'); return; }
+  try {
+    var res = await fetch(SB_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { apikey: SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pass })
+    });
+    var data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error_description || data.error || 'Erro ao entrar.');
+    var uname = (data.user && data.user.user_metadata && data.user.user_metadata.name) || '';
+    if (!uname && data.user && data.user.email) uname = data.user.email.split('@')[0];
+    var user = { name: uname, email: email, access_token: data.access_token };
+    localStorage.setItem('vc_user', JSON.stringify(user));
+    prefillUserData(user);
+    if (_checkoutPlan) { _openCheckoutModal(_checkoutPlan); } else { showScreen('home'); }
+  } catch(e) {
+    setAuthError('login', e.message);
+  }
+}
+
+async function doSignup() {
+  var name  = document.getElementById('auth-signup-name').value.trim();
+  var email = document.getElementById('auth-signup-email').value.trim();
+  var pass  = document.getElementById('auth-signup-pass').value;
+  setAuthError('signup', '');
+  if (!name)  { setAuthError('signup', 'Informe seu nome.'); return; }
+  if (!email) { setAuthError('signup', 'Informe seu email.'); return; }
+  if (pass.length < 8) { setAuthError('signup', 'Senha deve ter no minimo 8 caracteres.'); return; }
+  try {
+    var res = await fetch(SB_URL + '/auth/v1/signup', {
+      method: 'POST',
+      headers: { apikey: SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pass, data: { name: name } })
+    });
+    var data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error_description || data.error || 'Erro ao criar conta.');
+    var access_token = data.access_token || (data.session && data.session.access_token);
+    if (!access_token) {
+      alert('Conta criada! Verifique seu email para confirmar o cadastro e depois faca login.');
+      switchAuthTab('login');
+      return;
+    }
+    var user = { name: name, email: email, access_token: access_token };
+    localStorage.setItem('vc_user', JSON.stringify(user));
+    prefillUserData(user);
+    if (_checkoutPlan) { _openCheckoutModal(_checkoutPlan); } else { showScreen('home'); }
+  } catch(e) {
+    setAuthError('signup', e.message);
+  }
+}
+
+function prefillUserData(user) {
+  if (!user) return;
+  var nameEl  = document.getElementById('inp-name');
+  var emailEl = document.getElementById('inp-email');
+  if (nameEl  && !nameEl.value  && user.name)  nameEl.value  = user.name;
+  if (emailEl && !emailEl.value && user.email) emailEl.value = user.email;
+}
+
+// ══════════════════════════════════════════════════════════════
 // CHECKOUT — MERCADO PAGO / STRIPE
 // ══════════════════════════════════════════════════════════════
 const PLAN_INFO = {
@@ -2543,6 +2690,15 @@ let _checkoutPlan = null;
 
 function startCheckout(plan) {
   _checkoutPlan = plan;
+  const user = checkExistingAuth();
+  if (!user) {
+    showScreen('screen-auth');
+    return;
+  }
+  _openCheckoutModal(plan);
+}
+
+function _openCheckoutModal(plan) {
   const info = PLAN_INFO[plan];
   document.getElementById('co-emoji').textContent = info.emoji;
   document.getElementById('co-name').textContent  = info.name;
@@ -2566,20 +2722,8 @@ async function goCheckout() {
     S.session.id = 'vc_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
   }
 
-  // Plano validacao: acesso direto (pagamento combinado fora)
-  if (_checkoutPlan === 'validacao') {
-    S.plan = 'validacao';
-    localStorage.setItem('vc_pending_plan', 'validacao');
-    localStorage.setItem('vc_pending_session', S.session.id);
-    closeCheckout();
-    showScreen('screen-setup');
-    setTimeout(() => {
-      showToast('Acesso liberado! Vamos comecar.');
-      initCompletude();
-    }, 400);
-    return;
-  }
-
+  // TODO: Configure MP_ACCESS_TOKEN env var in Netlify to activate payments for all plans
+  // All plans (validacao, diagnostico, captacao) go through Mercado Pago
   try {
     const res = await fetch('/api/checkout', {
       method: 'POST',
@@ -2587,13 +2731,19 @@ async function goCheckout() {
       body: JSON.stringify({plan: _checkoutPlan, sessionId: S.session.id}),
     });
     const data = await res.json();
-    if (data.error) throw new Error(data.error);
+    if (data.error) {
+      if (data.error.includes('MP_ACCESS_TOKEN')) {
+        throw new Error('Pagamento temporariamente indisponivel. Entre em contato.');
+      }
+      throw new Error(data.error);
+    }
     S.plan = _checkoutPlan;
     localStorage.setItem('vc_pending_plan', _checkoutPlan);
     localStorage.setItem('vc_pending_session', S.session.id);
     window.location.href = data.checkout_url || data.sandbox_url;
   } catch(e) {
-    alert('Erro ao criar pagamento: ' + e.message);
+    const msg = e.message.includes('MP_ACCESS_TOKEN') ? 'Pagamento temporariamente indisponivel. Entre em contato.' : 'Erro ao criar pagamento: ' + e.message;
+    alert(msg);
     btn.disabled = false;
     btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#fff"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="#009ee3" font-weight="bold">MP</text></svg> Pagar com Mercado Pago';
   }
