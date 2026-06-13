@@ -1709,7 +1709,7 @@ async function submitAnswers(){
     // Se já estamos no round 2, pular avaliação e ir direto para análise final
     if(S.round===2){
       setProc(true,'Gerando relatório completo...');
-      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 3500, 'claude-haiku-4-5-20251001');
+      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 2500, 'claude-haiku-4-5-20251001');
       let finalParsed;
       try{finalParsed=parseJSON(finalRes)}
       catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório. Tente novamente.')}
@@ -1738,7 +1738,7 @@ async function submitAnswers(){
     }else{
       // Ready for final analysis
       setProc(true,'Gerando relatório completo...');
-      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 3500, 'claude-haiku-4-5-20251001');
+      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 2500, 'claude-haiku-4-5-20251001');
       let finalParsed;
       try{finalParsed=parseJSON(finalRes)}
       catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório. Tente novamente.')}
@@ -1856,28 +1856,10 @@ function renderAnalysis(d){
 
   // Concorrentes por abrangência (plano Validação)
   if(plan==='validacao' && d.concorrentes){
-    const cc=d.concorrentes;
-    const raioIcon={'local':'📍','estadual':'🗺','nacional':'🇧🇷','global':'🌎'};
-    const renderGrupo=(titulo,icon,lista)=>{
-      if(!lista?.length)return'';
-      return`<div style="margin-bottom:16px">
-        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--t2);margin-bottom:8px">${icon} ${titulo.toUpperCase()}</div>
-        ${lista.map(c=>`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-          <div style="flex:1">
-            <span style="font-size:13px;font-weight:600">${c.nome||'—'}</span>
-            <span style="font-size:11px;color:var(--t3);margin-left:8px;background:var(--s3);padding:2px 8px;border-radius:20px">${c.tipo||''}</span>
-          </div>
-          <div style="font-size:12px;color:var(--t2);max-width:55%">${c.fraqueza||''}</div>
-        </div>`).join('')}
-      </div>`;
-    };
-    ab.innerHTML+=`<div class="ab"><div class="ab-head"><span class="ab-num">C</span><span class="ab-title">Mapa Competitivo — ${raioIcon[cc.abrangencia]||'📍'} Raio ${(cc.abrangencia||'local').charAt(0).toUpperCase()+(cc.abrangencia||'local').slice(1)}</span></div><div class="ab-body">
-      ${renderGrupo('Concorrentes locais','📍',cc.locais)}
-      ${renderGrupo('Concorrentes regionais / estaduais','🗺',cc.regionais)}
-      ${renderGrupo('Concorrentes nacionais','🇧🇷',cc.nacionais)}
-      ${cc.diferencial?`<div class="msg msg-ok" style="margin-top:12px">⚡ <strong>Seu diferencial:</strong> ${cc.diferencial}</div>`:''}
-      ${cc.alerta?`<div class="msg msg-warn" style="margin-top:8px">⚠ <strong>Alerta competitivo:</strong> ${cc.alerta}</div>`:''}
-    </div></div>`;
+    const cc = d.concorrentes;
+    const ccText = typeof cc === 'string' ? cc
+      : (cc.diferencial||'') + (cc.alerta ? ' | ' + cc.alerta : '');
+    if(ccText) ab.innerHTML += `<div class="ab"><div class="ab-head"><span class="ab-num">C</span><span class="ab-title">Mapa Competitivo</span></div><div class="ab-body"><div style="font-size:13px;line-height:1.7">${ccText}</div></div></div>`;
   }
 
   // Financial
@@ -2377,49 +2359,29 @@ ${rules}
 JSON (sem markdown):
 {
   "verdict":"IDEIA CLARA|IDEIA PROMISSORA|IDEIA PRECISA CLAREZA",
-  "resumo":"3 linhas — não é veredito de aprovação/reprovação, é clareza sobre o que a ideia é e o que falta clarificar",
+  "resumo":"3 linhas — clareza sobre o que a ideia é e o que falta clarificar",
   "imi_score":0-100,
   "imi_nivel":"Semente|Germinando|Crescendo|Pronta",
   "imi_justificativa":"2 linhas — explica o score sem punir a falta de números",
   "clareza_ideia":{
-    "hipotese_central":"reescreva a hipótese central do negócio em 1 frase no formato: [persona] acredita que [mecanismo] vai resolver [problema] porque [causa raiz]",
-    "o_que_esta_claro":"3 pontos concretos que o founder já tem clareza — 1 linha cada",
+    "hipotese_central":"[persona] + [mecanismo] + [problema] + [causa raiz] — 1 frase",
+    "o_que_esta_claro":"3 pontos que o founder já tem clareza — 1 linha cada",
     "o_que_precisa_clarear":"3 perguntas que ele precisa responder antes do Diagnóstico — 1 linha cada",
-    "risco_fatal":"1 linha — o único risco que, se confirmado, inviabiliza tudo"
+    "risco_fatal":"o único risco que, se confirmado, inviabiliza tudo — 1 linha"
   },
-  "problema":"análise da dor — máx 3 linhas. Não exigir números — avaliar clareza e especificidade da dor descrita","problema_score":1-5,
-  "solucao":"análise da solução — máx 3 linhas. Avaliar se a solução endereça a causa raiz ou apenas o sintoma","solucao_score":1-5,
-  "mercado":"TAM Brasil em 1 número com premissa clara — prefixar [H] ou [D]. Se TAM for hipótese sem dado externo, mercado_score máximo 3/5","mercado_score":1-5,
-  "concorrentes":{
-    "abrangencia":"local|estadual|nacional|global — raio real de competição",
-    "locais":[{"nome":"player local ou perfil","tipo":"direto|indireto","fraqueza":"fraqueza em 1 linha"}],
-    "regionais":[{"nome":"player regional","tipo":"direto|indireto","fraqueza":"fraqueza em 1 linha"}],
-    "nacionais":[{"nome":"player nacional","tipo":"direto|indireto","fraqueza":"fraqueza em 1 linha"}],
-    "diferencial":"diferencial real em 1 linha",
-    "alerta":"ADVOGADO DO DIABO — para cada concorrente principal: (A) Como me copia em 6 meses: [mecanismo]. (B) Defesa possível: [ação] — ou VULNERABILIDADE ABERTA se não houver defesa real"
-  },
-  "modelo":"análise do modelo de negócio — máx 3 linhas — avaliar lógica, não números (ele ainda não tem)","modelo_score":1-5,
-  "referencias_mercado":[
-    {"nome":"case ou empresa de referência no setor","contexto":"onde/quando surgiu — país, ano","resultado":"o que conseguiu — números reais se disponíveis","licao":"o que este founder pode aprender ou adaptar em 1 linha"},
-    {"nome":"case 2","contexto":"","resultado":"","licao":""},
-    {"nome":"case 3 — pode ser fracasso","contexto":"","resultado":"por que falhou","licao":"o que evitar"}
-  ],
-  "benchmarks_alvo":{
-    "resumo":"em 1 linha: onde este negócio precisa chegar para ser considerado com PMF no setor",
-    "metricas":[
-      {"metrica":"nome da métrica","alvo":"valor de referência do setor","prazo":"em quanto tempo tipicamente","fonte":"fonte ou referência"}
-    ]
-  },
+  "problema":"análise da dor — máx 3 linhas","problema_score":1-5,
+  "solucao":"análise da solução — máx 3 linhas","solucao_score":1-5,
+  "mercado":"TAM Brasil em 1 número com premissa [H] ou [D] — máx 2 linhas","mercado_score":1-5,
+  "concorrentes":"principais concorrentes + diferencial real + 1 alerta de cópia — máx 3 linhas",
+  "modelo":"análise do modelo de negócio — máx 3 linhas","modelo_score":1-5,
   "todo_list":[
-    {"prioridade":"🔴 ESTA SEMANA","acao":"ação específica 1 com método e critério de sucesso","impacto":"o que isso vai desbloquear para o Diagnóstico"},
+    {"prioridade":"🔴 ESTA SEMANA","acao":"ação específica 1 com método e critério","impacto":"o que isso desbloqueia"},
     {"prioridade":"🔴 ESTA SEMANA","acao":"ação 2","impacto":"impacto 2"},
-    {"prioridade":"🟠 PRÓXIMAS 2 SEMANAS","acao":"ação 3","impacto":"impacto 3"},
-    {"prioridade":"🟠 PRÓXIMAS 2 SEMANAS","acao":"ação 4","impacto":"impacto 4"},
-    {"prioridade":"🟡 PRÓXIMO MÊS","acao":"ação 5","impacto":"impacto 5"},
-    {"prioridade":"🟡 PRÓXIMO MÊS","acao":"ação 6","impacto":"impacto 6"}
+    {"prioridade":"🟡 PRÓXIMAS 2 SEMANAS","acao":"ação 3","impacto":"impacto 3"},
+    {"prioridade":"🟡 PRÓXIMAS 2 SEMANAS","acao":"ação 4","impacto":"impacto 4"}
   ],
-  "criterio_diagnostico":"frase completa — quando o founder pode dizer que está pronto para o Diagnóstico. Ser específico: número de conversas, experimento feito, dado coletado.",
-  "manual":"parágrafo direto para o founder — máx 5 linhas — tom de mentor, não de juiz. O que fazer agora, o que evitar, qual é o próximo passo mais importante.",
+  "criterio_diagnostico":"quando o founder está pronto para o Diagnóstico — específico",
+  "manual":"parágrafo direto — máx 4 linhas — tom de mentor",
   "proximo_modulo":"1 linha — o que o Módulo Diagnóstico vai entregar que este não entrega"
 }`}];
   }
