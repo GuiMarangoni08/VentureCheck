@@ -1709,7 +1709,7 @@ async function submitAnswers(){
     // Se já estamos no round 2, pular avaliação e ir direto para análise final
     if(S.round===2){
       setProc(true,'Gerando relatório completo...');
-      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 2500, 'claude-haiku-4-5-20251001');
+      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 2000, 'claude-haiku-4-5-20251001');
       let finalParsed;
       try{finalParsed=parseJSON(finalRes)}
       catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório. Tente novamente.')}
@@ -1738,7 +1738,7 @@ async function submitAnswers(){
     }else{
       // Ready for final analysis
       setProc(true,'Gerando relatório completo...');
-      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 2500, 'claude-haiku-4-5-20251001');
+      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 2000, 'claude-haiku-4-5-20251001');
       let finalParsed;
       try{finalParsed=parseJSON(finalRes)}
       catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório. Tente novamente.')}
@@ -1783,15 +1783,17 @@ function buildQA(){
     ? `FOUNDER-IA: ${iaMap[S.session.iaUso]||S.session.iaUso}. ${S.session.iaDesc?'Detalhe: '+S.session.iaDesc:''}`
     : `FOUNDER-IA: não declarado.`;
   const benchLine=getSectorBenchmarks(S.session.sector||'');
-  let text=`NEGÓCIO: ${S.session.biz}\nSETOR: ${S.session.sector}\nDESCRIÇÃO INICIAL: ${S.session.desc}\n${psfLine}\n${naoFazLine}\n${iaLine}\n${benchLine}\n\n`;
+  let text=`NEGÓCIO: ${S.session.biz}\nSETOR: ${S.session.sector}\nDESCRIÇÃO INICIAL: ${(S.session.desc||'').substring(0,400)}\n${psfLine}\n${naoFazLine}\n${iaLine}\n${benchLine}\n\n`;
   text+=`=== RESPOSTAS RODADA 1 ===\n`;
   S.questions.forEach((q,i)=>{
-    text+=`\nPERGUNTA ${i+1} [${BLOCKS[(q.block||1)-1]}]: ${q.question}\nRESPOSTA: ${S.answers[i]||'(não respondida)'}\n`;
+    const _a=(S.answers[i]||'(não respondida)').substring(0,350);
+    text+=`\nPERGUNTA ${i+1} [${BLOCKS[(q.block||1)-1]}]: ${q.question}\nRESPOSTA: ${_a}\n`;
   });
   if(S.complement.length){
     text+=`\n=== RESPOSTAS COMPLEMENTARES ===\n`;
     S.complement.forEach((q,i)=>{
-      text+=`\nPERGUNTA COMPLEMENTAR ${i+1}: ${q.question}\nRESPOSTA: ${S.compAnswers[i]||'(não respondida)'}\n`;
+      const _ca=(S.compAnswers[i]||'(não respondida)').substring(0,350);
+      text+=`\nPERGUNTA COMPLEMENTAR ${i+1}: ${q.question}\nRESPOSTA: ${_ca}\n`;
     });
   }
   return text;
