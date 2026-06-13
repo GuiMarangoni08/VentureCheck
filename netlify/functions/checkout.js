@@ -6,6 +6,10 @@ const PLANS = {
   diagnostico:  { title: 'VentureCheck — Diagnóstico',    price: 497,  description: 'Análise completa · 7 blocos · Financeiro · Roadmap' },
   business_plan:{ title: 'VentureCheck — Business Plan',  price: 997,  description: 'Projeções · Plano operacional · Modelo financeiro' },
   venture:      { title: 'VentureCheck — Venture',        price: 1697, description: 'Valuation · Data room · Pitch deck · Estratégia captação' },
+  // Upgrade avulso — aplica quando usuário já tem plano anterior
+  upg_diagnostico:  { title: 'VentureCheck — Upgrade Diagnóstico', price: 500, description: 'Upgrade do Validação para Diagnóstico' },
+  upg_business_plan:{ title: 'VentureCheck — Upgrade Business Plan', price: 748, description: 'Upgrade do Diagnóstico para Business Plan' },
+  upg_venture:      { title: 'VentureCheck — Upgrade Venture',        price: 949, description: 'Upgrade do Business Plan para Venture' },
 };
 
 async function createMercadoPago(plan, sessionId, origin) {

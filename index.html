@@ -1718,6 +1718,7 @@ async function submitAnswers(){
       saveSession(finalParsed);
       renderAnalysis(finalParsed);
       showScreen('analysis');
+      renderUpgradeSection(S.plan||'diagnostico');
       return;
     }
 
@@ -1746,6 +1747,7 @@ async function submitAnswers(){
       saveSession(finalParsed);
       renderAnalysis(finalParsed);
       showScreen('analysis');
+      renderUpgradeSection(S.plan||'diagnostico');
     }
   }catch(err){
     setProc(false);
@@ -2113,7 +2115,7 @@ function renderAnalysis(d){
             </div>`;
           }).join('')}
           ${d.criterio_diagnostico?`<div class="msg msg-ok" style="margin-top:8px">🏁 <strong>Quando você está pronto para o Diagnóstico:</strong> ${d.criterio_diagnostico}</div>`:''}
-          <button class="btn btn-p" style="margin-top:16px;width:100%;justify-content:center" onclick="startCheckout('diagnostico')">Avançar para o Diagnóstico completo (R$497) →</button>
+          <div id="upgrade-section" style="margin-top:20px"></div>
           ${d.proximo_modulo?`<div style="font-size:12px;color:var(--accent);margin-top:10px;text-align:center">${d.proximo_modulo}</div>`:''}
         </div>
       </div>`;
@@ -2866,11 +2868,18 @@ const PLAN_INFO = {
   diagnostico:  {emoji:'🚀',name:'Diagnóstico',    price:'R$497',   desc:'7 blocos · Financeiro · MVP · Roadmap · Riscos · PDF'},
   business_plan:{emoji:'📋',name:'Business Plan',  price:'R$997',   desc:'Tudo + Projeções · Plano operacional · Modelo financeiro · PDF'},
   venture:      {emoji:'💎',name:'Venture',         price:'R$1.697', desc:'Tudo + Valuation · Data room · Pitch deck · Estratégia captação · PDF'},
+  upg_diagnostico:  {emoji:'🚀',name:'Upgrade Diagnóstico',  price:'R$500',   desc:'Upgrade do Validação para Diagnóstico'},
+  upg_business_plan:{emoji:'📋',name:'Upgrade Business Plan', price:'R$748',   desc:'Upgrade do Diagnóstico para Business Plan'},
+  upg_venture:      {emoji:'💎',name:'Upgrade Venture',        price:'R$949',   desc:'Upgrade do Business Plan para Venture'},
 };
 
 let _checkoutPlan = null;
+let _upgradeTo = null;
 
 function startCheckout(plan) {
+  // Map upgrade plans to their destination plan for post-payment activation
+  const upgMap = { upg_diagnostico:'diagnostico', upg_business_plan:'business_plan', upg_venture:'venture' };
+  if (upgMap[plan]) { _upgradeTo = upgMap[plan]; } else { _upgradeTo = null; }
   _checkoutPlan = plan;
   const user = checkExistingAuth();
   if (!user) {
@@ -2919,8 +2928,8 @@ async function goCheckout() {
       }
       throw new Error(data.error);
     }
-    S.plan = _checkoutPlan;
-    localStorage.setItem('vc_pending_plan', _checkoutPlan);
+    S.plan = _upgradeTo || _checkoutPlan;
+    localStorage.setItem('vc_pending_plan', _upgradeTo || _checkoutPlan);
     localStorage.setItem('vc_pending_session', S.session.id);
     window.location.href = data.checkout_url || data.sandbox_url;
   } catch(e) {
@@ -2946,6 +2955,88 @@ function exportPDF() {
   }, 150);
 }
 
+// ══════════════════════════════════════════════════════════════
+// UPSELL + CUPOM
+// ══════════════════════════════════════════════════════════════
+const UPGRADE_COUPON = 'Guigui@2013';
+
+const UPGRADE_NEXT = {
+  validacao:    { avulso: 'upg_diagnostico', avulso_price: 'R$500', full: 'business_plan', full_price: 'R$997', full_label: 'Business Plan', full_save: 'R$152', next_plan: 'diagnostico' },
+  diagnostico:  { avulso: 'upg_business_plan', avulso_price: 'R$748', full: 'venture', full_price: 'R$1.697', full_label: 'Venture', full_save: 'R$249', next_plan: 'business_plan' },
+  business_plan:{ avulso: 'upg_venture', avulso_price: 'R$949', full: null, full_price: null, full_label: null, full_save: null, next_plan: 'venture' },
+  venture: null,
+};
+
+function renderUpgradeSection(plan) {
+  const sec = document.getElementById('upgrade-section');
+  if (!sec) return;
+  const up = UPGRADE_NEXT[plan];
+  if (!up) { sec.innerHTML = ''; return; }
+
+  const nextPlanName = { diagnostico: 'Diagn\xf3stico', business_plan: 'Business Plan', venture: 'Venture' }[up.next_plan] || up.next_plan;
+
+  let html = `
+    <div style="border-top:1px solid var(--border2);padding-top:20px;margin-top:4px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;margin-bottom:4px;color:var(--accent)">\u2197 QUER IR PARA O ${nextPlanName.toUpperCase()}?</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:16px">Continue sua jornada e aprofunde a an\xe1lise do seu neg\xf3cio.</div>
+      <div style="display:grid;grid-template-columns:1fr${up.full ? ' 1fr' : ''};gap:14px;margin-bottom:16px">
+        <div style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r2);padding:18px;text-align:center">
+          <div style="font-size:11px;color:var(--t3);letter-spacing:1px;margin-bottom:6px">AVULSO</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent)">${up.avulso_price}</div>
+          <div style="font-size:11px;color:var(--t2);margin:8px 0">Somente o ${nextPlanName}</div>
+          <button class="btn btn-g" style="width:100%;justify-content:center;font-size:12px" onclick="startCheckout('${up.avulso}')">Contratar ${nextPlanName} \u2192</button>
+        </div>
+        ${up.full ? `
+        <div style="background:var(--s2);border:2px solid var(--accent);border-radius:var(--r2);padding:18px;text-align:center;position:relative">
+          <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;font-size:9px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:20px">MELHOR NEGÓCIO</div>
+          <div style="font-size:11px;color:var(--t3);letter-spacing:1px;margin-bottom:6px">PACOTE COMPLETO</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent)">${up.full_price}</div>
+          <div style="font-size:11px;color:var(--t2);margin:8px 0">${up.full_label} — economize ${up.full_save} vs avulso</div>
+          <button class="btn btn-p" style="width:100%;justify-content:center;font-size:12px" onclick="startCheckout('${up.full}')">Fechar pacote ${up.full_label} \u2192</button>
+        </div>` : ''}
+      </div>
+      <!-- Campo de cupom -->
+      <div style="border-top:1px solid var(--border2);padding-top:14px">
+        <div style="font-size:11px;color:var(--t3);letter-spacing:1px;margin-bottom:8px">TEM UM CUP\xd4M?</div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="coupon-input" placeholder="Digite seu cup\xf4m..."
+            style="flex:1;background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:inherit"
+            onkeydown="if(event.key==='Enter')applyCoupon('${up.next_plan}')">
+          <button class="btn btn-p" style="padding:10px 20px;font-size:13px" onclick="applyCoupon('${up.next_plan}')">Aplicar</button>
+        </div>
+        <div id="coupon-msg" style="font-size:12px;margin-top:6px"></div>
+      </div>
+    </div>`;
+  sec.innerHTML = html;
+}
+
+function applyCoupon(nextPlan) {
+  const inp = document.getElementById('coupon-input');
+  const msg = document.getElementById('coupon-msg');
+  if (!inp || !msg) return;
+  const val = inp.value.trim();
+  if (val === UPGRADE_COUPON) {
+    msg.style.color = 'var(--accent)';
+    msg.textContent = '\u2713 Cup\xf4m v\xe1lido! Liberando m\xf3dulo...';
+    inp.disabled = true;
+    setTimeout(() => {
+      S.plan = nextPlan;
+      localStorage.setItem('vc_plan_unlocked', nextPlan);
+      // Re-run questions with new plan
+      S.questions = [];
+      S.answers = {};
+      S.complement = [];
+      S.compAnswers = {};
+      S.round = 1;
+      generateQuestions();
+    }, 800);
+  } else {
+    msg.style.color = '#ff5a5a';
+    msg.textContent = '\u2717 Cup\xf4m inv\xe1lido.';
+    inp.focus();
+  }
+}
+
 function checkPaymentReturn() {
   const params = new URLSearchParams(window.location.search);
   const status = params.get('payment');
@@ -2955,7 +3046,9 @@ function checkPaymentReturn() {
   window.history.replaceState({}, '', window.location.pathname);
 
   if (status === 'success') {
-    const plan      = params.get('plan') || localStorage.getItem('vc_pending_plan');
+    const rawPlan   = params.get('plan') || localStorage.getItem('vc_pending_plan');
+    const upgMapRet = { upg_diagnostico:'diagnostico', upg_business_plan:'business_plan', upg_venture:'venture' };
+    const plan      = upgMapRet[rawPlan] || rawPlan;
     const sessionId = params.get('session') || localStorage.getItem('vc_pending_session');
     localStorage.removeItem('vc_pending_plan');
     localStorage.removeItem('vc_pending_session');
