@@ -1700,55 +1700,21 @@ async function submitAnswers(){
     }
   }
 
-  setProc(true,'Avaliando qualidade das respostas...');
+  setProc(true,'Gerando relatório completo...');
   document.getElementById('submit-row').style.display='none';
 
   try{
     const qa=buildQA();
-
-    // Se já estamos no round 2, pular avaliação e ir direto para análise final
-    if(S.round===2){
-      setProc(true,'Gerando relatório completo...');
-      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 2000, 'claude-haiku-4-5-20251001');
-      let finalParsed;
-      try{finalParsed=parseJSON(finalRes)}
-      catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório. Tente novamente.')}
-      setProc(false);
-      clearDraft();
-      saveSession(finalParsed);
-      renderAnalysis(finalParsed);
-      showScreen('analysis');
-      renderUpgradeSection(S.plan||'diagnostico');
-      return;
-    }
-
-    const res=await callClaude(evalPrompt(qa), 1800);
-    let parsed;
-    try{parsed=parseJSON(res)}
-    catch(e){console.error('Eval parse error:',e,'\nRaw:',res);throw new Error('Erro ao avaliar respostas.')}
-
-    if(parsed.needs_complement&&parsed.complement_questions?.length){
-      // Needs more
-      S.complement=parsed.complement_questions;
-      S.round=2;
-      setProc(false);
-      document.getElementById('complement-section').style.display='block';
-      renderQuestions(S.complement,true);
-
-    }else{
-      // Ready for final analysis
-      setProc(true,'Gerando relatório completo...');
-      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 2000, 'claude-haiku-4-5-20251001');
-      let finalParsed;
-      try{finalParsed=parseJSON(finalRes)}
-      catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório. Tente novamente.')}
-      setProc(false);
-      clearDraft();
-      saveSession(finalParsed);
-      renderAnalysis(finalParsed);
-      showScreen('analysis');
-      renderUpgradeSection(S.plan||'diagnostico');
-    }
+    const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 2000, 'claude-haiku-4-5-20251001');
+    let finalParsed;
+    try{finalParsed=parseJSON(finalRes)}
+    catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório. Tente novamente.')}
+    setProc(false);
+    clearDraft();
+    saveSession(finalParsed);
+    renderAnalysis(finalParsed);
+    showScreen('analysis');
+    renderUpgradeSection(S.plan||'diagnostico');
   }catch(err){
     setProc(false);
     document.getElementById('submit-row').style.display='flex';
@@ -2177,10 +2143,11 @@ async function callClaude(messages, maxTokens=4000, model='claude-haiku-4-5-2025
     body:JSON.stringify({model,max_tokens:maxTokens,system:SYSTEM_PROMPT,messages})
   });
   if(!res.ok){
-    const err=await res.json().catch(()=>({}));
-    const msg=err.error?.message||`Erro API ${res.status}`;
-    console.error('Claude API error:',msg,err);
-    throw new Error(msg);
+    const rawErr=await res.text().catch(()=>'');
+    let err={}; try{err=JSON.parse(rawErr)}catch(e){}
+    const msg=err.error?.message||rawErr.slice(0,120)||`Erro API ${res.status}`;
+    console.error('Claude API error status:',res.status,'body:',rawErr.slice(0,300));
+    throw new Error(`Erro ${res.status}: ${msg}`);
   }
   // Consume SSE stream — Anthropic sends tokens as they're generated
   const reader=res.body.getReader();
