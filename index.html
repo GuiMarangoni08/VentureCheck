@@ -2182,10 +2182,36 @@ async function callClaude(messages, maxTokens=4000, model='claude-haiku-4-5-2025
     console.error('Claude API error:',msg,err);
     throw new Error(msg);
   }
-  const data=await res.json();
-  const text=data.content?.[0]?.text||'';
-  if(!text) throw new Error('Resposta vazia da API. Tente novamente.');
-  return text;
+  // Consume SSE stream — Anthropic sends tokens as they're generated
+  const reader=res.body.getReader();
+  const decoder=new TextDecoder();
+  let fullText='';
+  let buf='';
+  while(true){
+    const {done,value}=await reader.read();
+    if(done) break;
+    buf+=decoder.decode(value,{stream:true});
+    const lines=buf.split('\n');
+    buf=lines.pop();
+    for(const line of lines){
+      if(!line.startsWith('data: ')) continue;
+      const raw=line.slice(6).trim();
+      if(raw==='[DONE]') break;
+      try{
+        const ev=JSON.parse(raw);
+        if(ev.type==='content_block_delta'&&ev.delta?.type==='text_delta'){
+          fullText+=ev.delta.text;
+        } else if(ev.type==='error'){
+          throw new Error(ev.error?.message||'Erro no stream');
+        }
+      }catch(e){
+        // Swallow JSON parse errors from non-data SSE lines
+        if(e.message&&!e.message.includes('JSON')&&!e.message.includes('token')&&!e.message.includes('parse')) throw e;
+      }
+    }
+  }
+  if(!fullText) throw new Error('Resposta vazia da API. Tente novamente.');
+  return fullText;
 }
 
 // ═══════════════════════════════════════════════

@@ -5,7 +5,4 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
-[[redirects]]
-  from = "/api/claude"
-  to = "/.netlify/functions/claude"
-  status = 200
+# /api/claude and /api/checkout are handled by functions v2 via config.path

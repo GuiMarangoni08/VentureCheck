@@ -1,5 +1,5 @@
-// Proxy para Anthropic API com streaming SSE — evita timeout 504
-// Rota: POST /api/claude (via redirect no netlify.toml)
+// Proxy para Anthropic API com streaming SSE — elimina timeout 504
+// Converte handler v1→v2 e usa stream:true para pipar tokens em tempo real
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,37 +7,35 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-export const handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
+export default async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+  if (req.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
   }
 
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers: corsHeaders, body: 'Method Not Allowed' };
-  }
-
-  const API_KEY = process.env.ANTHROPIC_API_KEY;
+  const API_KEY = Netlify.env.get('ANTHROPIC_API_KEY');
   if (!API_KEY) {
-    return {
-      statusCode: 500,
+    return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY não configurado' }), {
+      status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'ANTHROPIC_API_KEY não configurado' }),
-    };
+    });
   }
 
-  let parsed;
+  let body;
   try {
-    parsed = JSON.parse(event.body);
+    body = await req.json();
   } catch {
-    return {
-      statusCode: 400,
+    return new Response(JSON.stringify({ error: 'Body inválido' }), {
+      status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'Body inválido' }),
-    };
+    });
   }
 
-  // Faz a chamada sem streaming e retorna tudo de uma vez
-  // Timeout de 26s configurado no netlify.toml
+  // Força streaming — Anthropic começa a enviar tokens imediatamente
+  body.stream = true;
+
   const upstream = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -45,13 +43,28 @@ export const handler = async (event) => {
       'x-api-key': API_KEY,
       'anthropic-version': '2023-06-01',
     },
-    body: JSON.stringify(parsed),
+    body: JSON.stringify(body),
   });
 
-  const data = await upstream.text();
-  return {
-    statusCode: upstream.status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    body: data,
-  };
+  if (!upstream.ok) {
+    const errText = await upstream.text();
+    return new Response(errText, {
+      status: upstream.status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Pipa o SSE stream do Anthropic diretamente para o cliente
+  // Netlify não aplica timeout enquanto há dados fluindo
+  return new Response(upstream.body, {
+    status: 200,
+    headers: {
+      ...corsHeaders,
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'X-Accel-Buffering': 'no',
+    },
+  });
 };
+
+export const config = { path: '/api/claude' };
