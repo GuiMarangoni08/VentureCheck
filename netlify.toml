@@ -5,4 +5,6 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
-# /api/claude and /api/checkout are handled by functions v2 via config.path
+[[edge_functions]]
+  function = "claude"
+  path = "/api/claude"
