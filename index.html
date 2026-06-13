@@ -1618,6 +1618,15 @@ function recoverSession(){
         const ta = document.getElementById(`qa-${idx}`);
         if(ta){ ta.value = val; onAnswer(idx, val); }
       });
+      // Restaurar estado do round 2 (perguntas complementares)
+      if(S.round === 2 && S.complement?.length > 0){
+        document.getElementById('complement-section').style.display = 'block';
+        renderQuestions(S.complement, true);
+        Object.entries(S.compAnswers||{}).forEach(([idx, val])=>{
+          const ta = document.getElementById(`qa-c${idx}`);
+          if(ta){ ta.value = val; onAnswer('c'+idx, val); }
+        });
+      }
       document.getElementById('submit-row').style.display = 'flex';
     } else {
       // Só tinha o formulário — ir para setup
@@ -1653,11 +1662,18 @@ function clearDraft(){
 }
 async function submitAnswers(){
   const answered=Object.values(S.answers).filter(v=>v.trim().length>20).length;
-  const critical=S.questions.filter(q=>q.critical).map((_,i)=>i);
-  const criticalAnswered=critical.every(i=>(S.answers[i]||'').trim().length>20);
 
   if(answered<Math.ceil(S.questions.length*0.6)){
     alert(`Responda pelo menos ${Math.ceil(S.questions.length*0.6)} perguntas para continuar.`);return;
+  }
+
+  // Se estamos no round 2, verificar se perguntas críticas foram respondidas
+  if(S.round===2 && S.complement?.length>0){
+    const critComp=S.complement.filter(q=>q.critical).length;
+    const critAnswered=S.complement.filter((q,i)=>q.critical&&(S.compAnswers[i]||'').trim().length>10).length;
+    if(critComp>0 && critAnswered<critComp){
+      alert('Responda as perguntas críticas (⚡) para continuar.');return;
+    }
   }
 
   setProc(true,'Avaliando qualidade das respostas...');
@@ -1665,12 +1681,28 @@ async function submitAnswers(){
 
   try{
     const qa=buildQA();
+
+    // Se já estamos no round 2, pular avaliação e ir direto para análise final
+    if(S.round===2){
+      setProc(true,'Gerando relatório completo...');
+      const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 3500, 'claude-haiku-4-5-20251001');
+      let finalParsed;
+      try{finalParsed=parseJSON(finalRes)}
+      catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório. Tente novamente.')}
+      setProc(false);
+      clearDraft();
+      saveSession(finalParsed);
+      renderAnalysis(finalParsed);
+      showScreen('analysis');
+      return;
+    }
+
     const res=await callClaude(evalPrompt(qa), 1800);
     let parsed;
     try{parsed=parseJSON(res)}
     catch(e){console.error('Eval parse error:',e,'\nRaw:',res);throw new Error('Erro ao avaliar respostas.')}
 
-    if(parsed.needs_complement&&parsed.complement_questions?.length&&S.round===1){
+    if(parsed.needs_complement&&parsed.complement_questions?.length){
       // Needs more
       S.complement=parsed.complement_questions;
       S.round=2;
@@ -1684,8 +1716,9 @@ async function submitAnswers(){
       const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 3500, 'claude-haiku-4-5-20251001');
       let finalParsed;
       try{finalParsed=parseJSON(finalRes)}
-      catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório final.')}
+      catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório. Tente novamente.')}
       setProc(false);
+      clearDraft();
       saveSession(finalParsed);
       renderAnalysis(finalParsed);
       showScreen('analysis');
