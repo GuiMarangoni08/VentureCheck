@@ -2,9 +2,10 @@
 // Provider selecionado via variável de ambiente PAYMENT_PROVIDER (mp | stripe)
 
 const PLANS = {
-  validacao:   { title: 'VentureCheck — Validação',   price: 149, description: 'IMI · Análise de mercado · Veredito · Providências' },
-  diagnostico: { title: 'VentureCheck — Diagnóstico', price: 497, description: 'Análise completa · 7 blocos · Financeiro · Roadmap' },
-  captacao:    { title: 'VentureCheck — Captação',    price: 999, description: 'Tudo + Valuation · Data room · Pitch deck' },
+  validacao:    { title: 'VentureCheck — Validação',      price: 149,  description: 'IMI · Clareza da ideia · Veredito · Próximos passos' },
+  diagnostico:  { title: 'VentureCheck — Diagnóstico',    price: 497,  description: 'Análise completa · 7 blocos · Financeiro · Roadmap' },
+  business_plan:{ title: 'VentureCheck — Business Plan',  price: 997,  description: 'Projeções · Plano operacional · Modelo financeiro' },
+  venture:      { title: 'VentureCheck — Venture',        price: 1697, description: 'Valuation · Data room · Pitch deck · Estratégia captação' },
 };
 
 async function createMercadoPago(plan, sessionId, origin) {

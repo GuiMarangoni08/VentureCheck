@@ -540,6 +540,23 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
   .dna-grid{grid-template-columns:repeat(2,1fr)}
   .hero h1{font-size:40px}
 }
+
+@media print {
+  /* Hide everything except the analysis screen */
+  body > * { display: none !important; }
+  #screen-analysis { display: block !important; position: static !important; }
+  .app-shell, #left-panel, .ana-tabs, .btn-row, #fb-section, #proc-wrap,
+  #recovery-banner, #save-indicator, .flow-step-label { display: none !important; }
+  .screen { display: none !important; }
+  #screen-analysis { display: block !important; }
+  .tab-panel { display: block !important; page-break-inside: avoid; }
+  .card { break-inside: avoid; border: 1px solid #ddd !important; margin-bottom: 12px; }
+  body { background: #fff !important; color: #000 !important; font-size: 11pt; }
+  #ana-title { font-size: 24pt; color: #000 !important; }
+  .score-bar-fill { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  a { color: #000 !important; text-decoration: none; }
+  @page { margin: 18mm 15mm; size: A4; }
+}
 </style>
 </head>
 <body>
@@ -678,7 +695,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
       <!-- Planos -->
       <div class="dna-section" style="padding:22px;margin-bottom:0">
         <div class="section-title">💎 ESCOLHA SEU PLANO</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
           <div style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r2);padding:24px;text-align:center">
             <div style="font-size:28px;margin-bottom:8px">🌱</div>
             <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">Validação</div>
@@ -694,12 +711,19 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
             <div style="font-size:11px;color:var(--t2);margin:12px 0;line-height:1.7">Tudo do Validação + 7 blocos profundos · Financeiro · MVP · Priorização · Roadmap · Riscos</div>
             <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startCheckout('diagnostico')">Começar →</button>
           </div>
-          <div style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r2);padding:24px;text-align:center">
-            <div style="font-size:28px;margin-bottom:8px">💎</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">Captação</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);letter-spacing:2px">R$999</div>
-            <div style="font-size:11px;color:var(--t2);margin:12px 0;line-height:1.7">Tudo do Diagnóstico + Valuation · Data room · Pitch deck · Perfil do investidor ideal</div>
-            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="startCheckout('captacao')">Começar →</button>
+                    <div style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r2);padding:20px;text-align:center">
+            <div style="font-size:26px;margin-bottom:8px">📋</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:4px">Business Plan</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);letter-spacing:2px">R$997</div>
+            <div style="font-size:10px;color:var(--t2);margin:10px 0;line-height:1.7">Tudo + Projeções 3 anos · SWOT · Plano operacional · Modelo financeiro · PDF</div>
+            <button class="btn btn-p" style="width:100%;justify-content:center;font-size:12px" onclick="startCheckout('business_plan')">Começar →</button>
+          </div>
+          <div style="background:var(--s2);border:1px solid var(--border2);border-radius:var(--r2);padding:20px;text-align:center">
+            <div style="font-size:26px;margin-bottom:8px">💎</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:4px">Venture</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);letter-spacing:2px">R$1.697</div>
+            <div style="font-size:10px;color:var(--t2);margin:10px 0;line-height:1.7">Tudo + Valuation · Data room · Pitch deck · Estratégia captação · PDF</div>
+            <button class="btn btn-p" style="width:100%;justify-content:center;font-size:12px" onclick="startCheckout('venture')">Começar →</button>
           </div>
         </div>
       </div>
@@ -909,7 +933,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
         <div class="ana-tab tab-roadmap-btn" onclick="switchTab('roadmap')">🗺 Roadmap</div>
         <div class="ana-tab tab-risks-btn" onclick="switchTab('risks')">⚠ Riscos</div>
         <div class="ana-tab tab-benchmarks-btn" onclick="switchTab('benchmarks')" style="display:none">🌎 Benchmarks</div>
-        <div class="ana-tab tab-captacao-btn" onclick="switchTab('captacao')" style="display:none">💎 Captação</div>
+        <div class="ana-tab tab-captacao-btn" onclick="switchTab('captacao')" style="display:none">💎 Venture</div>
       </div>
 
       <div class="tab-panel active" id="tab-viability">
@@ -1030,7 +1054,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
       <hr>
       <div class="btn-row">
-        <button class="btn btn-p" onclick="exportPDF()">📄 Baixar PDF</button>
+        <button class="btn btn-p" id="btn-export-pdf" onclick="exportPDF()">📄 Baixar PDF</button>
         <button class="btn btn-g" onclick="startModeB()">+ Novo diagnóstico</button>
         <button class="btn btn-g" onclick="showScreen('home')">Dashboard</button>
       </div>
@@ -1781,9 +1805,10 @@ function renderAnalysis(d){
 
   // Controla visibilidade das tabs por plano
   const tabsConfig = {
-    validacao:   {financial:false, mvp:false, matrix:false, roadmap:false, risks:false, benchmarks:false, captacao:false},
-    diagnostico: {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:false},
-    captacao:    {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:true},
+    validacao:    {financial:false, mvp:false, matrix:false, roadmap:false, risks:false, benchmarks:false, captacao:false},
+    diagnostico:  {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:false},
+    business_plan:{financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:false},
+    venture:      {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:true},
   };
   const tc = tabsConfig[plan] || tabsConfig.diagnostico;
   document.querySelector('.tab-financial-btn').style.display   = tc.financial   ? '' : 'none';
@@ -1941,7 +1966,7 @@ function renderAnalysis(d){
 
   // Tab Captação (plano captacao)
   const capb = document.getElementById('captacao-body');
-  if(plan==='captacao' && capb){
+  if(plan==='venture' && capb){
     capb.innerHTML='';
     if(d.valuation){
       capb.innerHTML+=`<div class="card"><div class="card-head"><div class="card-title">💰 Valuation</div></div><div class="card-body">
@@ -1979,6 +2004,38 @@ function renderAnalysis(d){
   }
 
   // ── Seções exclusivas do Plano Validação ──────────────────────
+  // Business Plan: SWOT
+  if(plan==='business_plan' && d.analise_swot){
+    const swotWrap = document.getElementById('captacao-body');
+    if(swotWrap){
+      const sw = d.analise_swot;
+      swotWrap.innerHTML = `
+        <div class="card" style="margin-bottom:16px"><div class="card-head"><div class="card-title">📊 Análise SWOT</div></div><div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div style="background:rgba(127,255,110,.08);border:1px solid rgba(127,255,110,.25);border-radius:8px;padding:16px">
+              <div style="font-weight:700;margin-bottom:8px;color:#7fff6e">💪 Forças</div>
+              ${(sw.forcas||[]).map(f=>'<div style="margin-bottom:4px;font-size:13px">• '+f+'</div>').join('')}
+            </div>
+            <div style="background:rgba(255,90,90,.08);border:1px solid rgba(255,90,90,.25);border-radius:8px;padding:16px">
+              <div style="font-weight:700;margin-bottom:8px;color:#ff5a5a">⚠ Fraquezas</div>
+              ${(sw.fraquezas||[]).map(f=>'<div style="margin-bottom:4px;font-size:13px">• '+f+'</div>').join('')}
+            </div>
+            <div style="background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.25);border-radius:8px;padding:16px">
+              <div style="font-weight:700;margin-bottom:8px;color:#ffb347">🚀 Oportunidades</div>
+              ${(sw.oportunidades||[]).map(f=>'<div style="margin-bottom:4px;font-size:13px">• '+f+'</div>').join('')}
+            </div>
+            <div style="background:rgba(180,180,180,.08);border:1px solid rgba(180,180,180,.25);border-radius:8px;padding:16px">
+              <div style="font-weight:700;margin-bottom:8px;color:#b4b4b4">🔱 Ameaças</div>
+              ${(sw.ameacas||[]).map(f=>'<div style="margin-bottom:4px;font-size:13px">• '+f+'</div>').join('')}
+            </div>
+          </div>
+        </div></div>
+        ${d.plano_operacional ? '<div class="card"><div class="card-head"><div class="card-title">⚙ Plano Operacional</div></div><div class="card-body"><div style="margin-bottom:8px;font-size:13px">'+d.plano_operacional.estrutura+'</div><div style="margin-bottom:4px;font-size:11px;color:var(--t3)">PROCESSOS-CHAVE</div>'+(d.plano_operacional.processos_chave||[]).map(p=>'<div style="margin-bottom:4px;font-size:13px">• '+p+'</div>').join('')+'<div style="margin-top:8px;font-size:11px;color:var(--t3)">MÉTRICAS OPERACIONAIS</div>'+(d.plano_operacional.metricas_operacionais||[]).map(p=>'<div style="margin-bottom:4px;font-size:13px">• '+p+'</div>').join('')+'</div></div>' : ''}
+      `;
+      document.querySelector('.tab-captacao-btn').style.display = '';
+    }
+  }
+
   if(plan==='validacao'){
     const ppval = document.getElementById('proximos-passos-section');
 
@@ -2066,10 +2123,10 @@ function renderAnalysis(d){
 
   // Próximos Passos — diagnóstico e captação (validação usa to-do list acima)
   const ppsec = document.getElementById('proximos-passos-section');
-  if(ppsec && d.proximos_passos?.length && plan !== 'validacao'){
-    const planLabels = {diagnostico:'Captação (R$999)', captacao:'Série A'};
+  if(ppsec && d.proximos_passos?.length && plan !== 'validacao' && plan !== 'business_plan'){
+    const planLabels = {diagnostico:'Business Plan (R$997)', business_plan:'Venture (R$1.697)', venture:'Série A'};
     const nextLabel = planLabels[plan] || 'próximo nível';
-    const nextPlan  = {diagnostico:'captacao'}[plan];
+    const nextPlan  = {diagnostico:'business_plan', business_plan:'venture'}[plan];
     ppsec.style.display = 'block';
     ppsec.innerHTML = `
       <div class="card" style="border:1px solid var(--accent);background:var(--s2)">
@@ -2095,7 +2152,7 @@ function renderAnalysis(d){
     ppsec.style.display = 'none';
   }
   // Garantir que ppsec não apareça em validação (to-do list já substitui)
-  if(ppsec && plan==='validacao') ppsec.style.display = 'none';
+  if(ppsec && (plan==='validacao' || plan==='business_plan')) ppsec.style.display = 'none';
 
   // Feedback — todos os planos; janela 3 só para diagnóstico e captação
   const fbsec = document.getElementById('feedback-section');
@@ -2103,11 +2160,11 @@ function renderAnalysis(d){
     fbsec.style.display = 'block';
     for (let i = 1; i <= 5; i++) { _feedbackRatings[i] = 0; _feedbackSent[i] = false; }
     const fb3 = document.getElementById('fb-card-3');
-    if (fb3) fb3.style.display = (plan === 'diagnostico' || plan === 'captacao') ? 'block' : 'none';
+    if (fb3) fb3.style.display = (['diagnostico','business_plan','venture'].includes(plan)) ? 'block' : 'none';
     const fb4 = document.getElementById('fb-card-4');
-    if (fb4) fb4.style.display = plan === 'captacao' ? 'block' : 'none';
+    if (fb4) fb4.style.display = plan === 'venture' ? 'block' : 'none';
     const fb5 = document.getElementById('fb-card-5');
-    if (fb5) fb5.style.display = plan === 'captacao' ? 'block' : 'none';
+    if (fb5) fb5.style.display = plan === 'venture' ? 'block' : 'none';
   }
 }
 
@@ -2366,8 +2423,99 @@ JSON (sem markdown):
   }
 
   // ── PLANO CAPTAÇÃO ───────────────────────────────────────────
-  if(plan==='captacao'){
-    return[{role:'user',content:`Análise completa para captação de investimento — DNA Board 31 Lentes — Plano Captação.
+  if(plan==='business_plan'){
+    return[{role:'user',content:`Análise de Business Plan — DNA Board 31 Lentes — Plano Business Plan.
+Este founder já validou e diagnosticou o negócio. Responda: como estruturar o Business Plan operacional completo?
+
+${qa}
+
+REGRA PSF GATE: se o contexto indicar ZERO conversas reais, problema_score máximo é 2/5.
+REGRA HIPÓTESE vs DADO: prefixar números com [H] (hipótese) ou [D] (dado medido). Se 80%+ forem [H]: alerta obrigatório no campo financeiro.
+REGRA ESCOPO: se naoFaz não estiver declarado, incluir nos proximos_passos.
+REGRA FOUNDER-IA: se Geração 3, destacar no campo "time" como vantagem de eficiência operacional.
+
+${rules}
+
+JSON (sem markdown):
+{
+  "verdict":"VIÁVEL|VIÁVEL COM AJUSTES|INVIÁVEL",
+  "resumo":"3 linhas — avaliação do plano de negócio com justificativa",
+  "problema":"análise do problema de negócio — máx 4 linhas","problema_score":1-5,
+  "solucao":"análise da solução e proposta de valor — máx 4 linhas","solucao_score":1-5,
+  "mercado":"TAM/SAM/SOM com números — máx 4 linhas","mercado_score":1-5,
+  "modelo":"modelo de receita, unit economics, margens — máx 4 linhas","modelo_score":1-5,
+  "competicao":"análise competitiva com posicionamento — máx 4 linhas","competicao_score":1-5,
+  "time":"análise do time executivo e gaps — máx 4 linhas","time_score":1-5,
+  "capital":"necessidades de capital e uso dos recursos — máx 4 linhas","capital_score":1-5,
+  "financeiro":"sumário financeiro em 2 linhas",
+  "financeiro_table":[
+    {"metrica":"Receita projetada Ano 1","valor":"R$ X","obs":"premissas principais"},
+    {"metrica":"Receita projetada Ano 2","valor":"R$ X","obs":"taxa de crescimento"},
+    {"metrica":"Receita projetada Ano 3","valor":"R$ X","obs":""},
+    {"metrica":"Margem bruta","valor":"X%","obs":""},
+    {"metrica":"Margem EBITDA (Ano 2)","valor":"X%","obs":""},
+    {"metrica":"CAC","valor":"R$ X","obs":"canal principal"},
+    {"metrica":"LTV","valor":"R$ X","obs":""},
+    {"metrica":"LTV/CAC","valor":"Xx","obs":"saudável >3x"},
+    {"metrica":"Break-even","valor":"Mês X","obs":""},
+    {"metrica":"Capital necessário","valor":"R$ X","obs":"para X meses"},
+    {"metrica":"Payback do investimento","valor":"X meses","obs":""}
+  ],
+  "plano_operacional":{
+    "estrutura":"estrutura organizacional — 2 linhas",
+    "processos_chave":["processo crítico 1","processo 2","processo 3"],
+    "tecnologia":"stack tecnológico e infraestrutura — 1 linha",
+    "fornecedores":["fornecedor/parceiro crítico 1","2","3"],
+    "metricas_operacionais":["KPI operacional 1 com meta","2","3"]
+  },
+  "mvp":{
+    "descricao":"estado atual do produto — 2 linhas",
+    "entra":["feature essencial 1","2","3"],
+    "fora":["o que não construir agora 1","2"],
+    "custo":"R$ X",
+    "tempo":"X semanas",
+    "stack":"stack recomendado",
+    "criterios":"métricas que provam que o produto funciona"
+  },
+  "matriz":{
+    "quick_wins":["ação de alto impacto 1 com prazo","2","3"],
+    "apostas":["aposta estratégica 1","2"],
+    "tarefas":["tarefa operacional 1","2"],
+    "descartar":["o que eliminar do plano 1","2"],
+    "primeiro_passo":"ação CONCRETA que acontece AMANHÃ"
+  },
+  "roadmap":[
+    {"title":"Lançamento","period":"0-3 meses","actions":"o que construir e lançar"},
+    {"title":"Validação de mercado","period":"Mês 3-6","actions":"como provar que o modelo funciona"},
+    {"title":"Crescimento inicial","period":"Mês 6-12","actions":"como escalar com o que foi validado"},
+    {"title":"Expansão","period":"Ano 2","actions":"novos mercados, produtos ou canais"}
+  ],
+  "riscos":[
+    "Risco 1: [nome] — probabilidade + impacto + mitigação",
+    "Risco 2: [nome] — probabilidade + impacto + mitigação",
+    "Risco 3: [nome] — probabilidade + impacto + mitigação",
+    "Risco 4: [nome] — probabilidade + impacto + mitigação"
+  ],
+  "analise_swot":{
+    "forcas":["força 1","força 2","força 3"],
+    "fraquezas":["fraqueza 1","fraqueza 2","fraqueza 3"],
+    "oportunidades":["oportunidade 1","oportunidade 2","oportunidade 3"],
+    "ameacas":["ameaça 1","ameaça 2","ameaça 3"]
+  },
+  "proximos_passos":[
+    {"check":"ação específica 1","motivo":"por que é crítico para o sucesso do plano"},
+    {"check":"ação 2","motivo":"motivo 2"},
+    {"check":"ação 3","motivo":"motivo 3"},
+    {"check":"ação 4","motivo":"motivo 4"},
+    {"check":"ação 5","motivo":"motivo 5"},
+    {"check":"ação 6","motivo":"motivo 6"}
+  ],
+  "criterio_pronto":"frase completa — quando este Business Plan está pronto para execução ou captação"
+}`}];
+  }
+
+  if(plan==='venture'){
+    return[{role:'user',content:`Análise completa para Venture — DNA Board 31 Lentes — Plano Venture.
 Este founder já validou o negócio. Responda: como estruturar para levantar capital?
 
 ${qa}
@@ -2714,9 +2862,10 @@ function prefillUserData(user) {
 // CHECKOUT — MERCADO PAGO / STRIPE
 // ══════════════════════════════════════════════════════════════
 const PLAN_INFO = {
-  validacao:   {emoji:'🌱',name:'Validação',   price:'R$149', desc:'IMI · Análise de mercado · Veredito · Providências · Manual'},
-  diagnostico: {emoji:'🚀',name:'Diagnóstico', price:'R$497', desc:'Tudo do Validação + 7 blocos · Financeiro · MVP · Roadmap · Riscos'},
-  captacao:    {emoji:'💎',name:'Captação',     price:'R$999', desc:'Tudo do Diagnóstico + Valuation · Data room · Pitch deck'},
+  validacao:    {emoji:'🌱',name:'Validação',      price:'R$149',   desc:'IMI · Clareza da ideia · Veredito · Próximos passos · PDF'},
+  diagnostico:  {emoji:'🚀',name:'Diagnóstico',    price:'R$497',   desc:'7 blocos · Financeiro · MVP · Roadmap · Riscos · PDF'},
+  business_plan:{emoji:'📋',name:'Business Plan',  price:'R$997',   desc:'Tudo + Projeções · Plano operacional · Modelo financeiro · PDF'},
+  venture:      {emoji:'💎',name:'Venture',         price:'R$1.697', desc:'Tudo + Valuation · Data room · Pitch deck · Estratégia captação · PDF'},
 };
 
 let _checkoutPlan = null;
@@ -2780,6 +2929,21 @@ async function goCheckout() {
     btn.disabled = false;
     btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#fff"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="#009ee3" font-weight="bold">MP</text></svg> Pagar com Mercado Pago';
   }
+}
+
+function exportPDF() {
+  const btn = document.getElementById('btn-export-pdf');
+  if (btn) { btn.textContent = 'Preparando...'; btn.disabled = true; }
+  // Set document title for PDF filename
+  const biz = document.getElementById('ana-title')?.textContent || 'VentureCheck';
+  const oldTitle = document.title;
+  document.title = biz + ' — Relatório VentureCheck';
+  // Small delay to let button state render, then print
+  setTimeout(() => {
+    window.print();
+    document.title = oldTitle;
+    if (btn) { btn.textContent = '📄 Baixar PDF'; btn.disabled = false; }
+  }, 150);
 }
 
 function checkPaymentReturn() {
@@ -2884,7 +3048,19 @@ const COMPLETUDE_ITEMS = {
     { id: 'ck-ia',      label: 'Uso de IA declarado',   desc: 'Classificação como founder-orquestrador impacta diretamente o roadmap e a projeção financeira.', pct: 5,  check: () => !!document.getElementById('inp-ia-uso')?.value },
     { id: 'ck-files',   label: 'Material de apoio enviado', desc: 'Planilha, deck, pesquisa ou protótipo aumentam a profundidade dos 7 blocos.', pct: 10, check: () => (window._completudeFilesCount || 0) > 0 },
   ],
-  captacao: [
+  business_plan: [
+    { id: 'ck-name',    label: 'Seu nome',                 desc: 'Identifica o fundador.',                                pct: 5,  check: () => !!document.getElementById('inp-name')?.value.trim() },
+    { id: 'ck-biz',     label: 'Nome do negócio',          desc: 'Base para projeções e comparáveis de mercado.',          pct: 5,  check: () => !!document.getElementById('inp-biz')?.value.trim() },
+    { id: 'ck-sector',  label: 'Setor de atuação',         desc: 'Benchmarks e margens corretos para o seu segmento.',     pct: 5,  check: () => !!document.getElementById('inp-sector')?.value },
+    { id: 'ck-desc',    label: 'Descrição completa',       desc: 'Problema, solução, público e modelo de negócio (100+ palavras).', pct: 10, check: () => (document.getElementById('inp-desc')?.value.trim().split(/\s+/).length || 0) >= 100 },
+    { id: 'ck-tracao',  label: 'Tração ou histórico',      desc: 'Qualquer evidência: receita, usuários, vendas, pilotos.', pct: 15, check: () => /trac|cliente|vend|pilot|mvp|receita|mrr|arr|r\$|usuário/i.test(document.getElementById('inp-desc')?.value || '') },
+    { id: 'ck-modelo',  label: 'Modelo de receita claro',  desc: 'Como você ganha dinheiro? Recorrente, transacional, B2B, B2C?', pct: 10, check: () => /recorr|assin|mensalit|comiss|transac|b2b|b2c|saas|marke/i.test(document.getElementById('inp-desc')?.value || '') },
+    { id: 'ck-psf',     label: 'Conversas com clientes',   desc: 'Validação com mercado real fortalece as premissas do BP.',  pct: 15, check: () => !!document.getElementById('inp-conv')?.value },
+    { id: 'ck-nao-faz', label: 'O que o MVP não faz',     desc: 'Escopo deliberado de produto revela disciplina de execução.', pct: 5, check: () => (document.getElementById('inp-nao-faz')?.value.trim().length || 0) >= 20 },
+    { id: 'ck-ia',      label: 'Uso de IA declarado',      desc: 'Impacta diretamente as projeções de custo e equipe no BP.', pct: 5,  check: () => !!document.getElementById('inp-ia-uso')?.value },
+    { id: 'ck-files',   label: 'Material financeiro enviado', desc: 'Planilha ou modelo financeiro aumenta a precisão das projeções.', pct: 15, check: () => (window._completudeFilesCount || 0) > 0 },
+  ],
+  venture: [
     { id: 'ck-name',    label: 'Seu nome',                 desc: 'Identifica o fundador.',                                pct: 5,  check: () => !!document.getElementById('inp-name')?.value.trim() },
     { id: 'ck-biz',     label: 'Nome do negócio',          desc: 'Base para valuation e comparáveis de mercado.',          pct: 5,  check: () => !!document.getElementById('inp-biz')?.value.trim() },
     { id: 'ck-sector',  label: 'Setor de atuação',         desc: 'Lentes e múltiplos corretos para o seu segmento.',       pct: 5,  check: () => !!document.getElementById('inp-sector')?.value },
@@ -2934,7 +3110,7 @@ function updateCompletude() {
   if (lbl)  lbl.textContent  = totalPct >= 80 ? '✅ Excelente! A análise terá máxima precisão.' : totalPct >= 60 ? '👍 Bom nível. Adicione mais detalhes para garantir 80%+.' : '⚠ Preencha mais campos para uma entrega de qualidade.';
   if (warn) warn.style.display = totalPct < 60 ? 'block' : 'none';
 
-  const planNames = { validacao: 'Validação', diagnostico: 'Diagnóstico', captacao: 'Captação' };
+  const planNames = { validacao: 'Validação', diagnostico: 'Diagnóstico', business_plan: 'Business Plan', venture: 'Venture' };
   const hdr = document.querySelector('#completude-card .card-title');
   if (hdr) hdr.textContent = `📋 Checklist de completude — ${planNames[plan] || plan}`;
 }
