@@ -2051,7 +2051,7 @@ function renderAnalysis(d){
       const prioColors={'🔴 ESTA SEMANA':'var(--red)','🟠 PRÓXIMAS 2 SEMANAS':'var(--amber)','🟡 PRÓXIMO MÊS':'#a3e635'};
       const tdEl=document.createElement('div');tdEl.style.marginTop='24px';
       tdEl.innerHTML=`<div class="card" style="border:1px solid var(--accent);background:var(--s2)">
-        <div class="card-head"><div class="card-title" style="color:var(--accent)">✅ To-do List — O que fazer agora para ter um Diagnóstico preciso</div></div>
+        <div class="card-head"><div class="card-title" style="color:var(--accent)">✅ To-do List — Ações para cumprir os pré-requisitos do Diagnóstico</div></div>
         <div class="card-body">
           ${d.todo_list.map((t,i)=>{
             const col=prioColors[t.prioridade]||'var(--t2)';
@@ -2073,38 +2073,56 @@ function renderAnalysis(d){
     }
   }
 
-  // Próximos Passos — diagnóstico e captação (validação usa to-do list acima)
+  // Próximos Passos — diagnóstico/captação/venture
   const ppsec = document.getElementById('proximos-passos-section');
-  if(ppsec && d.proximos_passos?.length && plan !== 'validacao' && plan !== 'business_plan'){
-    const planLabels = {diagnostico:'Business Plan (R$997)', business_plan:'Venture (R$1.697)', venture:'Série A'};
-    const nextLabel = planLabels[plan] || 'próximo nível';
-    const nextPlan  = {diagnostico:'business_plan', business_plan:'venture'}[plan];
+  // Unifica campos: prereqs_captacao (novo) ou proximos_passos (legado/BP/venture)
+  const passos = d.prereqs_captacao || d.proximos_passos;
+  const todoItems = d.todo_list;
+  const planLabels = {diagnostico:'Captação (R$497)', business_plan:'Venture (R$1.697)', venture:'Série A'};
+  const nextLabel = planLabels[plan] || 'próximo nível';
+  const nextPlan  = {diagnostico:'business_plan', business_plan:'venture'}[plan];
+
+  if(ppsec && plan !== 'validacao' && (passos?.length || todoItems?.length)){
+    const prioColors={'🔴 ESTA SEMANA':'var(--red)','🟡 PRÓXIMAS 2 SEMANAS':'var(--amber)','🟢 PRÓXIMO MÊS':'#a3e635'};
     ppsec.style.display = 'block';
     ppsec.innerHTML = `
-      <div class="card" style="border:1px solid var(--accent);background:var(--s2)">
+      <div class="card" style="border:1px solid var(--accent);background:var(--s2);margin-bottom:16px">
         <div class="card-head">
-          <div class="card-title" style="color:var(--accent)">→ PRÓXIMOS PASSOS — Como avançar para ${nextLabel}</div>
+          <div class="card-title" style="color:var(--accent)">🏁 Pré-requisitos para ${nextLabel}</div>
         </div>
         <div class="card-body">
-          ${d.proximos_passos.map((p,i)=>`
-            <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
-              <div style="width:20px;height:20px;border:2px solid var(--border3);border-radius:4px;flex-shrink:0;margin-top:2px"></div>
+          ${(passos||[]).map((p,i)=>`
+            <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+              <div style="min-width:22px;height:22px;border:2px solid var(--accent);border-radius:4px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--accent)">${i+1}</div>
               <div>
-                <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">${p.check}</div>
-                <div style="font-size:12px;color:var(--t2)">${p.motivo}</div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">${typeof p==='string'?p:(p.check||p)}</div>
+                ${p.motivo?`<div style="font-size:12px;color:var(--t2);margin-top:2px">${p.motivo}</div>`:''}
               </div>
             </div>`).join('')}
-          ${d.proximo_modulo||d.criterio_pronto?`<div style="font-size:12px;color:var(--accent);margin-top:8px;padding-top:12px;border-top:1px solid var(--border3)">
-            ${d.proximo_modulo||d.criterio_pronto}
-          </div>`:''}
+          ${d.proximo_modulo||d.criterio_pronto?`<div style="font-size:12px;color:var(--t2);margin-top:4px;padding-top:10px;border-top:1px solid var(--border3)">${d.proximo_modulo||d.criterio_pronto}</div>`:''}
           ${nextPlan?`<button class="btn btn-p" style="margin-top:16px;width:100%;justify-content:center" onclick="startCheckout('${nextPlan}')">Avançar para ${nextLabel} →</button>`:''}
         </div>
-      </div>`;
+      </div>
+      ${todoItems?.length?`<div class="card" style="border:1px solid var(--border2);background:var(--s2)">
+        <div class="card-head"><div class="card-title">✅ To-do List — O que fazer agora</div></div>
+        <div class="card-body">
+          ${todoItems.map(t=>{
+            const col=prioColors[t.prioridade]||'var(--t2)';
+            return`<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+              <div style="width:20px;height:20px;border:2px solid var(--border3);border-radius:4px;flex-shrink:0;margin-top:2px"></div>
+              <div style="flex:1">
+                <div style="font-size:10px;font-family:'DM Mono',monospace;letter-spacing:1px;color:${col};margin-bottom:4px">${t.prioridade||''}</div>
+                <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">${t.acao}</div>
+                <div style="font-size:12px;color:var(--t2)">${t.impacto}</div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`:''}`;
   } else if(ppsec){
     ppsec.style.display = 'none';
   }
-  // Garantir que ppsec não apareça em validação (to-do list já substitui)
-  if(ppsec && (plan==='validacao' || plan==='business_plan')) ppsec.style.display = 'none';
+  if(ppsec && plan==='validacao') ppsec.style.display = 'none';
 
   // Feedback — todos os planos; janela 3 só para diagnóstico e captação
   const fbsec = document.getElementById('feedback-section');
@@ -2651,6 +2669,13 @@ JSON (sem markdown, sem texto fora):
     "pré-requisito 3",
     "pré-requisito 4",
     "pré-requisito 5"
+  ],
+  "todo_list":[
+    {"prioridade":"🔴 ESTA SEMANA","acao":"ação concreta ligada ao prereq mais crítico — método + critério de conclusão","impacto":"qual prereq de captação isso destrava"},
+    {"prioridade":"🔴 ESTA SEMANA","acao":"ação 2","impacto":"impacto 2"},
+    {"prioridade":"🟡 PRÓXIMAS 2 SEMANAS","acao":"ação 3","impacto":"impacto 3"},
+    {"prioridade":"🟡 PRÓXIMAS 2 SEMANAS","acao":"ação 4","impacto":"impacto 4"},
+    {"prioridade":"🟢 PRÓXIMO MÊS","acao":"ação 5","impacto":"impacto 5"}
   ],
   "proximo_modulo":"1 frase — o que o Módulo Captação entrega que este não entrega"
 }`}];
