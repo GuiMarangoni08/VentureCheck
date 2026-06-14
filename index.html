@@ -1149,6 +1149,15 @@ function renderDNA(){
 }
 
 // ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// VERSION
+// ══════════════════════════════════════════════════════════════
+const APP_VERSION = 'v0.7';
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.querySelector('.logo-tag');
+  if (el) el.textContent = `${APP_VERSION} · Diagnóstico Preciso Para Sua Ideia`;
+});
+
 // STATE
 // ══════════════════════════════════════════════════════════════
 let S={
@@ -2997,7 +3006,7 @@ body { background: #0a0a0a !important; }
       ${reportHTML}
     </div>
     <div style="text-align:center;padding:32px 0;border-top:1px solid #222;margin-top:32px">
-      <div style="font-size:11px;color:#444;font-family:monospace">Gerado por VentureCheck · DNA Board 31 Lentes · aesthetic-granita-9df2c5.netlify.app</div>
+      <div style="font-size:11px;color:#444;font-family:monospace">Gerado por VentureCheck ${APP_VERSION} · DNA Board 31 Lentes · aesthetic-granita-9df2c5.netlify.app</div>
     </div>
   </div>
 <script>
