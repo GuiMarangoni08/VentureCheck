@@ -1705,7 +1705,7 @@ async function submitAnswers(){
 
   try{
     const qa=buildQA();
-    const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 3500, 'claude-haiku-4-5-20251001');
+    const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 4096, 'claude-haiku-4-5-20251001');
     let finalParsed;
     try{finalParsed=parseJSON(finalRes)}
     catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório. Tente novamente.')}
@@ -2615,16 +2615,12 @@ JSON COMPLETO (sem markdown, sem texto fora do JSON):
   "financeiro_table":[
     {"metrica":"Investimento inicial","valor":"R$ X","obs":"breakdown resumido"},
     {"metrica":"Receita Ano 1","valor":"R$ X","obs":"premissa principal"},
-    {"metrica":"Receita Ano 2","valor":"R$ X","obs":""},
-    {"metrica":"Receita Ano 3","valor":"R$ X","obs":""},
     {"metrica":"Break-even","valor":"X meses","obs":""},
     {"metrica":"CAC estimado","valor":"R$ X","obs":"canal principal"},
     {"metrica":"LTV estimado","valor":"R$ X","obs":""},
     {"metrica":"LTV/CAC","valor":"Xx","obs":"saudável >3x"},
-    {"metrica":"ROI (3 anos)","valor":"X%","obs":""},
-    {"metrica":"TIR estimada","valor":"X%","obs":""},
-    {"metrica":"Payback","valor":"X meses","obs":""},
-    {"metrica":"Margem contribuição","valor":"X%","obs":"perspectiva Leandro"}
+    {"metrica":"Margem contribuição","valor":"X%","obs":""},
+    {"metrica":"Payback","valor":"X meses","obs":""}
   ],
   "mvp":{
     "descricao":"o que é o MVP — 2 linhas diretas",
@@ -2643,10 +2639,10 @@ JSON COMPLETO (sem markdown, sem texto fora do JSON):
     "primeiro_passo":"ação CONCRETA que acontece AMANHÃ — com horário e métrica de sucesso"
   },
   "roadmap":[
-    {"title":"Fase 1 — Validação","period":"Mês 1-3","actions":"ações específicas Tallis+Nardon — máx 5 linhas"},
-    {"title":"Fase 2 — Tração","period":"Mês 4-6","actions":"ações Denis+Soares — máx 5 linhas"},
-    {"title":"Fase 3 — Escala","period":"Mês 7-12","actions":"ações Bloisi+Zuck — máx 5 linhas"},
-    {"title":"Fase 4 — Expansão","period":"Ano 2-3","actions":"visão Benchimol+Stelleo+Napoli+L.C.Fernandes — máx 5 linhas"}
+    {"title":"Fase 1 — Validação","period":"Mês 1-3","actions":"ações específicas — máx 2 linhas"},
+    {"title":"Fase 2 — Tração","period":"Mês 4-6","actions":"ações de crescimento — máx 2 linhas"},
+    {"title":"Fase 3 — Escala","period":"Mês 7-12","actions":"ações de escala — máx 2 linhas"},
+    {"title":"Fase 4 — Expansão","period":"Ano 2-3","actions":"visão de longo prazo — máx 2 linhas"}
   ],
   "riscos":[
     "Risco 1: [nome] — consequência + mitigação concreta",
@@ -2654,35 +2650,21 @@ JSON COMPLETO (sem markdown, sem texto fora do JSON):
     "Risco 3: [nome] — consequência + mitigação"
   ],
   "benchmarks":{
-    "abrangencia":"local|estadual|nacional|global — raio real de referência para este negócio",
-    "local":[
-      {"nome":"nome de referência local ou perfil típico","metricas":"1-2 métricas-chave (faturamento, volume, clientes)","aprendizado":"o que esse benchmark ensina para este negócio"}
-    ],
-    "estadual":[
-      {"nome":"referência estadual","metricas":"métricas relevantes","aprendizado":"aprendizado aplicável"}
-    ],
     "nacional":[
-      {"nome":"referência nacional","metricas":"métricas relevantes","aprendizado":"aprendizado aplicável"}
+      {"nome":"referência nacional","metricas":"1-2 métricas-chave","aprendizado":"aprendizado aplicável"}
     ],
     "internacional":[
-      {"nome":"referência internacional — país ou empresa","metricas":"métricas relevantes","aprendizado":"o que o Brasil pode aprender ou adaptar"}
+      {"nome":"referência internacional","metricas":"1-2 métricas-chave","aprendizado":"o que adaptar para o Brasil"}
     ],
-    "cases_sucesso":[
-      {"nome":"nome do case","contexto":"onde/quando surgiu","resultado":"resultado alcançado em 1 linha","licao":"lição principal aplicável a este negócio"}
-    ],
-    "cases_fracasso":[
-      {"nome":"nome do case ou perfil","contexto":"onde/quando","motivo":"por que falhou em 1 linha","licao":"o que este founder deve evitar"}
-    ]
+    "case_sucesso":{"nome":"nome do case","licao":"lição principal em 1 linha"},
+    "case_fracasso":{"nome":"nome do case","licao":"o que este founder deve evitar em 1 linha"}
   },
   "proximos_passos":[
-    {"check":"ação específica 1","motivo":"por que isso é pré-requisito para o Módulo Captação"},
+    {"check":"ação específica 1","motivo":"por que é pré-requisito para Captação"},
     {"check":"ação 2","motivo":"motivo 2"},
     {"check":"ação 3","motivo":"motivo 3"},
     {"check":"ação 4","motivo":"motivo 4"},
-    {"check":"ação 5","motivo":"motivo 5"},
-    {"check":"ação 6","motivo":"motivo 6"},
-    {"check":"ação 7","motivo":"motivo 7"},
-    {"check":"ação 8","motivo":"motivo 8"}
+    {"check":"ação 5","motivo":"motivo 5"}
   ],
   "proximo_modulo":"1 linha sobre o que o Módulo Captação entrega de diferente"
 }`}];
