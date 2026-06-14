@@ -2340,46 +2340,50 @@ function finalPrompt(qa, plan){
   if(plan==='validacao'){
     return[{role:'user',content:`Análise de clareza de ideia — DNA Board 31 Lentes — Plano Validação.
 
-FILOSOFIA DESTE PLANO: o founder provavelmente não tem números ainda — e tudo bem. Sua missão não é cobrar evidências que ele não tem. É: (1) clarificar a ideia com precisão cirúrgica, (2) mostrar o que o mercado já prova sobre ideias parecidas, (3) dar um to-do list tão preciso que o Diagnóstico vai ser muito melhor por causa do que ele vai fazer agora.
+MISSÃO: Não validar o negócio — clarificar a hipótese. O founder está na fase de ideação: provavelmente não tem números, não vendeu ainda, pode não ter nem conversado com clientes. Sua função é:
+1. Nomear com precisão o que a ideia É e o que ela NÃO É
+2. Identificar a hipótese mais arriscada que precisa ser testada ANTES de gastar dinheiro
+3. Dar um to-do list tão específico que o Diagnóstico vai ser 10x melhor por causa do que ele vai fazer agora
+4. Decidir: vale avançar para Diagnóstico, clarear mais, ou a hipótese é fundamentalmente frágil?
 
 ${qa}
 
-REGRA PSF GATE: se o contexto indicar "ZERO conversas reais", problema_score máximo 2/5 e campo "problema" deve nomear explicitamente a ausência — sem punir, mas apontando o próximo passo obrigatório.
-REGRA ESCOPO: se "o que não faz" não estiver declarado, incluir como primeiro item do to-do list.
-REGRA HIPÓTESE vs DADO: em todo número que aparecer no relatório, prefixar com [H] se for hipótese/estimativa ou [D] se for dado medido/comprovado. Se 80%+ dos números forem [H]: (1) tração_score máximo 2/5 E (2) mercado_score máximo 3/5 — o mercado não pode receber nota alta se o TAM e toda premissa financeira forem hipótese sem dado externo comprovado.
-REGRA FOUNDER-IA: se Geração 1 (não usa IA), adicionar item no to-do list com ferramentas específicas para este setor. Se Geração 3, aumentar founder_score em 1 ponto e mencionar explicitamente como diferencial de runway.
-BENCHMARKS: use os benchmarks setoriais fornecidos no contexto como régua explícita — compare onde o founder está vs. onde precisa chegar e nomeie o gap em número: ex. "retenção D30 estimada de X% vs benchmark de ≥40%".
-REGRA ADVERSARIAL (concorrentes): para cada concorrente identificado, inclua no campo "alerta" um parágrafo estruturado em 2 partes: (A) "Como me copia em 6 meses: [mecanismo específico]" e (B) "O que eu precisaria fazer para tornar isso incopiável: [ação defensável]". Se não conseguir construir uma defesa real, marcar como "VULNERABILIDADE ABERTA".
+REGRAS DE ANÁLISE:
+- Zero conversas com clientes = problema_score máximo 2/5. Nomear isso sem punir — é o próximo passo obrigatório.
+- Números sem dado real = prefixar [H]. Se 80%+ forem [H]: mercado_score máximo 3/5.
+- Se Geração 1 (sem IA): incluir ferramentas de IA específicas para o setor no to-do list.
+- Para cada concorrente: nomear como copiam em 6 meses E qual a defesa possível. Se não houver defesa: "VULNERABILIDADE ABERTA".
+- O farol de avanço NÃO é genérico. São 3-4 pré-requisitos específicos e verificáveis que, se cumpridos, tornam o Diagnóstico muito mais preciso.
 
 ${rules}
 
-JSON (sem markdown):
+JSON (sem markdown, sem texto fora):
 {
-  "verdict":"IDEIA CLARA|IDEIA PROMISSORA|IDEIA PRECISA CLAREZA",
-  "resumo":"3 linhas — clareza sobre o que a ideia é e o que falta clarificar",
+  "verdict":"AVANÇAR PARA DIAGNÓSTICO|CLAREAR ANTES DE AVANÇAR|HIPÓTESE FRÁGIL — VOLTE À RUA",
+  "resumo":"2 frases diretas — o que a ideia é de fato + o maior gap atual",
   "imi_score":0-100,
   "imi_nivel":"Semente|Germinando|Crescendo|Pronta",
-  "imi_justificativa":"2 linhas — explica o score sem punir a falta de números",
-  "clareza_ideia":{
-    "hipotese_central":"[persona] + [mecanismo] + [problema] + [causa raiz] — 1 frase",
-    "o_que_esta_claro":"3 pontos que o founder já tem clareza — 1 linha cada",
-    "o_que_precisa_clarear":"3 perguntas que ele precisa responder antes do Diagnóstico — 1 linha cada",
-    "risco_fatal":"o único risco que, se confirmado, inviabiliza tudo — 1 linha"
-  },
-  "problema":"análise da dor — máx 3 linhas","problema_score":1-5,
-  "solucao":"análise da solução — máx 3 linhas","solucao_score":1-5,
-  "mercado":"TAM Brasil em 1 número com premissa [H] ou [D] — máx 2 linhas","mercado_score":1-5,
-  "concorrentes":"principais concorrentes + diferencial real + 1 alerta de cópia — máx 3 linhas",
-  "modelo":"análise do modelo de negócio — máx 3 linhas","modelo_score":1-5,
+  "hipotese_central":"[persona específica] tem [problema concreto] porque [causa raiz]. A solução é [mecanismo] e o modelo de receita é [como cobra].",
+  "o_que_esta_claro":["ponto 1 — 1 frase","ponto 2","ponto 3"],
+  "hipotese_mais_arriscada":"a hipótese que, se falsa, mata tudo — 1 frase direta",
+  "problema":"o problema é real? validado como? qual o grau de dor? — 2 frases","problema_score":1-5,
+  "solucao":"a solução resolve o problema real? tem diferencial defensável? — 2 frases","solucao_score":1-5,
+  "mercado":"TAM Brasil: [H/D] R$X — premissa em 1 linha. Concorrência direta em 1 linha.","mercado_score":1-5,
+  "modelo":"como cobra, de quem, quanto — unit economics básico. Se não definido: nomear o gap.","modelo_score":1-5,
+  "risco_fatal":"o único risco que, se confirmado, inviabiliza tudo — 1 frase",
   "todo_list":[
-    {"prioridade":"🔴 ESTA SEMANA","acao":"ação específica 1 com método e critério","impacto":"o que isso desbloqueia"},
+    {"prioridade":"🔴 ESTA SEMANA","acao":"ação específica com método e critério de sucesso","impacto":"o que desbloqueia para o Diagnóstico"},
     {"prioridade":"🔴 ESTA SEMANA","acao":"ação 2","impacto":"impacto 2"},
     {"prioridade":"🟡 PRÓXIMAS 2 SEMANAS","acao":"ação 3","impacto":"impacto 3"},
     {"prioridade":"🟡 PRÓXIMAS 2 SEMANAS","acao":"ação 4","impacto":"impacto 4"}
   ],
-  "criterio_diagnostico":"quando o founder está pronto para o Diagnóstico — específico",
-  "manual":"parágrafo direto — máx 4 linhas — tom de mentor",
-  "proximo_modulo":"1 linha — o que o Módulo Diagnóstico vai entregar que este não entrega"
+  "prereqs_diagnostico":[
+    "pré-requisito 1 — verificável e específico (ex: 10 entrevistas com clientes reais documentadas)",
+    "pré-requisito 2",
+    "pré-requisito 3",
+    "pré-requisito 4"
+  ],
+  "proximo_modulo":"1 frase — o que o Diagnóstico entrega que este módulo não entrega"
 }`}];
   }
 
@@ -2575,93 +2579,80 @@ JSON (sem markdown):
   // ── PLANO DIAGNÓSTICO (default) ──────────────────────────────
   return[{role:'user',content:`Análise completa de viabilidade — DNA Board 31 Lentes — Plano Diagnóstico.
 
+MISSÃO: O founder já passou pela Validação. Agora precisa saber se o negócio tem fundamento real para avançar para Captação. Sua função é:
+1. Avaliar cada bloco com rigor — o founder já deveria ter conversas reais, algum número, escopo definido
+2. Nomear exatamente o que está comprovado [D] vs hipótese [H] em cada bloco
+3. Dar um veredito claro: está pronto para Captação, precisa ajustar, ou tem problemas fundamentais
+4. Listar pré-requisitos específicos e verificáveis para o Módulo Captação — não genéricos
+
 ${qa}
 
-REGRA PSF GATE: se o contexto indicar "ZERO conversas reais", a nota imi_dimensoes.problema fica limitada a 8/20 e o campo "problema" deve indicar explicitamente a ausência de validação com clientes reais.
-REGRA ESCOPO: se o founder não declarou o que o MVP não faz, incluir nos proximos_passos como ação obrigatória pré-Captação.
-REGRA ADVERSARIAL COMPETITIVO: no campo "competicao", após a análise Musk+Zuck+Benchimol, inclua obrigatoriamente um bloco "ADVOGADO DO DIABO" para cada concorrente principal com 2 partes: (A) "Como me copia em 6 meses: [mecanismo específico e realista]" e (B) "Defesa possível: [ação concreta]". Se não houver defesa real, marcar "VULNERABILIDADE ABERTA". O objetivo é destruir o posicionamento do founder — se a ideia sobreviver ao ataque, mereceu a nota.
-REGRA HIPÓTESE vs DADO: em todo número citado no relatório, prefixar com [H] se for hipótese/estimativa ou [D] se dado medido/comprovado. Se 80%+ forem [H]: (1) tracao score em imi_dimensoes máximo 8/20 E (2) mercado score em imi_dimensoes máximo 12/20 — mercado sem dado externo validado não pode receber nota cheia.
-REGRA FOUNDER-IA: se Geração 1, adicionar item no proximos_passos com ferramentas de IA específicas para este setor. Se Geração 3, aumentar nota de founder em 1 ponto e destacar no campo "time" como vantagem de execução.
-BENCHMARKS: use os benchmarks setoriais do contexto como régua — nomeie o gap em número: ex. "retenção D30 estimada [H]X% vs benchmark ≥40%".
+REGRAS DE ANÁLISE:
+- Zero conversas reais = problema em imi_dimensoes limitado a 8/20. Nomear explicitamente.
+- Prefixar todos os números com [H] hipótese ou [D] dado medido. Se 80%+ [H]: tracao máx 8/20 e mercado máx 12/20.
+- Competição: para cada concorrente, nomear (A) como copia em 6 meses e (B) defesa possível. Sem defesa = "VULNERABILIDADE ABERTA".
+- Benchmarks setoriais: comparar onde o founder está vs onde precisa estar com número explícito.
+- Geração 1 (sem IA): adicionar ferramenta específica do setor nos prereqs. Geração 3: +1 ponto founder.
+- MVP não definido (naoFaz ausente): incluir como prereq obrigatório.
+- Os prereqs_captacao NÃO são genéricos. São condições que, se não cumpridas, fazem o investidor rejeitar na primeira reunião.
 
 ${rules}
 
-JSON COMPLETO (sem markdown, sem texto fora do JSON):
+JSON (sem markdown, sem texto fora):
 {
-  "verdict":"APROVADO|REPROVADO|REQUER AJUSTES",
-  "resumo":"3 linhas diretas — veredito com justificativa integrada DNA Board",
+  "verdict":"PRONTO PARA CAPTAÇÃO|REQUER AJUSTES|NÃO ESTÁ PRONTO",
+  "resumo":"2 frases — veredito direto com o principal motivo",
   "imi_score":0-100,
   "imi_nivel":"Semente|Germinando|Crescendo|Pronta",
   "imi_dimensoes":{
-    "problema":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
+    "problema":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha com evidência ou gap"},
     "solucao":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
     "mercado":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
     "founder":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
-    "tracao":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"}
+    "tracao":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha com número [H] ou [D]"}
   },
-  "problema":"2 frases — problema real + gap de validação","problema_score":1-5,
-  "solucao":"2 frases — diferencial real + maior fraqueza","solucao_score":1-5,
-  "mercado":"TAM/SAM/SOM em 1 linha com número","mercado_score":1-5,
-  "modelo":"unit economics em 1 linha + risco principal","modelo_score":1-5,
-  "competicao":"2 concorrentes + VULNERABILIDADE ABERTA se não houver defesa","competicao_score":1-5,
-  "time":"2 frases — ponto forte + gap crítico do time","time_score":1-5,
-  "capital":"necessidade em R$ + runway + risco principal","capital_score":1-5,
-  "financeiro":"tese financeira em 2 linhas",
+  "problema":"dor validada? com quem? qual evidência? — 2 frases","problema_score":1-5,
+  "solucao":"diferencial real vs concorrentes + fraqueza principal — 2 frases","solucao_score":1-5,
+  "mercado":"[H/D] TAM R$X · SAM R$X · SOM R$X — premissa em 1 linha","mercado_score":1-5,
+  "modelo":"como cobra + unit economics básico + gap principal — 2 frases","modelo_score":1-5,
+  "competicao":"concorrente 1: copia como + defesa. concorrente 2: copia como + defesa. — 2 frases","competicao_score":1-5,
+  "time":"credencial mais relevante + gap crítico que pode travar execução — 2 frases","time_score":1-5,
+  "capital":"necessidade: R$X para X meses · risco principal de runway — 1 frase","capital_score":1-5,
   "financeiro_table":[
-    {"metrica":"Investimento inicial","valor":"R$ X","obs":"breakdown resumido"},
-    {"metrica":"Receita Ano 1","valor":"R$ X","obs":"premissa principal"},
-    {"metrica":"Break-even","valor":"X meses","obs":""},
-    {"metrica":"CAC estimado","valor":"R$ X","obs":"canal principal"},
-    {"metrica":"LTV estimado","valor":"R$ X","obs":""},
+    {"metrica":"Investimento inicial","valor":"[H/D] R$ X","obs":"premissa principal"},
+    {"metrica":"Receita Ano 1","valor":"[H/D] R$ X","obs":"canal e premissa"},
+    {"metrica":"Break-even","valor":"Mês X","obs":""},
+    {"metrica":"CAC","valor":"[H/D] R$ X","obs":"canal principal"},
+    {"metrica":"LTV","valor":"[H/D] R$ X","obs":""},
     {"metrica":"LTV/CAC","valor":"Xx","obs":"saudável >3x"},
-    {"metrica":"Margem contribuição","valor":"X%","obs":""},
+    {"metrica":"Margem bruta","valor":"X%","obs":""},
     {"metrica":"Payback","valor":"X meses","obs":""}
   ],
   "mvp":{
-    "descricao":"o que é o MVP — 2 linhas diretas",
-    "entra":["feature 1 — específica","feature 2","feature 3","feature 4"],
-    "fora":["o que não entra e por quê — 1","2","3"],
-    "custo":"R$ X",
-    "tempo":"X semanas",
-    "stack":"stack específica recomendada",
-    "criterios":"métricas concretas de sucesso — números específicos em 60 dias"
-  },
-  "matriz":{
-    "quick_wins":["ação concreta 1 com prazo","2","3"],
-    "apostas":["ação alto impacto alto esforço 1","2","3"],
-    "tarefas":["ação baixo impacto 1","2"],
-    "descartar":["o que descartar e por quê 1","2"],
-    "primeiro_passo":"ação CONCRETA que acontece AMANHÃ — com horário e métrica de sucesso"
+    "descricao":"o que é o MVP em 1 frase",
+    "entra":["feature essencial 1","feature 2","feature 3"],
+    "fora":["o que NÃO entra 1","o que NÃO entra 2"],
+    "custo":"R$ X","tempo":"X semanas","stack":"stack recomendada",
+    "criterios":"métrica de sucesso em 60 dias — número específico"
   },
   "roadmap":[
-    {"title":"Fase 1 — Validação","period":"Mês 1-3","actions":"ações específicas — máx 2 linhas"},
-    {"title":"Fase 2 — Tração","period":"Mês 4-6","actions":"ações de crescimento — máx 2 linhas"},
-    {"title":"Fase 3 — Escala","period":"Mês 7-12","actions":"ações de escala — máx 2 linhas"},
-    {"title":"Fase 4 — Expansão","period":"Ano 2-3","actions":"visão de longo prazo — máx 2 linhas"}
+    {"title":"Fase 1","period":"Mês 1-3","actions":"ações concretas — 1 frase"},
+    {"title":"Fase 2","period":"Mês 4-6","actions":"ações de tração — 1 frase"},
+    {"title":"Fase 3","period":"Mês 7-12","actions":"escala — 1 frase"}
   ],
   "riscos":[
-    "Risco 1: [nome] — consequência + mitigação concreta",
-    "Risco 2: [nome] — consequência + mitigação",
-    "Risco 3: [nome] — consequência + mitigação"
+    "Risco 1: nome — consequência + mitigação em 1 frase",
+    "Risco 2: nome — consequência + mitigação",
+    "Risco 3: nome — consequência + mitigação"
   ],
-  "benchmarks":{
-    "nacional":[
-      {"nome":"referência nacional","metricas":"1-2 métricas-chave","aprendizado":"aprendizado aplicável"}
-    ],
-    "internacional":[
-      {"nome":"referência internacional","metricas":"1-2 métricas-chave","aprendizado":"o que adaptar para o Brasil"}
-    ],
-    "case_sucesso":{"nome":"nome do case","licao":"lição principal em 1 linha"},
-    "case_fracasso":{"nome":"nome do case","licao":"o que este founder deve evitar em 1 linha"}
-  },
-  "proximos_passos":[
-    {"check":"ação específica 1","motivo":"por que é pré-requisito para Captação"},
-    {"check":"ação 2","motivo":"motivo 2"},
-    {"check":"ação 3","motivo":"motivo 3"},
-    {"check":"ação 4","motivo":"motivo 4"},
-    {"check":"ação 5","motivo":"motivo 5"}
+  "prereqs_captacao":[
+    "pré-requisito 1 — verificável, específico, com critério de sucesso (ex: MRR de R$5k por 3 meses consecutivos)",
+    "pré-requisito 2",
+    "pré-requisito 3",
+    "pré-requisito 4",
+    "pré-requisito 5"
   ],
-  "proximo_modulo":"1 linha sobre o que o Módulo Captação entrega de diferente"
+  "proximo_modulo":"1 frase — o que o Módulo Captação entrega que este não entrega"
 }`}];
 }
 
