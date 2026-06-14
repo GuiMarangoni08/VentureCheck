@@ -131,6 +131,7 @@ body::after{
 .screen{display:none}
 .screen.active{display:block;animation:fadeUp .4s ease forwards}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-8px);opacity:1}}
 
 /* ══════════════════════════════════════
    HOME
@@ -769,7 +770,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
         <button class="btn btn-g" style="margin-bottom:12px;font-size:12px;padding:6px 14px" onclick="manualSave();showScreen('home')">← Início</button>
         <div class="flow-step-label">// passo 1 de 3</div>
         <div class="flow-title">Quem é você<br>e qual é a ideia?</div>
-        <div class="flow-desc">Preencha seus dados e descreva o negócio com o máximo de detalhes possível. Quanto mais contexto você der, mais precisas serão as perguntas do DNA Board.</div>
+        <div class="flow-desc">Descreva sua ideia com o máximo de detalhes. O DNA Board vai ler o que você escreveu e gerar perguntas específicas para o seu negócio — não um formulário padrão.</div>
       </div>
 
       <div class="card">
@@ -863,7 +864,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
       </div>
 
       <div class="btn-row">
-        <button class="btn btn-p" onclick="generateQuestions()">Gerar perguntas do DNA Board →</button>
+        <button class="btn btn-p" onclick="generateQuestions()">Enviar para o DNA Board →</button>
         <button class="btn btn-g" onclick="manualSave()">💾 Salvar rascunho</button>
 
       </div>
@@ -871,7 +872,26 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
     <!-- ══ QUESTIONS ══ -->
     <div class="screen" id="screen-questions">
-      <div class="flow-header">
+      <!-- Estado de leitura — aparece enquanto Claude processa -->
+      <div id="dna-reading-state" style="display:none;text-align:center;padding:48px 24px">
+        <div style="font-size:48px;margin-bottom:20px;animation:pulse 1.5s ease-in-out infinite">🧬</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;margin-bottom:8px">DNA Board</div>
+        <div id="dna-reading-step" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:24px">LENDO SUA IDEIA...</div>
+        <div style="display:flex;justify-content:center;gap:6px">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:bounce 1.2s ease-in-out infinite"></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:bounce 1.2s ease-in-out .2s infinite"></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:bounce 1.2s ease-in-out .4s infinite"></div>
+        </div>
+        <div id="dna-reading-mentors" style="margin-top:28px;font-size:11px;color:var(--t3);font-family:'DM Mono',monospace;letter-spacing:1px"></div>
+      </div>
+      <!-- Intro personalizada — aparece após processar, antes das perguntas -->
+      <div id="dna-intro-state" style="display:none;padding:0 0 24px">
+        <div style="background:linear-gradient(135deg,rgba(127,255,110,.06),rgba(167,139,250,.06));border:1px solid rgba(127,255,110,.2);border-radius:var(--r2);padding:24px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--accent);margin-bottom:10px">// DNA BOARD — LEITURA INICIAL</div>
+          <div id="dna-intro-text" style="font-size:14px;color:var(--text);line-height:1.8;font-family:'Instrument Serif',serif;font-style:italic"></div>
+        </div>
+      </div>
+      <div class="flow-header" id="q-flow-header" style="display:none">
         <div class="flow-step-label">// passo 2 de 3</div>
         <div class="flow-title" id="q-screen-title">Responda as perguntas</div>
         <div class="flow-desc" id="q-screen-desc">O DNA Board analisou sua descrição e preparou perguntas específicas para o seu negócio. Responda com profundidade — a qualidade do relatório depende das suas respostas.</div>
@@ -1315,28 +1335,69 @@ async function generateQuestions(){
   saveDraft(true);
 
   showScreen('questions');
-  setProc(true,'Analisando sua descrição...');
+  // Estado de leitura — esconde tudo e mostra animação
+  document.getElementById('dna-reading-state').style.display='block';
+  document.getElementById('dna-intro-state').style.display='none';
+  document.getElementById('q-flow-header').style.display='none';
+  document.getElementById('imi-section').style.display='none';
+  document.getElementById('questions-list').innerHTML='';
   document.getElementById('submit-row').style.display='none';
   document.getElementById('complement-section').style.display='none';
-  document.getElementById('questions-list').innerHTML='';
+  // Anima mentores passando
+  const mentorNames=DNA.map(d=>d.av+' '+d.name);
+  let mi=0;
+  const mentorInterval=setInterval(()=>{
+    const el=document.getElementById('dna-reading-mentors');
+    if(el&&mentorNames[mi])el.textContent=mentorNames[mi]+'...';
+    mi=(mi+1)%mentorNames.length;
+  },220);
 
   try{
     let res=await callClaude(genQPrompt(), 1500);
     let parsed;
     try{parsed=parseJSON(res)}
     catch(e){
-      try{setProc(true,'Reprocessando...');res=await callClaude(genQPrompt(),1800);parsed=parseJSON(res);}
+      try{
+        document.getElementById('dna-reading-step').textContent='REFINANDO ANÁLISE...';
+        res=await callClaude(genQPrompt(),1800);parsed=parseJSON(res);
+      }
       catch(e2){throw new Error('Erro ao interpretar perguntas. Tente novamente.')}
     }
+    clearInterval(mentorInterval);
 
     S.questions=parsed.questions||[];
-    saveDraft(true); // Salvar perguntas geradas
-    renderQuestions(S.questions);
-    setProc(false);
+    saveDraft(true);
 
-    // Update screen header
-    document.getElementById('q-screen-title').textContent=`${parsed.questions?.length||0} perguntas para ${biz}`;
-    document.getElementById('q-screen-desc').textContent=parsed.intro||'Responda com profundidade. A qualidade do relatório depende das suas respostas.';
+    // Mostra intro personalizada com efeito typewriter
+    document.getElementById('dna-reading-state').style.display='none';
+    const introText=parsed.intro||'';
+    if(introText){
+      document.getElementById('dna-intro-state').style.display='block';
+      const introEl=document.getElementById('dna-intro-text');
+      introEl.textContent='';
+      let ci=0;
+      const typeInterval=setInterval(()=>{
+        introEl.textContent=introText.slice(0,ci+1);
+        ci++;
+        if(ci>=introText.length){
+          clearInterval(typeInterval);
+          // Após intro, revela header e perguntas com delay
+          setTimeout(()=>{
+            document.getElementById('q-flow-header').style.display='block';
+            document.getElementById('q-screen-title').textContent=`${parsed.questions?.length||0} perguntas para ${biz}`;
+            document.getElementById('q-screen-desc').textContent='Responda com profundidade — a qualidade do relatório depende das suas respostas.';
+            renderQuestions(S.questions);
+            setProc(false);
+          },600);
+        }
+      },18);
+    } else {
+      document.getElementById('q-flow-header').style.display='block';
+      document.getElementById('q-screen-title').textContent=`${parsed.questions?.length||0} perguntas para ${biz}`;
+      document.getElementById('q-screen-desc').textContent='Responda com profundidade — a qualidade do relatório depende das suas respostas.';
+      renderQuestions(S.questions);
+      setProc(false);
+    }
 
     // Render IMI + veredito preliminar + providências + manual
     const imiEl=document.getElementById('imi-section');
