@@ -1056,7 +1056,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
       <div class="btn-row">
         <button class="btn btn-p" id="btn-export-playbook" onclick="exportPlaybook()">📋 Exportar Playbook</button>
         <button class="btn btn-g" id="btn-export-pdf" onclick="exportPDF()">📄 Baixar PDF</button>
-        <button class="btn btn-g" onclick="startModeB()">+ Nova análise</button>
+        <button class="btn btn-p" onclick="newAnalysisConfirm()">+ Nova análise</button>
         <button class="btn btn-g" onclick="showScreen('home')">Dashboard</button>
       </div>
     </div>
@@ -1169,6 +1169,21 @@ const BLOCKS=['Problema','Cliente/Segmento','Solução','Modelo de Negócio','Me
 function getSessions(){try{return JSON.parse(localStorage.getItem('vc5_sessions')||'[]')}catch{return[]}}
 function saveSess(s){localStorage.setItem('vc5_sessions',JSON.stringify(s))}
 
+function migrateOldSessions(){
+  // Lê chaves antigas e importa para vc5_sessions sem duplicar
+  const oldKeys=['vc_sessions','vc4_sessions','vc3_sessions','vc2_sessions','vc1_sessions'];
+  let current=getSessions();
+  const ids=new Set(current.map(s=>s.id));
+  let changed=false;
+  oldKeys.forEach(k=>{
+    try{
+      const old=JSON.parse(localStorage.getItem(k)||'[]');
+      old.forEach(s=>{if(s.id&&!ids.has(s.id)){current.unshift(s);ids.add(s.id);changed=true;}});
+    }catch{}
+  });
+  if(changed){saveSess(current);renderSessions();}
+}
+
 function saveSession(data){
   const sessions=getSessions();
   const idx=sessions.findIndex(s=>s.id===S.session.id);
@@ -1230,6 +1245,17 @@ function startModeB(){
   showScreen('setup');
   var _u = checkExistingAuth(); if (_u) prefillUserData(_u);
   setTimeout(initCompletude, 50);
+}
+
+function newAnalysisConfirm(){
+  // Report is already saved — show sidebar highlight then start new session
+  const biz = S.session?.biz || S.session?.name || 'este relatório';
+  const toast = document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:14px 22px;font-size:13px;color:var(--text);z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.4);text-align:center;max-width:340px';
+  toast.innerHTML=`<div style="font-weight:600;margin-bottom:4px">✅ Relatório salvo</div><div style="color:var(--t3);font-size:12px">"${biz}" ficará acessível na barra lateral</div>`;
+  document.body.appendChild(toast);
+  setTimeout(()=>{toast.style.transition='opacity .4s';toast.style.opacity='0';setTimeout(()=>toast.remove(),400)}, 2200);
+  setTimeout(startModeB, 300);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2688,6 +2714,7 @@ JSON (sem markdown, sem texto fora):
 // INIT
 // ══════════════════════════════════════════════════════════════
 renderDNA();
+migrateOldSessions();
 renderSessions();
 startAutoSave();
 initFieldAutoSave();
@@ -2912,9 +2939,10 @@ function exportPlaybook() {
   const btn = document.getElementById('btn-export-playbook');
   if (btn) { btn.textContent = '⏳ Exportando...'; btn.disabled = true; }
 
-  // Captura o conteúdo do relatório
-  const reportEl = document.getElementById('screen-report');
-  if (!reportEl) {
+  // Captura o conteúdo do relatório — o container real é screen-analysis
+  const reportEl = document.getElementById('screen-analysis');
+  const hasReport = reportEl && (document.getElementById('verdict-el')?.innerHTML?.trim() || document.getElementById('ana-title')?.textContent?.includes('—'));
+  if (!hasReport) {
     alert('Gere um relatório primeiro.');
     if (btn) { btn.textContent = '📋 Exportar Playbook'; btn.disabled = false; }
     return;
@@ -2946,11 +2974,13 @@ function exportPlaybook() {
 ${styles}
 /* Overrides para standalone */
 body { background: #0a0a0a !important; }
-#screen-report { display: block !important; opacity: 1 !important; padding: 24px !important; max-width: 860px; margin: 0 auto; }
+.screen { display: none !important; }
+#screen-analysis { display: block !important; opacity: 1 !important; padding: 24px !important; max-width: 860px; margin: 0 auto; }
+.sidebar, .topbar { display: none !important; }
 .btn-row { display: none !important; }
 #feedback-section { display: none !important; }
 #upgrade-section { display: none !important; }
-.tab-nav { pointer-events: none; }
+.ana-tabs { pointer-events: none; }
 .tab-panel { display: block !important; opacity: 1 !important; margin-bottom: 16px; }
 </style>
 </head>
@@ -2961,7 +2991,7 @@ body { background: #0a0a0a !important; }
       <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#00ff88;letter-spacing:3px">VENTURECHECK</div>
       <div style="font-size:12px;color:#666;font-family:monospace">${planLabel} · ${name} · ${date}</div>
     </div>
-    <div id="screen-report">
+    <div id="screen-analysis" class="screen">
       ${reportHTML}
     </div>
     <div style="text-align:center;padding:32px 0;border-top:1px solid #222;margin-top:32px">
@@ -2977,13 +3007,21 @@ body { background: #0a0a0a !important; }
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `venturecheck_${(biz).replace(/\s+/g,'_').toLowerCase()}_${plan}.html`;
+  const filename = `venturecheck_${(biz).replace(/\s+/g,'_').toLowerCase()}_${plan}.html`;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
   if (btn) { btn.textContent = '📋 Exportar Playbook'; btn.disabled = false; }
+
+  // Toast de confirmação
+  const toast = document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid #00ff88;border-radius:12px;padding:14px 22px;font-size:13px;color:var(--text);z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.5);text-align:center;max-width:380px';
+  toast.innerHTML=`<div style="font-weight:600;margin-bottom:4px;color:#00ff88">✅ Playbook exportado!</div><div style="color:var(--t3);font-size:12px">📁 Downloads/${filename}</div>`;
+  document.body.appendChild(toast);
+  setTimeout(()=>{toast.style.transition='opacity .4s';toast.style.opacity='0';setTimeout(()=>toast.remove(),400)}, 3000);
 }
 
 // ══════════════════════════════════════════════════════════════

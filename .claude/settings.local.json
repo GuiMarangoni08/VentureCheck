@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:sweet-sunburst-1eeb2f.netlify.app)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "PowerShell(curl.exe -s \"https://sweet-sunburst-1eeb2f.netlify.app/\" -o \"C:\\\\Users\\\\guilherme.SOLUTION\\\\Desktop\\\\VentureCheck\\\\venture-check-ref.html\" --max-time 30)"
+    ]
+  }
+}

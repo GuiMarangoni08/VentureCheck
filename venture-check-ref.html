@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VentureCheck — Diagnóstico de Negócio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@300;400;500&display=swap');
+
+:root {
+  --bg:#060608;--s1:#0e0e12;--s2:#16161c;--s3:#1e1e26;
+  --border:#ffffff0f;--border2:#ffffff1a;--border3:#ffffff28;
+  --accent:#7fff6e;--accent2:#5fdf4e;--accent-dim:rgba(127,255,110,.12);
+  --amber:#ffb347;--amber-dim:rgba(255,179,71,.1);
+  --red:#ff4d6d;--red-dim:rgba(255,77,109,.08);
+  --blue:#4d9eff;--purple:#a78bfa;--teal:#2dd4bf;
+  --text:#f2f2f4;--t2:#9090a0;--t3:#55555f;--t4:#333340;
+  --r:8px;--r2:12px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:14px;
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* Subtle grid */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(127,255,110,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(127,255,110,.015) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;z-index:0;
+}
+
+/* Noise */
+body::after{
+  content:'';position:fixed;inset:0;opacity:.018;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;
+}
+
+.app{display:flex;min-height:100vh;position:relative;z-index:1}
+
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+.sidebar{
+  width:260px;min-width:260px;
+  background:var(--s1);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;
+}
+
+.sidebar-logo{padding:28px 22px 18px;border-bottom:1px solid var(--border)}
+.logo-mark{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;line-height:1}
+.logo-mark span{color:var(--accent)}
+.logo-tag{font-family:'DM Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:2px;margin-top:5px}
+
+.dna-badge{
+  margin:14px 10px;padding:12px 14px;
+  background:linear-gradient(135deg,rgba(127,255,110,.05),rgba(167,139,250,.05));
+  border:1px solid rgba(127,255,110,.12);border-radius:var(--r);
+}
+.dna-badge-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:7px}
+.dna-badge-names{font-size:10px;color:var(--t2);line-height:1.8}
+.dna-badge-names em{color:var(--purple);font-style:normal}
+
+.nav-section{padding:18px 14px 8px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--t4);text-transform:uppercase}
+
+.nav-btn{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;margin:2px 8px;
+  border-radius:var(--r);cursor:pointer;border:none;
+  background:transparent;color:var(--t2);
+  font-family:'DM Sans',sans-serif;font-size:13px;
+  width:calc(100% - 16px);text-align:left;transition:all .2s;
+}
+.nav-btn:hover{background:var(--s2);color:var(--text)}
+.nav-btn.active{background:var(--s3);color:var(--accent);border:1px solid rgba(127,255,110,.15)}
+.nav-btn .ni{font-size:15px;width:20px;text-align:center}
+
+.sidebar-cta{
+  margin:10px;padding:13px;
+  background:var(--accent);color:#000;border:none;border-radius:var(--r);
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;width:calc(100% - 20px);letter-spacing:.3px;transition:all .2s;
+}
+.sidebar-cta:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(127,255,110,.2)}
+
+.session-list{flex:1;overflow-y:auto;padding-bottom:20px}
+.s-item{
+  padding:11px 14px;margin:3px 8px;
+  border-radius:var(--r);cursor:pointer;
+  border:1px solid transparent;transition:all .2s;
+}
+.s-item:hover{background:var(--s2);border-color:var(--border)}
+.s-item-name{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-item-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);margin-top:3px}
+.vpill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-top:5px}
+.vp-ok{background:rgba(127,255,110,.12);color:var(--accent)}
+.vp-no{background:rgba(255,77,109,.12);color:var(--red)}
+.vp-rev{background:rgba(255,179,71,.12);color:var(--amber)}
+.vp-pend{background:rgba(144,144,160,.1);color:var(--t2)}
+
+/* ══════════════════════════════════════
+   MAIN
+══════════════════════════════════════ */
+.main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+.topbar{
+  padding:0 36px;height:56px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(6,6,8,.9);backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:50;
+}
+.topbar-path{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--t3)}
+.topbar-path span{color:var(--accent)}
+.topbar-status{display:flex;align-items:center;gap:8px}
+.pulse{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+.status-text{font-family:'DM Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:2px}
+
+.content{padding:36px;max-width:980px}
+
+/* ══════════════════════════════════════
+   SCREENS
+══════════════════════════════════════ */
+.screen{display:none}
+.screen.active{display:block;animation:fadeUp .4s ease forwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════════════════════════════════════
+   HOME
+══════════════════════════════════════ */
+.hero{
+  background:linear-gradient(135deg,var(--s1),var(--s2));
+  border:1px solid var(--border2);border-radius:var(--r2);
+  padding:44px;margin-bottom:32px;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:280px;height:280px;
+  background:radial-gradient(circle,rgba(127,255,110,.07),transparent 70%);
+  border-radius:50%;
+}
+.hero::after{
+  content:'';position:absolute;bottom:-40px;left:40%;
+  width:160px;height:160px;
+  background:radial-gradient(circle,rgba(167,139,250,.04),transparent 70%);
+  border-radius:50%;
+}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:3px;line-height:.95;margin-bottom:16px}
+.hero h1 em{color:var(--accent);font-style:normal;display:block}
+.hero p{color:var(--t2);font-size:15px;line-height:1.7;max-width:520px;margin-bottom:28px}
+.hero-meta{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding-top:24px;border-top:1px solid var(--border);margin-top:8px;
+}
+.hero-stat{text-align:center}
+.hero-stat-num{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);letter-spacing:2px;line-height:1}
+.hero-stat-label{font-size:10px;color:var(--t3);letter-spacing:.5px;margin-top:2px}
+.hero-divider{width:1px;height:40px;background:var(--border2)}
+
+/* Mode cards */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px}
+.mode-card{
+  background:var(--s1);border:1px solid var(--border2);border-radius:var(--r2);
+  padding:28px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;
+}
+.mode-card::before{
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;
+  background:linear-gradient(135deg,rgba(127,255,110,.04),transparent);
+}
+.mode-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 32px rgba(127,255,110,.08)}
+.mode-card:hover::before{opacity:1}
+.mode-card-icon{font-size:32px;margin-bottom:14px}
+.mode-card-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:8px}
+.mode-card-desc{font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:16px}
+.mode-card-tags{display:flex;flex-wrap:wrap;gap:6px}
+.mode-tag{padding:3px 10px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;font-size:10px;color:var(--t2)}
+.mode-badge{
+  position:absolute;top:16px;right:16px;
+  padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+}
+.badge-new{background:rgba(127,255,110,.15);color:var(--accent);border:1px solid rgba(127,255,110,.3)}
+.badge-pro{background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.25)}
+
+/* Deliverables */
+.deliv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px}
+.deliv-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px;transition:all .2s}
+.deliv-card:hover{border-color:var(--border2);background:var(--s2)}
+.deliv-icon{font-size:20px;margin-bottom:8px}
+.deliv-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+.deliv-desc{font-size:10px;color:var(--t3);line-height:1.6}
+
+/* DNA Board */
+.dna-section{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:26px;margin-bottom:32px}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:18px}
+.dna-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.dna-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;transition:all .25s;cursor:default}
+.dna-card:hover{border-color:var(--purple);background:rgba(167,139,250,.04);transform:translateY(-2px)}
+.dna-av{font-size:24px;margin-bottom:7px}
+.dna-name{font-size:11px;font-weight:600;color:var(--text);margin-bottom:2px}
+.dna-co{font-family:'DM Mono',monospace;font-size:8px;color:var(--t3);letter-spacing:1px;margin-bottom:6px}
+.dna-sk{font-size:9px;color:var(--purple);line-height:1.5}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:22px}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:2px;color:var(--accent);line-height:1}
+.stat-label{font-size:11px;color:var(--t2);margin-top:5px}
+
+/* ══════════════════════════════════════
+   FORMS
+══════════════════════════════════════ */
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.fg{display:flex;flex-direction:column;gap:7px}
+.fg.full{grid-column:1/-1}
+.fg label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--t2);text-transform:uppercase}
+.fg input,.fg select,.fg textarea{
+  background:var(--s1);border:1px solid var(--border2);border-radius:var(--r);
+  padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;
+  outline:none;transition:border-color .2s;width:100%;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(127,255,110,.06)}
+select option{background:var(--s2)}
+textarea{resize:vertical;line-height:1.7}
+
+/* ══════════════════════════════════════
+   CARDS
+══════════════════════════════════════ */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:20px}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:var(--s2);border-bottom:1px solid var(--border)}
+.card-title{font-size:12px;font-weight:600;letter-spacing:.3px;display:flex;align-items:center;gap:9px}
+.card-body{padding:22px}
+
+/* ══════════════════════════════════════
+   INTERVIEW FLOW (MODO B)
+══════════════════════════════════════ */
+.flow-header{margin-bottom:32px}
+.flow-step-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:8px}
+.flow-title{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;line-height:1;margin-bottom:10px}
+.flow-desc{font-size:13px;color:var(--t2);line-height:1.7;max-width:580px}
+
+/* Progress */
+.prog-wrap{background:var(--s2);border-radius:2px;height:3px;margin-bottom:32px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+
+/* Blocks tracker */
+.blocks-track{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:32px}
+.bc{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:10px 6px;text-align:center;transition:all .3s}
+.bc .bcn{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--t3);display:block}
+.bc .bcl{font-size:8px;letter-spacing:1px;color:var(--t3);text-transform:uppercase;display:block;margin-top:1px}
+.bc.on{border-color:var(--accent);background:var(--accent-dim)}
+.bc.on .bcn,.bc.on .bcl{color:var(--accent)}
+.bc.done{border-color:var(--border2)}
+.bc.done .bcn{color:var(--t2)}
+.bc.done::after{content:'✓';display:block;font-size:9px;color:var(--accent);margin-top:2px}
+
+/* Questions */
+.q-list{display:flex;flex-direction:column;gap:0}
+
+.q-item{
+  border:1px solid var(--border2);border-radius:var(--r);
+  overflow:hidden;margin-bottom:16px;
+  transition:border-color .2s;
+}
+.q-item.active{border-color:rgba(127,255,110,.3);box-shadow:0 0 0 1px rgba(127,255,110,.08)}
+.q-item.answered{border-color:var(--border2);opacity:.7}
+.q-item.critical{border-left:3px solid var(--amber)}
+
+.q-header{
+  padding:14px 18px;background:var(--s2);
+  display:flex;align-items:flex-start;gap:12px;
+  cursor:pointer;user-select:none;
+}
+.q-num{
+  font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);
+  line-height:1;min-width:28px;
+}
+.q-item.critical .q-num{color:var(--amber)}
+.q-content{flex:1}
+.q-block-tag{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:5px}
+.q-text{font-size:13px;font-weight:500;color:var(--text);line-height:1.6}
+.q-priority{font-size:9px;color:var(--t3);margin-top:4px;font-style:italic}
+
+.q-body{padding:16px 18px;border-top:1px solid var(--border)}
+
+.q-answer{
+  width:100%;background:var(--s2);border:1px solid var(--border2);
+  border-radius:var(--r);padding:12px 14px;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;
+  line-height:1.7;resize:vertical;outline:none;
+  transition:border-color .2s;min-height:90px;
+}
+.q-answer:focus{border-color:var(--accent)}
+.q-answer::placeholder{color:var(--t3)}
+
+/* Quality indicator */
+.q-quality{
+  display:flex;align-items:center;gap:8px;
+  margin-top:8px;font-size:11px;color:var(--t2);
+  min-height:20px;transition:all .3s;
+}
+.q-quality-bar{flex:1;background:var(--s2);border-radius:2px;height:3px;overflow:hidden}
+.q-quality-fill{height:100%;border-radius:2px;transition:all .4s}
+.q-quality-label{font-family:'DM Mono',monospace;font-size:9px;white-space:nowrap}
+
+/* CTA section */
+.q-cta{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--border);background:var(--s2)}
+.q-status-icon{font-size:16px}
+
+/* Round summary */
+.round-summary{
+  background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);
+  padding:16px 18px;margin-bottom:16px;font-size:13px;line-height:1.7;
+  color:var(--text);white-space:pre-wrap;
+}
+.round-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:8px}
+
+/* ══════════════════════════════════════
+   PROCESSING
+══════════════════════════════════════ */
+.proc-wrap{
+  display:none;text-align:center;padding:56px 32px;
+}
+.proc-wrap.on{display:block}
+.proc-ring{
+  width:48px;height:48px;border:2px solid var(--border2);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin .8s linear infinite;margin:0 auto 20px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--t2);text-transform:uppercase;margin-bottom:8px}
+.proc-step{font-size:13px;color:var(--accent);animation:fadeStep 2s ease infinite}
+@keyframes fadeStep{0%,100%{opacity:.6}50%{opacity:1}}
+.proc-dna{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:20px;max-width:400px;margin-left:auto;margin-right:auto}
+.proc-chip{padding:3px 10px;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.15);border-radius:20px;font-size:9px;color:var(--purple);animation:chipPulse 3s ease infinite}
+@keyframes chipPulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* ══════════════════════════════════════
+   ANALYSIS OUTPUT
+══════════════════════════════════════ */
+.ana-tabs{
+  display:flex;gap:0;margin-bottom:28px;
+  border:1px solid var(--border2);border-radius:var(--r);
+  overflow:hidden;background:var(--s1);
+}
+.ana-tab{
+  flex:1;padding:11px 8px;font-size:11px;font-weight:500;
+  color:var(--t2);cursor:pointer;text-align:center;
+  transition:all .2s;border-right:1px solid var(--border);
+  letter-spacing:.3px;
+}
+.ana-tab:last-child{border-right:none}
+.ana-tab:hover{color:var(--text);background:var(--s2)}
+.ana-tab.active{color:var(--accent);background:var(--accent-dim)}
+
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeUp .3s ease}
+
+/* Verdict */
+.verdict-wrap{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:28px 32px;border-radius:var(--r2);margin-bottom:28px;border:1px solid;gap:24px;flex-wrap:wrap;
+}
+.verdict-wrap.ok{background:rgba(127,255,110,.05);border-color:rgba(127,255,110,.2)}
+.verdict-wrap.no{background:rgba(255,77,109,.05);border-color:rgba(255,77,109,.2)}
+.verdict-wrap.rev{background:rgba(255,179,71,.05);border-color:rgba(255,179,71,.2)}
+
+.verdict-v{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:4px;line-height:1}
+.verdict-wrap.ok .verdict-v{color:var(--accent)}
+.verdict-wrap.no .verdict-v{color:var(--red)}
+.verdict-wrap.rev .verdict-v{color:var(--amber)}
+.verdict-sub{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--t2);margin-top:5px;margin-bottom:12px}
+.verdict-chips{display:flex;flex-wrap:wrap;gap:5px}
+.vchip{padding:2px 8px;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.18);border-radius:20px;font-size:8px;color:var(--purple)}
+.verdict-resumo{font-size:14px;color:var(--t2);line-height:1.8;max-width:460px;font-style:italic}
+
+/* Score grid */
+.score-g{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.si{display:flex;flex-direction:column;gap:7px}
+.si-label{font-size:11px;color:var(--t2);display:flex;justify-content:space-between}
+.si-label strong{color:var(--accent)}
+.si-bar{background:var(--s2);border-radius:2px;height:4px;overflow:hidden}
+.si-fill{height:100%;border-radius:2px;transition:width .9s cubic-bezier(.4,0,.2,1)}
+
+/* Analysis blocks */
+.ab{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+.ab-head{display:flex;align-items:center;gap:10px;padding:13px 20px;background:var(--s2);border-bottom:1px solid var(--border)}
+.ab-num{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;color:var(--accent);min-width:26px}
+.ab-title{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);flex:1}
+.ab-stars{font-size:11px;color:var(--accent)}
+.ab-body{padding:18px 20px;font-size:13px;line-height:1.9;color:var(--text);white-space:pre-wrap}
+
+/* Financial */
+.fin-t{width:100%;border-collapse:collapse;font-size:13px}
+.fin-t th{text-align:left;padding:11px 16px;background:var(--s2);color:var(--t2);font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:500;border-bottom:1px solid var(--border)}
+.fin-t td{padding:11px 16px;border-bottom:1px solid var(--border);color:var(--text)}
+.fin-t tr:last-child td{border-bottom:none}
+.fin-t tr:hover td{background:rgba(255,255,255,.01)}
+.fin-num{font-family:'DM Mono',monospace;color:var(--accent);font-weight:500}
+.fin-hl{background:rgba(127,255,110,.03)!important}
+
+/* MVP */
+.mvp-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.mvp-col{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.mvp-col-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--t2);text-transform:uppercase;margin-bottom:12px}
+.mvp-row{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;line-height:1.5;color:var(--text)}
+.mvp-row:last-child{border-bottom:none}
+.dot-in{width:6px;height:6px;min-width:6px;background:var(--accent);border-radius:50%;margin-top:4px}
+.dot-out{width:6px;height:6px;min-width:6px;background:var(--red);border-radius:50%;margin-top:4px;opacity:.6}
+
+.mvp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.mvp-stat{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
+.mvp-stat-val{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;color:var(--amber)}
+.mvp-stat-label{font-size:10px;color:var(--t3);margin-top:4px}
+
+/* Priority matrix */
+.matrix{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px;border-radius:var(--r);overflow:hidden;margin-bottom:16px}
+.mq{padding:16px;min-height:140px}
+.mq-tl{background:rgba(255,179,71,.05);border:1px solid rgba(255,179,71,.15)}
+.mq-tr{background:rgba(127,255,110,.05);border:1px solid rgba(127,255,110,.15)}
+.mq-bl{background:rgba(144,144,160,.03);border:1px solid var(--border)}
+.mq-br{background:rgba(255,77,109,.04);border:1px solid rgba(255,77,109,.12)}
+.mq-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-bottom:5px}
+.mq-tl .mq-label{color:var(--amber)}
+.mq-tr .mq-label{color:var(--accent)}
+.mq-bl .mq-label{color:var(--t3)}
+.mq-br .mq-label{color:var(--red)}
+.mq-sub{font-size:9px;color:var(--t3);margin-bottom:10px}
+.mq-items{display:flex;flex-direction:column;gap:5px}
+.mq-i{font-size:11px;line-height:1.4;padding:5px 8px;border-radius:4px;color:var(--text)}
+.mq-tl .mq-i{background:rgba(255,179,71,.07)}
+.mq-tr .mq-i{background:rgba(127,255,110,.07)}
+.mq-bl .mq-i{background:rgba(255,255,255,.03)}
+.mq-br .mq-i{background:rgba(255,77,109,.06)}
+
+/* Roadmap */
+.roadmap{display:flex;flex-direction:column}
+.ph{display:flex;gap:18px;padding-bottom:28px;position:relative}
+.ph:not(:last-child)::before{content:'';position:absolute;left:15px;top:34px;bottom:0;width:1px;background:var(--border2)}
+.ph-dot{width:32px;height:32px;min-width:32px;background:var(--s2);border:2px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--accent);z-index:1}
+.ph-body{flex:1;padding-top:4px}
+.ph-title{font-weight:600;font-size:14px;margin-bottom:5px}
+.ph-period{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:1px;margin-bottom:9px}
+.ph-text{font-size:12px;color:var(--t2);line-height:1.8;white-space:pre-wrap}
+
+/* Risks */
+.risk-list{display:flex;flex-direction:column;gap:12px}
+.risk-i{display:flex;gap:14px;padding:16px 18px;background:var(--red-dim);border:1px solid rgba(255,77,109,.15);border-radius:var(--r);font-size:13px;color:var(--text);line-height:1.7}
+.risk-n{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--red);opacity:.5;min-width:22px}
+
+/* Messages */
+.msg{padding:13px 16px;border-radius:var(--r);font-size:12px;line-height:1.6;margin-bottom:16px}
+.msg-ok{background:var(--accent-dim);border:1px solid rgba(127,255,110,.2);color:var(--accent)}
+.msg-warn{background:var(--amber-dim);border:1px solid rgba(255,179,71,.2);color:var(--amber)}
+
+/* Upload */
+.upload-z{border:1px dashed var(--border2);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px}
+.upload-z:hover{border-color:var(--accent);background:rgba(127,255,110,.02)}
+.upload-z input{display:none}
+.upload-hint{font-size:11px;color:var(--t2)}
+.file-list{display:flex;flex-direction:column;gap:6px}
+.fi{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);font-size:11px}
+.fi span{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fi-sz{color:var(--t3);white-space:nowrap}
+.fi-thumb{width:32px;height:32px;object-fit:cover;border-radius:3px;border:1px solid var(--border)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
+.btn-p{background:var(--accent);color:#000}
+.btn-p:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(127,255,110,.2)}
+.btn-p:disabled{background:var(--s3);color:var(--t3);cursor:not-allowed;transform:none;box-shadow:none}
+.btn-g{background:transparent;color:var(--t2);border:1px solid var(--border2)}
+.btn-g:hover{color:var(--text);background:var(--s2)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+hr{border:none;border-top:1px solid var(--border);margin:32px 0}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+@media print{
+  .sidebar,.topbar,.btn-row,.ana-tabs,.mode-grid{display:none}
+  .main{margin-left:0}.content{padding:16px}
+  .tab-panel{display:block!important}
+  body{background:white;color:black}
+  .verdict-wrap,.ab,.card{border:1px solid #ddd;background:white}
+}
+@media(max-width:800px){
+  .sidebar{display:none}.main{margin-left:0}
+  .mode-grid,.blocks-track,.score-g,.mvp-2col,.matrix,.mvp-stats,.setup-grid,.deliv-grid{grid-template-columns:1fr}
+  .dna-grid{grid-template-columns:repeat(2,1fr)}
+  .hero h1{font-size:40px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">Venture<span>Check</span></div>
+    <div class="logo-tag">v0.5 · Diagnóstico de Negócio</div>
+  </div>
+
+  <div class="dna-badge">
+    <div class="dna-badge-label">⚡ DNA Board · 18 mentes</div>
+    <div class="dna-badge-names">
+      Tallis · Nardon · Soares · Rony<br>
+      Benchimol · Bloisi · Stelleo<br>
+      Zuck · Musk · Orosco<br>
+      Allan · Denis · Henry · Leandro<br>
+      <em>Napoli · Adibe · L.C.F · Zanetti</em>
+    </div>
+  </div>
+
+  <div style="padding:10px 10px 6px">
+    <button class="sidebar-cta" onclick="startModeB()">+ Novo diagnóstico</button>
+  </div>
+
+  <div class="nav-section">Navegação</div>
+  <button class="nav-btn active" id="nav-home" onclick="showScreen('home')">
+    <span class="ni">⚡</span> Dashboard
+  </button>
+  <button class="nav-btn" onclick="showScreen('home')">
+    <span class="ni">📊</span> Relatórios
+  </button>
+
+  <div class="nav-section">Sessões salvas</div>
+  <div class="session-list" id="session-list">
+    <div style="padding:10px 14px;font-size:11px;color:var(--t3)">Nenhuma sessão ainda</div>
+  </div>
+</div>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-path" id="topbar-path"><span>VENTURECHECK</span> / DASHBOARD</div>
+    <div class="topbar-status">
+      <div id="save-indicator" style="display:none;align-items:center;gap:6px;padding:5px 12px;background:rgba(127,255,110,.08);border:1px solid rgba(127,255,110,.2);border-radius:20px;margin-right:12px;cursor:pointer" onclick="manualSave()" title="Clique para salvar agora">
+        <span id="save-icon" style="font-size:12px">💾</span>
+        <span id="save-text" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:1px">SALVO</span>
+      </div>
+      <div class="pulse"></div>
+      <span class="status-text">18 MENTORES · SISTEMA ATIVO</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ HOME ══ -->
+    <div class="screen active" id="screen-home">
+      <!-- Banner de recuperação -->
+      <div id="recovery-banner" style="display:none;background:rgba(255,179,71,.06);border:1px solid rgba(255,179,71,.25);border-radius:var(--r);padding:16px 20px;margin-bottom:20px;display:none;align-items:center;justify-content:space-between;gap:16px">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--amber);margin-bottom:5px">⚡ SESSÃO NÃO FINALIZADA ENCONTRADA</div>
+          <div id="recovery-desc" style="font-size:13px;color:var(--text)"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="btn btn-p" style="padding:8px 16px;font-size:12px" onclick="recoverSession()">Continuar</button>
+          <button class="btn btn-g" style="padding:8px 16px;font-size:12px" onclick="discardRecovery()">Descartar</button>
+        </div>
+      </div>
+      <div class="hero">
+        <h1>DIAGNÓSTICO<br><em>DE NEGÓCIO</em><br>EM 30 MINUTOS</h1>
+        <p>14 dos maiores empreendedores do Brasil analisam sua ideia. Sem reunião. Sem espera. Relatório completo com viabilidade, financeiro, MVP, priorização e roadmap.</p>
+        <button class="btn btn-p" style="font-size:14px;padding:14px 32px" onclick="startModeB()">▶ Iniciar diagnóstico gratuito</button>
+        <div class="hero-meta">
+          <div class="hero-stat"><div class="hero-stat-num" id="h-total">0</div><div class="hero-stat-label">Diagnósticos</div></div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat"><div class="hero-stat-num" id="h-approved">0</div><div class="hero-stat-label">Aprovados</div></div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat"><div class="hero-stat-num">18</div><div class="hero-stat-label">Mentores</div></div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat"><div class="hero-stat-num">6</div><div class="hero-stat-label">Módulos</div></div>
+        </div>
+      </div>
+
+      <!-- Modes -->
+      <div class="mode-grid">
+        <div class="mode-card" onclick="startModeB()">
+          <div class="mode-badge badge-new">PRINCIPAL</div>
+          <div class="mode-card-icon">🤖</div>
+          <div class="mode-card-title">Modo Self-Service</div>
+          <div class="mode-card-desc">O empreendedor preenche sozinho. A IA gera perguntas personalizadas baseadas na descrição do negócio. Relatório completo ao final sem nenhuma reunião.</div>
+          <div class="mode-card-tags">
+            <span class="mode-tag">Sem reunião</span>
+            <span class="mode-tag">30 minutos</span>
+            <span class="mode-tag">Relatório completo</span>
+          </div>
+        </div>
+        <div class="mode-card" onclick="startModeB()">
+          <div class="mode-badge badge-pro">PRO</div>
+          <div class="mode-card-icon">🎯</div>
+          <div class="mode-card-title">Modo Conduzido</div>
+          <div class="mode-card-desc">Você conduz a entrevista. Grava o áudio, transcreve e a IA processa em rodadas. Para casos que precisam de profundidade maior e acompanhamento presencial.</div>
+          <div class="mode-card-tags">
+            <span class="mode-tag">Gravação de áudio</span>
+            <span class="mode-tag">Rodadas</span>
+            <span class="mode-tag">Análise profunda</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deliverables -->
+      <div class="dna-section" style="padding:22px">
+        <div class="section-title">O QUE VOCÊ RECEBE</div>
+        <div class="deliv-grid">
+          <div class="deliv-card"><div class="deliv-icon">🎯</div><div class="deliv-title">Análise de Viabilidade</div><div class="deliv-desc">7 blocos com scores · Veredito final · Análise profunda com DNA Board</div></div>
+          <div class="deliv-card"><div class="deliv-icon">💰</div><div class="deliv-title">Projeção Financeira</div><div class="deliv-desc">ROI · TIR · Payback · CAC · LTV · Break-even · Receita Ano 1/2/3 · Margem</div></div>
+          <div class="deliv-card"><div class="deliv-icon">🚀</div><div class="deliv-title">Definição de MVP</div><div class="deliv-desc">O que entra e o que fica fora · Stack · Custo · Prazo · Critérios de sucesso</div></div>
+          <div class="deliv-card"><div class="deliv-icon">⚡</div><div class="deliv-title">Matriz de Priorização</div><div class="deliv-desc">Impacto × Esforço · Quick wins · Apostas · O que descartar agora</div></div>
+          <div class="deliv-card"><div class="deliv-icon">🗺</div><div class="deliv-title">Roadmap de Implantação</div><div class="deliv-desc">4 fases com timeline · Ações concretas · Marcos de validação</div></div>
+          <div class="deliv-card"><div class="deliv-icon">⚠</div><div class="deliv-title">Riscos & Mitigação</div><div class="deliv-desc">Top 3 riscos críticos · Estratégia de mitigação do DNA Board</div></div>
+        </div>
+      </div>
+
+      <!-- DNA Board -->
+      <div class="dna-section">
+        <div class="section-title">⚡ DNA BOARD — 14 MENTES ANALISANDO SUA IDEIA</div>
+        <div class="dna-grid" id="dna-grid"></div>
+      </div>
+    </div>
+
+    <!-- ══ SETUP ══ -->
+    <div class="screen" id="screen-setup">
+      <div class="flow-header">
+        <div class="flow-step-label">// passo 1 de 3</div>
+        <div class="flow-title">Quem é você<br>e qual é a ideia?</div>
+        <div class="flow-desc">Preencha seus dados e descreva o negócio com o máximo de detalhes possível. Quanto mais contexto você der, mais precisas serão as perguntas do DNA Board.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">👤 Seus dados</div></div>
+        <div class="card-body">
+          <div class="setup-grid">
+            <div class="fg"><label>Nome completo *</label><input type="text" id="inp-name" placeholder="João Silva"></div>
+            <div class="fg"><label>Email</label><input type="email" id="inp-email" placeholder="joao@email.com"></div>
+            <div class="fg"><label>Nome do negócio / ideia *</label><input type="text" id="inp-biz" placeholder="Ex: PlataformaX, AppDelivery..."></div>
+            <div class="fg"><label>Setor</label>
+              <select id="inp-sector">
+                <option value="">Selecione...</option>
+                <option>Tecnologia / SaaS</option><option>E-commerce / Varejo</option>
+                <option>Saúde / HealthTech</option><option>Educação / EdTech</option>
+                <option>Finanças / FinTech</option><option>Construção / ConstrTech</option>
+                <option>Alimentos / FoodTech</option><option>Logística / Mobilidade</option>
+                <option>Agronegócio / AgTech</option><option>Serviços B2B</option>
+                <option>Serviços B2C</option><option>Marketplace</option><option>Outro</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">💡 Descreva sua ideia</div>
+          <div style="font-size:11px;color:var(--t2)">Seja específico — isso define a qualidade das perguntas</div>
+        </div>
+        <div class="card-body">
+          <div class="fg" style="margin-bottom:16px">
+            <label>Descrição do negócio *</label>
+            <textarea id="inp-desc" rows="6" placeholder="Descreva sua ideia com detalhes. O que você quer fazer? Qual problema resolve? Para quem? Como pretende ganhar dinheiro? Já testou de alguma forma? Qual é sua experiência no setor?"></textarea>
+          </div>
+          <div class="msg msg-ok">
+            💡 <strong>Dica do DNA Board:</strong> Empreendedores que descrevem o problema antes da solução recebem análises 40% mais precisas. Foque no problema real que você quer resolver.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">📎 Materiais de apoio (opcional)</div></div>
+        <div class="card-body">
+          <div class="upload-z" onclick="document.getElementById('setup-files').click()">
+            <input type="file" id="setup-files" multiple accept="image/*,.pdf,.xlsx,.docx,.txt" onchange="handleFiles(event,'setup-files-list')">
+            <div style="font-size:24px;opacity:.3;margin-bottom:6px">📁</div>
+            <div class="upload-hint">Fotos, protótipos, pesquisas, planilhas, apresentações</div>
+          </div>
+          <div class="file-list" id="setup-files-list"></div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-p" onclick="generateQuestions()">Gerar perguntas do DNA Board →</button>
+        <button class="btn btn-g" onclick="manualSave()">💾 Salvar rascunho</button>
+        <button class="btn btn-g" onclick="showScreen('home')">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- ══ QUESTIONS ══ -->
+    <div class="screen" id="screen-questions">
+      <div class="flow-header">
+        <div class="flow-step-label">// passo 2 de 3</div>
+        <div class="flow-title" id="q-screen-title">Responda as perguntas</div>
+        <div class="flow-desc" id="q-screen-desc">O DNA Board analisou sua descrição e preparou perguntas específicas para o seu negócio. Responda com profundidade — a qualidade do relatório depende das suas respostas.</div>
+      </div>
+
+      <div class="prog-wrap"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+
+      <div class="blocks-track" id="blocks-track">
+        <div class="bc on" id="bc-1"><span class="bcn">01</span><span class="bcl">Problema</span></div>
+        <div class="bc" id="bc-2"><span class="bcn">02</span><span class="bcl">Cliente</span></div>
+        <div class="bc" id="bc-3"><span class="bcn">03</span><span class="bcl">Solução</span></div>
+        <div class="bc" id="bc-4"><span class="bcn">04</span><span class="bcl">Modelo</span></div>
+        <div class="bc" id="bc-5"><span class="bcn">05</span><span class="bcl">Mercado</span></div>
+        <div class="bc" id="bc-6"><span class="bcn">06</span><span class="bcl">Time</span></div>
+        <div class="bc" id="bc-7"><span class="bcn">07</span><span class="bcl">Capital</span></div>
+      </div>
+
+      <div id="questions-list"></div>
+
+      <div class="proc-wrap" id="proc-wrap">
+        <div class="proc-ring"></div>
+        <div class="proc-title">DNA Board processando</div>
+        <div class="proc-step" id="proc-step">Analisando suas respostas...</div>
+        <div class="proc-dna" id="proc-dna"></div>
+      </div>
+
+      <div id="complement-section" style="display:none">
+        <div class="msg msg-warn">
+          ⚡ <strong>O DNA Board identificou gaps importantes.</strong> Responda as perguntas abaixo para completar a análise.
+        </div>
+        <div id="complement-list"></div>
+      </div>
+
+      <div class="btn-row" id="submit-row" style="display:none">
+        <button class="btn btn-p" id="btn-submit" onclick="submitAnswers()">
+          ⚡ Enviar para análise do DNA Board
+        </button>
+        <button class="btn btn-g" onclick="manualSave()">💾 Salvar progresso</button>
+        <button class="btn btn-g" onclick="showScreen('setup')">Voltar</button>
+      </div>
+    </div>
+
+    <!-- ══ ANALYSIS ══ -->
+    <div class="screen" id="screen-analysis">
+      <div style="margin-bottom:8px">
+        <div class="flow-step-label">// diagnóstico concluído</div>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:6px" id="ana-title">RELATÓRIO DE VIABILIDADE</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);letter-spacing:1px;margin-bottom:24px" id="ana-meta"></div>
+
+      <div id="verdict-el"></div>
+
+      <div class="ana-tabs" id="ana-tabs">
+        <div class="ana-tab active" onclick="switchTab('viability')">📊 Viabilidade</div>
+        <div class="ana-tab" onclick="switchTab('financial')">💰 Financeiro</div>
+        <div class="ana-tab" onclick="switchTab('mvp')">🚀 MVP</div>
+        <div class="ana-tab" onclick="switchTab('matrix')">⚡ Priorização</div>
+        <div class="ana-tab" onclick="switchTab('roadmap')">🗺 Roadmap</div>
+        <div class="ana-tab" onclick="switchTab('risks')">⚠ Riscos</div>
+      </div>
+
+      <div class="tab-panel active" id="tab-viability">
+        <div class="card"><div class="card-head"><div class="card-title">📊 Scores por bloco</div></div><div class="card-body"><div class="score-g" id="score-g"></div></div></div>
+        <div id="ana-blocks"></div>
+      </div>
+      <div class="tab-panel" id="tab-financial">
+        <div class="card"><div class="card-head"><div class="card-title">💰 Projeção Financeira Completa</div></div><div class="card-body" id="fin-body"></div></div>
+      </div>
+      <div class="tab-panel" id="tab-mvp">
+        <div class="card"><div class="card-head"><div class="card-title">🚀 Definição do MVP</div></div><div class="card-body" id="mvp-body"></div></div>
+      </div>
+      <div class="tab-panel" id="tab-matrix">
+        <div class="card"><div class="card-head"><div class="card-title">⚡ Matriz de Priorização — Impacto × Esforço</div></div><div class="card-body" id="matrix-body"></div></div>
+      </div>
+      <div class="tab-panel" id="tab-roadmap">
+        <div class="card"><div class="card-head"><div class="card-title">🗺 Roadmap de Implantação</div></div><div class="card-body"><div class="roadmap" id="roadmap-body"></div></div></div>
+      </div>
+      <div class="tab-panel" id="tab-risks">
+        <div class="card"><div class="card-head"><div class="card-title">⚠ Riscos Críticos</div></div><div class="card-body"><div class="risk-list" id="risks-body"></div></div></div>
+      </div>
+
+      <hr>
+      <div class="btn-row">
+        <button class="btn btn-p" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
+        <button class="btn btn-g" onclick="startModeB()">+ Novo diagnóstico</button>
+        <button class="btn btn-g" onclick="showScreen('home')">Dashboard</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// DNA BOARD — 14 MENTES
+// ══════════════════════════════════════════════════════════════
+const DNA = [
+  {name:'Tallis Gomes',co:'Easy Taxi · Singu',av:'🚀',sk:'Validação · Escala global',dna:'TALLIS GOMES (Easy Taxi, Singu): Valida em 90 dias ou pivota. Pensa global desde o dia 1. Velocidade de aprendizado vale mais que perfeição. Pergunta: "em 90 dias você consegue provar que isso funciona?" Avalia urgência real do empreendedor.'},
+  {name:'Bruno Nardon',co:'Rappi BR · G4',av:'⚡',sk:'Execução brutal · Dono',dna:'BRUNO NARDON (Rappi, G4): Obsessão por execução. Avalia mentalidade de dono vs funcionário. Questiona com brutalidade: "quanto vendeu essa semana?" Startup que não vende desde o dia 1 está morrendo devagar.'},
+  {name:'Alfredo Soares',co:'G4 Educação',av:'📈',sk:'Vendas · Gestão por resultado',dna:'ALFREDO SOARES (G4): Vendas é o oxigênio. Avalia se o empreendedor sabe vender. Questiona CAC real e ciclo de vendas. Pergunta: "você já vendeu para alguém que não é seu amigo?" Defende OKRs desde o início.'},
+  {name:'Rony Meisler',co:'Reserva · Cabeça de Dono',av:'🎯',sk:'Propósito + lucro · Marca',dna:'RONY MEISLER (Reserva): Negócio sem propósito não tem longevidade. Avalia se a marca tem alma. Questiona o "porquê" visceral. Pergunta: "daqui a 10 anos, o que esse negócio transformou no mundo?"'},
+  {name:'G. Benchimol',co:'XP Investimentos',av:'🏦',sk:'Longo prazo · Ecossistema',dna:'GUILHERME BENCHIMOL (XP): Pensa em décadas. Avalia paciência estratégica. Analisa potencial de ecossistema. Pergunta: "em 20 anos esse negócio pode ser referência do setor?"'},
+  {name:'F. Bloisi',co:'iFood',av:'🍔',sk:'Escala complexa · Marketplace',dna:'FABRÍCIO BLOISI (iFood): Como funciona com 100x o tamanho? Avalia gargalos operacionais. Analisa problema ovo-galinha. Pergunta: "qual seu maior custo unitário e como cai com escala?"'},
+  {name:'Stelleo Tolda',co:'Mercado Livre',av:'🌎',sk:'Plataforma · Paciência estratégica',dna:'STELLEO TOLDA (Mercado Livre): Construiu ecossistema com paciência. Avalia se pensa em plataforma não só produto. Pergunta: "como você tornará o cliente cada vez mais dependente da sua plataforma positivamente?"'},
+  {name:'Mark Zuckerberg',co:'Meta',av:'👁',sk:'Crescimento · Dados',dna:'ZUCKERBERG (Meta): Qual é a métrica norte? Avalia loops de retenção e network effects. Pergunta: "qual feature está mais correlacionada com retenção de longo prazo?" Potencial de hábito diário.'},
+  {name:'Elon Musk',co:'Tesla · SpaceX',av:'🔥',sk:'Primeiros princípios · Missão',dna:'ELON MUSK (Tesla, SpaceX): Primeiros princípios — questiona cada premissa. Pergunta: "por que isso não foi feito antes? Qual é a barreira real?" Questiona custo de cada componente.'},
+  {name:'Thiago Orosco',co:'RD Station',av:'📊',sk:'SaaS B2B · Produto que educa',dna:'THIAGO OROSCO (RD Station): SaaS B2B no Brasil. Avalia maturidade digital do segmento. Questiona churn potencial. Pergunta: "como seu produto torna o cliente mais inteligente com o tempo?"'},
+  {name:'Allan Barros',co:'Pulsee · Acelerai',av:'💡',sk:'Capital inteligente · Aceleração',dna:'ALLAN BARROS (Pulsee, Acelerai): Cap table para capital inteligente. Questiona uso do capital. Pergunta: "qual é sua taxa de aprendizado por real investido?" Avalia maturidade para receber investimento.'},
+  {name:'Denis Wang',co:'Growth · Digital',av:'📡',sk:'Growth hacking · Aquisição digital',dna:'DENIS WANG: Growth como motor. Avalia canais de aquisição e custo por canal. Questiona loops virais. Pergunta: "qual canal vai trazer seus primeiros 1000 clientes e quanto vai custar?" Analisa métricas de ativação e retenção.'},
+  {name:'Henry Zylberstein',co:'Venture Building',av:'🏗',sk:'Inovação · Venture building',dna:'HENRY ZYLBERSTEIN: Estruturação de negócios complexos. Avalia governança e estrutura societária. Pergunta: "quem são os parceiros estratégicos que podem acelerar esse negócio e como você os atrai?"'},
+  {name:'A. Napoli',co:'Endeavor · Scale-ups',av:'🦁',sk:'Scale-up · Governança · Endeavor',dna:'ANTONIO NAPOLI (Endeavor Brasil): Especialista em scale-ups e governança de alto crescimento. Avalia se o negócio tem estrutura para crescer sem implodir. Questiona governança societária, processos e cultura antes de escalar. Pergunta: "quando você tiver 50 funcionários, o que vai quebrar primeiro na sua gestão?" Analisa se o fundador está construindo uma empresa ou um projeto pessoal.'},
+  {name:'João Adibe',co:'Gestão · Alta Performance',av:'🏆',sk:'Alta performance · Gestão de pessoas',dna:'JOÃO ADIBE (Alta Performance): Especialista em gestão de pessoas e cultura de alta performance. Avalia se o time tem os comportamentos certos para executar em velocidade de startup. Questiona ritmo de decisão, accountability e se existe cultura de feedback real. Pergunta: "quem no seu time você demitiria amanhã se pudesse ser completamente honesto — e por que ainda não fez isso?" Analisa se a liderança inspira ou apenas gerencia.'},
+  {name:'L.C. Fernandes',co:'Fundador · Investidor Serial',av:'🎖',sk:'Legado · Resiliência · Investidor',dna:'LUIZ CESAR FERNANDES (Investidor Serial): Décadas construindo e investindo em negócios relevantes no Brasil. Avalia potencial de legado e impacto de longo prazo. Questiona se o fundador tem resiliência para atravessar as crises inevitáveis dos primeiros 3 anos. Pergunta: "quando tudo der errado — e vai dar — o que vai te fazer continuar?" Analisa se o negócio tem potencial de se tornar referência geracional no setor.'},
+  {name:'Leandro Farielo',co:'Finanças · Startups',av:'📉',sk:'Unit economics · Eficiência',dna:'LEANDRO FARIELO: Unit economics é a saúde real. Avalia margem de contribuição e burn rate. Pergunta: "qual é sua margem unitária hoje e qual ela precisa ser para o negócio ser sustentável?"'},
+  {name:'C. Zanetti',co:'Direito · Startups · M&A',av:'⚖️',sk:'Jurídico · Regulatório · Cap table',dna:'CRISTIANO ZANETTI (Direito Empresarial e Startups): Especialista em estruturação jurídica de startups, M&A e contratos empresariais. Avalia se o negócio tem as bases legais para crescer sem explodir. Questiona estrutura societária, cap table, acordos de sócios, proteção de propriedade intelectual e compliance regulatório. Para negócios em saúde, finanças, educação e dados — avalia conformidade com LGPD, ANVISA, Banco Central e CVM. Pergunta: "se um investidor fizer due diligence amanhã, quais são os 3 problemas jurídicos que ele vai encontrar que podem travar o deal?" Analisa se o empreendedor está construindo em terreno firme ou sobre uma bomba-relógio legal que vai explodir na hora da captação ou do exit.'}
+];
+
+function renderDNA(){
+  const g=document.getElementById('dna-grid');
+  if(!g)return;
+  g.innerHTML=DNA.map(p=>`<div class="dna-card"><div class="dna-av">${p.av}</div><div class="dna-name">${p.name}</div><div class="dna-co">${p.co}</div><div class="dna-sk">${p.sk}</div></div>`).join('');
+  const pd=document.getElementById('proc-dna');
+  if(pd)pd.innerHTML=DNA.map(p=>`<span class="proc-chip">${p.av} ${p.name.split(' ')[0]}</span>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let S={
+  session:null,
+  questions:[],      // perguntas geradas
+  answers:{},        // respostas por índice
+  complement:[],     // perguntas complementares
+  compAnswers:{},    // respostas complementares
+  setupFiles:[],
+  round:1
+};
+
+const BLOCKS=['Problema','Cliente/Segmento','Solução','Modelo de Negócio','Mercado','Time','Capital'];
+
+// ══════════════════════════════════════════════════════════════
+// PERSISTENCE
+// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ══════════════════════════════════════════════════════════════
+const SUPA_URL='https://xlyhynjhlpwkyvyzijfv.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhseWh5bmpobHB3a3l2eXppamZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjYzODcsImV4cCI6MjA5NDEwMjM4N30.FSpBXL2gUXKZu-k9vNJ7xexKwdZ88QvollV8d08G5nY';
+const SH={'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`};
+
+async function supaGet(table,query=''){
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/${table}${query}`,{headers:SH});
+    if(!r.ok)throw new Error(r.status);
+    return await r.json();
+  }catch(e){console.warn('Supabase GET falhou:',e.message);return null;}
+}
+
+async function supaUpsert(table,data){
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/${table}`,{
+      method:'POST',
+      headers:{...SH,'Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(data)
+    });
+    if(!r.ok){const t=await r.text();throw new Error(`${r.status}: ${t}`);}
+    return true;
+  }catch(e){console.warn('Supabase UPSERT falhou:',e.message);return false;}
+}
+
+// ══════════════════════════════════════════════════════════════
+// PERSISTENCE — Supabase + localStorage fallback
+// ══════════════════════════════════════════════════════════════
+async function getSessions(){
+  const data=await supaGet('vc_sessions','?order=updated_at.desc&limit=50');
+  if(data&&Array.isArray(data)){
+    localStorage.setItem('vc5_sessions',JSON.stringify(data));
+    return data;
+  }
+  try{return JSON.parse(localStorage.getItem('vc5_sessions')||'[]');}catch{return[];}
+}
+
+async function saveSession(data){
+  const entry={
+    id:S.session.id,
+    name:S.session.name,
+    email:S.session.email||'',
+    biz:S.session.biz,
+    sector:S.session.sector||'',
+    description:S.session.desc||'',
+    verdict:data?.verdict||'PENDENTE',
+    analysis:data,
+    rounds:S.round,
+    updated_at:new Date().toISOString()
+  };
+  // Supabase
+  const ok=await supaUpsert('vc_sessions',entry);
+  // localStorage backup sempre
+  const sessions=JSON.parse(localStorage.getItem('vc5_sessions')||'[]');
+  const idx=sessions.findIndex(s=>s.id===entry.id);
+  if(idx>=0)sessions[idx]=entry;else sessions.unshift(entry);
+  localStorage.setItem('vc5_sessions',JSON.stringify(sessions));
+  if(ok)console.log('✅ Salvo no Supabase');else console.log('💾 Salvo no localStorage');
+  clearDraft();
+  await renderSessions();
+}
+
+async function renderSessions(){
+  const sessions=await getSessions();
+  const list=document.getElementById('session-list');
+  document.getElementById('h-total').textContent=sessions.length;
+  document.getElementById('h-approved').textContent=sessions.filter(s=>s.verdict==='APROVADO').length;
+  if(!sessions.length){list.innerHTML='<div style="padding:10px 14px;font-size:11px;color:var(--t3)">Nenhuma sessão ainda</div>';return;}
+  list.innerHTML=sessions.map(s=>{
+    const vc=s.verdict==='APROVADO'?'vp-ok':s.verdict==='REPROVADO'?'vp-no':s.verdict==='REQUER AJUSTES'?'vp-rev':'vp-pend';
+    const d=s.updated_at?new Date(s.updated_at).toLocaleDateString('pt-BR'):(s.updatedAt?new Date(s.updatedAt).toLocaleDateString('pt-BR'):'');
+    return`<div class="s-item" onclick="loadSession('${s.id}')"><div class="s-item-name">${s.biz||s.name}</div><div class="s-item-meta">${s.name} · ${d}</div><span class="vpill ${vc}">${s.verdict||'Pendente'}</span></div>`;
+  }).join('');
+}
+
+async function loadSession(id){
+  let session=null;
+  const data=await supaGet('vc_sessions',`?id=eq.${id}&limit=1`);
+  if(data?.[0])session=data[0];
+  if(!session){
+    const sessions=JSON.parse(localStorage.getItem('vc5_sessions')||'[]');
+    session=sessions.find(s=>s.id===id);
+  }
+  if(session?.analysis){S.session=session;S.round=session.rounds||1;renderAnalysis(session.analysis);showScreen('analysis');}
+}
+
+// ══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  const labels={home:'DASHBOARD',setup:'NOVO DIAGNÓSTICO',questions:'ENTREVISTA',analysis:'RELATÓRIO'};
+  document.getElementById('topbar-path').innerHTML=`<span>VENTURECHECK</span> / ${labels[name]||name.toUpperCase()}`;
+}
+
+function switchTab(name){
+  const tabs=['viability','financial','mvp','matrix','roadmap','risks'];
+  document.querySelectorAll('.ana-tab').forEach((t,i)=>t.classList.toggle('active',tabs[i]===name));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+function startModeB(){
+  S={session:null,questions:[],answers:{},complement:[],compAnswers:{},setupFiles:[],round:1};
+  ['inp-name','inp-email','inp-biz','inp-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  document.getElementById('inp-sector').value='';
+  document.getElementById('setup-files-list').innerHTML='';
+  showScreen('setup');
+}
+
+// ══════════════════════════════════════════════════════════════
+// FILES
+// ══════════════════════════════════════════════════════════════
+function handleFiles(e,listId){
+  Array.from(e.target.files).forEach(f=>{
+    S.setupFiles.push(f);
+    const list=document.getElementById(listId);
+    const size=f.size<1024*1024?(f.size/1024).toFixed(0)+' KB':(f.size/1024/1024).toFixed(1)+' MB';
+    const item=document.createElement('div');item.className='fi';
+    if(f.type.startsWith('image/')){const r=new FileReader();r.onload=ev=>{item.innerHTML=`<img class="fi-thumb" src="${ev.target.result}"><span>${f.name}</span><span class="fi-sz">${size}</span>`};r.readAsDataURL(f)}
+    else{const icons={pdf:'📄',xlsx:'📊',docx:'📝',pptx:'📋',txt:'📃',csv:'📊'};const ext=f.name.split('.').pop().toLowerCase();item.innerHTML=`<span style="font-size:18px">${icons[ext]||'📎'}</span><span>${f.name}</span><span class="fi-sz">${size}</span>`}
+    list.appendChild(item);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// GENERATE QUESTIONS
+// ══════════════════════════════════════════════════════════════
+async function generateQuestions(){
+  const name=document.getElementById('inp-name').value.trim();
+  const biz=document.getElementById('inp-biz').value.trim();
+  const desc=document.getElementById('inp-desc').value.trim();
+  if(!name||!biz||!desc){alert('Preencha nome, nome do negócio e a descrição.');return}
+
+  S.session={id:'vc5_'+Date.now(),name,email:document.getElementById('inp-email').value.trim(),biz,sector:document.getElementById('inp-sector').value,desc,createdAt:new Date().toISOString(),verdict:'PENDENTE'};
+  saveDraft(true);
+
+  showScreen('questions');
+  setProc(true,'Analisando sua descrição...');
+  document.getElementById('submit-row').style.display='none';
+  document.getElementById('complement-section').style.display='none';
+  document.getElementById('questions-list').innerHTML='';
+
+  try{
+    const res=await callClaude(genQPrompt(), 5000);
+    let parsed;
+    try{parsed=parseJSON(res)}
+    catch(e){console.error('JSON parse error:',e,'\nRaw:',res);throw new Error('Erro ao interpretar perguntas. Tente novamente.')}
+
+    S.questions=parsed.questions||[];
+    saveDraft(true); // Salvar perguntas geradas
+    renderQuestions(S.questions);
+    setProc(false);
+
+    // Update screen header
+    document.getElementById('q-screen-title').textContent=`${parsed.questions?.length||0} perguntas para ${biz}`;
+    document.getElementById('q-screen-desc').textContent=parsed.intro||'Responda com profundidade. A qualidade do relatório depende das suas respostas.';
+
+  }catch(err){
+    setProc(false);
+    document.getElementById('questions-list').innerHTML=`<div class="msg msg-warn">⚠ ${err.message||'Erro ao gerar perguntas.'}</div>`;
+  }
+}
+
+function renderQuestions(questions,isComplement=false){
+  const container=isComplement?document.getElementById('complement-list'):document.getElementById('questions-list');
+  container.innerHTML='';
+  const answers=isComplement?S.compAnswers:S.answers;
+
+  questions.forEach((q,i)=>{
+    const div=document.createElement('div');
+    div.className=`q-item${q.critical?' critical':''}`;
+    div.id=`q-${isComplement?'c':''}${i}`;
+
+    div.innerHTML=`
+      <div class="q-header" onclick="toggleQ('${isComplement?'c':''}${i}')">
+        <div class="q-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="q-content">
+          <div class="q-block-tag">${BLOCKS[(q.block||1)-1]} ${q.critical?'· ⚡ CRÍTICA':''}</div>
+          <div class="q-text">${q.question}</div>
+          ${q.why?`<div class="q-priority">Por que isso importa: ${q.why}</div>`:''}
+        </div>
+        <div class="q-status-icon" id="qsi-${isComplement?'c':''}${i}">○</div>
+      </div>
+      <div class="q-body" id="qb-${isComplement?'c':''}${i}" style="display:none">
+        <textarea class="q-answer" id="qa-${isComplement?'c':''}${i}" rows="4"
+          placeholder="${q.placeholder||'Responda com detalhes específicos do seu negócio...'}"
+          oninput="onAnswer('${isComplement?'c':''}${i}',this.value)">${answers[i]||''}</textarea>
+        <div class="q-quality" id="qq-${isComplement?'c':''}${i}">
+          <span class="q-quality-label" style="color:var(--t3)">Digite sua resposta...</span>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+
+    // Auto-open first unanswered
+    if(i===0) toggleQ(`${isComplement?'c':''}${i}`);
+  });
+
+  // Show submit button
+  document.getElementById('submit-row').style.display='flex';
+}
+
+function toggleQ(id){
+  const body=document.getElementById('qb-'+id);
+  const isOpen=body.style.display!=='none';
+  // Close all
+  document.querySelectorAll('[id^="qb-"]').forEach(b=>b.style.display='none');
+  if(!isOpen) body.style.display='block';
+}
+
+function onAnswer(id,val){
+  const isComp=id.startsWith('c');
+  const idx=parseInt(id.replace('c',''));
+  if(isComp)S.compAnswers[idx]=val;else S.answers[idx]=val;
+
+  // Quality indicator
+  const qEl=document.getElementById('qq-'+id);
+  const siEl=document.getElementById('qsi-'+id);
+  const qItem=document.getElementById('q-'+id);
+
+  const words=val.trim().split(/\s+/).filter(w=>w).length;
+  const hasNumbers=/\d/.test(val);
+  const score=Math.min(3,Math.floor(words/20)+(hasNumbers?1:0));
+
+  const colors=['var(--t3)','var(--amber)','var(--blue)','var(--accent)'];
+  const labels=['Digite mais...','Resposta curta — pode aprofundar','Boa resposta — adicione dados se possível','Resposta excelente ✓'];
+  const widths=['10%','35%','65%','100%'];
+
+  qEl.innerHTML=`
+    <div class="q-quality-bar"><div class="q-quality-fill" style="width:${widths[score]};background:${colors[score]}"></div></div>
+    <span class="q-quality-label" style="color:${colors[score]}">${labels[score]}</span>
+  `;
+
+  if(words>15){siEl.textContent='✓';siEl.style.color='var(--accent)';qItem.classList.add('answered')}
+  else{siEl.textContent='○';siEl.style.color='';qItem.classList.remove('answered')}
+
+  // Update blocks progress + auto-save
+  updateBlocksProgress();
+  clearTimeout(window._answerSaveTimer);
+  window._answerSaveTimer = setTimeout(()=> saveDraft(true), 2000);
+}
+
+function updateBlocksProgress(){
+  const answered=Object.values(S.answers).filter(v=>v.trim().split(/\s+/).filter(w=>w).length>10).length;
+  const total=S.questions.length||7;
+  const pct=Math.min(100,Math.round(answered/total*100));
+  document.getElementById('prog-fill').style.width=pct+'%';
+
+  // Update block chips based on questions coverage
+  S.questions.forEach((q,i)=>{
+    const val=S.answers[i]||'';
+    const covered=val.trim().split(/\s+/).filter(w=>w).length>10;
+    const block=q.block||1;
+    const el=document.getElementById('bc-'+block);
+    if(!el)return;
+    if(covered){el.className='bc done'}else{el.className='bc on'}
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// SISTEMA DE AUTO-SAVE — 3 CAMADAS
+// ══════════════════════════════════════════════════════════════
+const DRAFT_KEY = 'vc5_draft';
+let autoSaveTimer = null;
+let lastSavedHash = '';
+
+// Camada 1 — Salvar rascunho completo
+function saveDraft(silent=true){
+  try{
+    const draft = {
+      session: S.session,
+      questions: S.questions,
+      answers: S.answers,
+      complement: S.complement,
+      compAnswers: S.compAnswers,
+      round: S.round,
+      screen: document.querySelector('.screen.active')?.id || 'screen-home',
+      // Campos do formulário de setup
+      form: {
+        name: document.getElementById('inp-name')?.value || '',
+        email: document.getElementById('inp-email')?.value || '',
+        biz: document.getElementById('inp-biz')?.value || '',
+        sector: document.getElementById('inp-sector')?.value || '',
+        desc: document.getElementById('inp-desc')?.value || ''
+      },
+      savedAt: new Date().toISOString()
+    };
+
+    const hash = JSON.stringify(draft);
+    if(hash === lastSavedHash && silent) return; // Nada mudou
+    lastSavedHash = hash;
+
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    showSaveIndicator(silent);
+  } catch(e){
+    console.warn('Auto-save falhou:', e);
+  }
+}
+
+// Camada 2 — Mostrar indicador de save
+function showSaveIndicator(silent=false){
+  const indicator = document.getElementById('save-indicator');
+  const icon = document.getElementById('save-icon');
+  const text = document.getElementById('save-text');
+  if(!indicator) return;
+
+  indicator.style.display = 'flex';
+  const time = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+
+  if(!silent){
+    // Feedback visual de save manual
+    icon.textContent = '✅';
+    text.textContent = `SALVO ${time}`;
+    indicator.style.background = 'rgba(127,255,110,.15)';
+    setTimeout(()=>{
+      icon.textContent = '💾';
+      text.textContent = `SALVO ${time}`;
+      indicator.style.background = 'rgba(127,255,110,.08)';
+    }, 2000);
+  } else {
+    icon.textContent = '💾';
+    text.textContent = `SALVO ${time}`;
+  }
+}
+
+// Camada 3 — Save manual (botão)
+function manualSave(){
+  // Capturar campos do form antes de salvar
+  if(S.session){
+    saveDraft(false);
+  } else {
+    // Salvar mesmo sem sessão iniciada (formulário em preenchimento)
+    const draft = {
+      session: null,
+      questions: [],
+      answers: {},
+      complement: [],
+      compAnswers: {},
+      round: 1,
+      screen: 'screen-setup',
+      form: {
+        name: document.getElementById('inp-name')?.value || '',
+        email: document.getElementById('inp-email')?.value || '',
+        biz: document.getElementById('inp-biz')?.value || '',
+        sector: document.getElementById('inp-sector')?.value || '',
+        desc: document.getElementById('inp-desc')?.value || ''
+      },
+      savedAt: new Date().toISOString()
+    };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    showSaveIndicator(false);
+  }
+}
+
+// Auto-save a cada 30 segundos
+function startAutoSave(){
+  if(autoSaveTimer) clearInterval(autoSaveTimer);
+  autoSaveTimer = setInterval(()=> saveDraft(true), 30000);
+}
+
+// Auto-save ao sair de campos de texto
+function initFieldAutoSave(){
+  document.addEventListener('input', (e)=>{
+    if(e.target.matches('input, textarea, select')){
+      clearTimeout(window._fieldSaveTimer);
+      window._fieldSaveTimer = setTimeout(()=> saveDraft(true), 1500);
+    }
+  });
+}
+
+// Verificar se existe rascunho ao carregar
+function checkDraft(){
+  try{
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if(!raw) return;
+    const draft = JSON.parse(raw);
+    if(!draft.savedAt) return;
+
+    // Só mostrar se o rascunho tiver conteúdo relevante
+    const hasBiz = draft.form?.biz || draft.session?.biz;
+    const hasAnswers = Object.keys(draft.answers||{}).length > 0;
+    const savedAt = new Date(draft.savedAt);
+    const hoursAgo = (Date.now() - savedAt.getTime()) / 1000 / 3600;
+
+    // Ignorar rascunhos com mais de 48h ou sem conteúdo
+    if(hoursAgo > 48 || !hasBiz) return;
+
+    const banner = document.getElementById('recovery-banner');
+    const desc = document.getElementById('recovery-desc');
+    if(!banner || !desc) return;
+
+    const timeStr = savedAt.toLocaleString('pt-BR');
+    const answersCount = Object.values(draft.answers||{}).filter(v=>v?.trim()).length;
+
+    desc.textContent = `"${hasBiz}" — salvo em ${timeStr}${answersCount > 0 ? ` · ${answersCount} respostas preenchidas` : ''}`;
+    banner.style.display = 'flex';
+    banner.style.removeProperty('display');
+    // Forçar flex pois o style foi definido como display:none no HTML
+    banner.setAttribute('style', 'display:flex;background:rgba(255,179,71,.06);border:1px solid rgba(255,179,71,.25);border-radius:var(--r);padding:16px 20px;margin-bottom:20px;align-items:center;justify-content:space-between;gap:16px');
+
+  } catch(e){ console.warn('Erro ao verificar rascunho:', e); }
+}
+
+// Recuperar sessão do rascunho
+function recoverSession(){
+  try{
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if(!raw) return;
+    const draft = JSON.parse(raw);
+
+    // Restaurar estado
+    if(draft.session) S.session = draft.session;
+    if(draft.questions) S.questions = draft.questions;
+    if(draft.answers) S.answers = draft.answers;
+    if(draft.complement) S.complement = draft.complement;
+    if(draft.compAnswers) S.compAnswers = draft.compAnswers;
+    if(draft.round) S.round = draft.round;
+
+    // Restaurar formulário
+    if(draft.form){
+      const f = draft.form;
+      if(f.name) document.getElementById('inp-name').value = f.name;
+      if(f.email) document.getElementById('inp-email').value = f.email;
+      if(f.biz) document.getElementById('inp-biz').value = f.biz;
+      if(f.sector) document.getElementById('inp-sector').value = f.sector;
+      if(f.desc) document.getElementById('inp-desc').value = f.desc;
+    }
+
+    // Esconder banner
+    document.getElementById('recovery-banner').style.display = 'none';
+
+    // Ir para a tela correta
+    if(draft.questions?.length > 0 && Object.keys(draft.answers||{}).length > 0){
+      // Tinha perguntas e respostas — ir para tela de perguntas
+      showScreen('questions');
+      updateBlocksProgress();
+      renderQuestions(S.questions);
+      // Restaurar respostas nos campos
+      Object.entries(S.answers).forEach(([idx, val])=>{
+        const ta = document.getElementById(`qa-${idx}`);
+        if(ta){ ta.value = val; onAnswer(idx, val); }
+      });
+      document.getElementById('submit-row').style.display = 'flex';
+    } else {
+      // Só tinha o formulário — ir para setup
+      showScreen('setup');
+    }
+
+    showSaveIndicator(false);
+  } catch(e){
+    console.warn('Erro ao recuperar sessão:', e);
+    discardRecovery();
+  }
+}
+
+// Descartar rascunho
+function discardRecovery(){
+  localStorage.removeItem(DRAFT_KEY);
+  document.getElementById('recovery-banner').style.display = 'none';
+}
+
+// Limpar rascunho quando análise for concluída
+function clearDraft(){
+  localStorage.removeItem(DRAFT_KEY);
+  lastSavedHash = '';
+  const indicator = document.getElementById('save-indicator');
+  if(indicator) indicator.style.display = 'none';
+}
+async function submitAnswers(){
+  // Capturar todas as respostas dos textareas antes de avaliar
+  S.questions.forEach((_,i)=>{
+    const ta=document.getElementById(`qa-${i}`);
+    if(ta&&ta.value.trim()) S.answers[i]=ta.value.trim();
+  });
+  S.complement.forEach((_,i)=>{
+    const ta=document.getElementById(`qa-c${i}`);
+    if(ta&&ta.value.trim()) S.compAnswers[i]=ta.value.trim();
+  });
+
+  const answered=Object.values(S.answers).filter(v=>v&&v.trim().length>20).length;
+
+  if(answered<Math.ceil(S.questions.length*0.6)){
+    alert(`Responda pelo menos ${Math.ceil(S.questions.length*0.6)} perguntas para continuar.`);return;
+  }
+
+  setProc(true,'Avaliando qualidade das respostas...');
+  document.getElementById('submit-row').style.display='none';
+
+  try{
+    const qa=buildQA();
+    const res=await callClaude(evalPrompt(qa), 2000);
+    let parsed;
+    try{parsed=parseJSON(res)}
+    catch(e){console.error('Eval parse error:',e,'\nRaw:',res);throw new Error('Erro ao avaliar respostas.')}
+
+    if(parsed.needs_complement&&parsed.complement_questions?.length&&S.round===1){
+      // Needs more
+      S.complement=parsed.complement_questions;
+      S.round=2;
+      setProc(false);
+      document.getElementById('complement-section').style.display='block';
+      renderQuestions(S.complement,true);
+
+    }else{
+      // Ready for final analysis
+      setProc(true,'Gerando relatório completo...');
+      const finalRes=await callClaude(finalPrompt(qa), 8000);
+      let finalParsed;
+      try{finalParsed=parseJSON(finalRes)}
+      catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório final.')}
+      setProc(false);
+      saveSession(finalParsed);
+      renderAnalysis(finalParsed);
+      showScreen('analysis');
+    }
+  }catch(err){
+    setProc(false);
+    document.getElementById('submit-row').style.display='flex';
+    const d=document.createElement('div');d.className='msg msg-warn';
+    d.textContent='⚠ '+(err.message||'Erro. Tente novamente.');
+    document.getElementById('questions-list').prepend(d);
+  }
+}
+
+function parseJSON(raw){
+  // Remove markdown code blocks if present
+  let clean=raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  // Find first { and last } to extract JSON even with surrounding text
+  const start=clean.indexOf('{');
+  const end=clean.lastIndexOf('}');
+  if(start!==-1&&end!==-1&&end>start){
+    clean=clean.substring(start,end+1);
+  }
+  return JSON.parse(clean);
+}
+
+function buildQA(){
+  let text=`NEGÓCIO: ${S.session.biz}\nSETOR: ${S.session.sector}\nDESCRIÇÃO INICIAL: ${S.session.desc}\n\n`;
+  text+=`=== RESPOSTAS RODADA 1 ===\n`;
+  S.questions.forEach((q,i)=>{
+    text+=`\nPERGUNTA ${i+1} [${BLOCKS[(q.block||1)-1]}]: ${q.question}\nRESPOSTA: ${S.answers[i]||'(não respondida)'}\n`;
+  });
+  if(S.complement.length){
+    text+=`\n=== RESPOSTAS COMPLEMENTARES ===\n`;
+    S.complement.forEach((q,i)=>{
+      text+=`\nPERGUNTA COMPLEMENTAR ${i+1}: ${q.question}\nRESPOSTA: ${S.compAnswers[i]||'(não respondida)'}\n`;
+    });
+  }
+  return text;
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER ANALYSIS
+// ══════════════════════════════════════════════════════════════
+function renderAnalysis(d){
+  document.getElementById('ana-title').textContent=`RELATÓRIO — ${(S.session?.biz||d.biz||'ANÁLISE').toUpperCase()}`;
+  document.getElementById('ana-meta').textContent=`${new Date().toLocaleDateString('pt-BR',{dateStyle:'full'})} · Empreendedor: ${S.session?.name||'—'} · DNA Board 18 mentores`;
+
+  const vc=d.verdict==='APROVADO'?'ok':d.verdict==='REPROVADO'?'no':'rev';
+  const vi=d.verdict==='APROVADO'?'✅':d.verdict==='REPROVADO'?'❌':'⚠️';
+  document.getElementById('verdict-el').innerHTML=`
+    <div class="verdict-wrap ${vc}">
+      <div>
+        <div class="verdict-v">${vi} ${d.verdict}</div>
+        <div class="verdict-sub">VEREDITO DO DNA BOARD · 18 MENTORES</div>
+        <div class="verdict-chips">${DNA.map(p=>`<span class="vchip">${p.av} ${p.name.split(' ')[0]}</span>`).join('')}</div>
+      </div>
+      <div class="verdict-resumo">"${d.resumo||''}"</div>
+    </div>`;
+
+  // Scores
+  const sg=document.getElementById('score-g');sg.innerHTML='';
+  [{l:'Problema',k:'problema'},{l:'Solução',k:'solucao'},{l:'Mercado',k:'mercado'},{l:'Modelo',k:'modelo'},{l:'Competição',k:'competicao'},{l:'Time',k:'time'},{l:'Capital',k:'capital'}].forEach(x=>{
+    const s=d[x.k+'_score']||0;const c=s>=4?'var(--accent)':s>=3?'var(--amber)':'var(--red)';
+    sg.innerHTML+=`<div class="si"><div class="si-label">${x.l} <strong>${s}/5</strong></div><div class="si-bar"><div class="si-fill" style="width:${s/5*100}%;background:${c}"></div></div></div>`;
+  });
+
+  // Blocks
+  const ab=document.getElementById('ana-blocks');ab.innerHTML='';
+  [{n:'01',t:'Problema',k:'problema'},{n:'02',t:'Solução',k:'solucao'},{n:'03',t:'Mercado & TAM/SAM/SOM',k:'mercado'},{n:'04',t:'Modelo de Negócio',k:'modelo'},{n:'05',t:'Competição',k:'competicao'},{n:'06',t:'Time',k:'time'},{n:'07',t:'Capital & Investimento',k:'capital'}].forEach(b=>{
+    if(!d[b.k])return;const s=d[b.k+'_score']||0;
+    ab.innerHTML+=`<div class="ab"><div class="ab-head"><span class="ab-num">${b.n}</span><span class="ab-title">${b.t}</span><span class="ab-stars">${'★'.repeat(s)}${'☆'.repeat(5-s)}</span></div><div class="ab-body">${d[b.k]}</div></div>`;
+  });
+
+  // Financial
+  const fb=document.getElementById('fin-body');
+  fb.innerHTML=d.financeiro_table?`<table class="fin-t"><thead><tr><th>Métrica</th><th>Valor estimado</th><th>Observação</th></tr></thead><tbody>${d.financeiro_table.map((r,i)=>`<tr class="${i%2===0?'fin-hl':''}"><td>${r.metrica}</td><td class="fin-num">${r.valor}</td><td style="color:var(--t2);font-size:12px">${r.obs||''}</td></tr>`).join('')}</tbody></table>`:`<div style="color:var(--t2)">${d.financeiro||'—'}</div>`;
+
+  // MVP
+  const mb=document.getElementById('mvp-body');
+  if(d.mvp){
+    mb.innerHTML=`
+      ${d.mvp.descricao?`<p style="font-size:13px;color:var(--t2);line-height:1.8;margin-bottom:20px">${d.mvp.descricao}</p>`:''}
+      <div class="mvp-stats">
+        <div class="mvp-stat"><div class="mvp-stat-val">${d.mvp.custo||'—'}</div><div class="mvp-stat-label">Custo estimado</div></div>
+        <div class="mvp-stat"><div class="mvp-stat-val">${d.mvp.tempo||'—'}</div><div class="mvp-stat-label">Prazo estimado</div></div>
+        <div class="mvp-stat"><div class="mvp-stat-val">${d.mvp.stack||'—'}</div><div class="mvp-stat-label">Stack recomendada</div></div>
+      </div>
+      <div class="mvp-2col">
+        <div class="mvp-col"><div class="mvp-col-title">✅ O que entra no MVP</div>${(d.mvp.entra||[]).map(i=>`<div class="mvp-row"><div class="dot-in"></div><div>${i}</div></div>`).join('')}</div>
+        <div class="mvp-col"><div class="mvp-col-title">❌ O que fica fora</div>${(d.mvp.fora||[]).map(i=>`<div class="mvp-row"><div class="dot-out"></div><div>${i}</div></div>`).join('')}</div>
+      </div>
+      ${d.mvp.criterios?`<div class="card" style="background:var(--s2);margin-bottom:0"><div class="card-head"><div class="card-title">🎯 Critérios de sucesso do MVP</div></div><div class="card-body" style="font-size:13px;color:var(--text);line-height:1.8">${d.mvp.criterios}</div></div>`:''}`
+  }else{mb.innerHTML='<div style="color:var(--t2)">—</div>'}
+
+  // Matrix
+  const matb=document.getElementById('matrix-body');
+  if(d.matriz){
+    matb.innerHTML=`
+      <div class="matrix">
+        <div class="mq mq-tl"><div class="mq-label">🏆 Apostas</div><div class="mq-sub">Alto impacto · Alto esforço</div><div class="mq-items">${(d.matriz.apostas||[]).map(i=>`<div class="mq-i">${i}</div>`).join('')}</div></div>
+        <div class="mq mq-tr"><div class="mq-label">⚡ Quick Wins</div><div class="mq-sub">Alto impacto · Baixo esforço</div><div class="mq-items">${(d.matriz.quick_wins||[]).map(i=>`<div class="mq-i">${i}</div>`).join('')}</div></div>
+        <div class="mq mq-bl"><div class="mq-label">📋 Tarefas</div><div class="mq-sub">Baixo impacto · Baixo esforço</div><div class="mq-items">${(d.matriz.tarefas||[]).map(i=>`<div class="mq-i">${i}</div>`).join('')}</div></div>
+        <div class="mq mq-br"><div class="mq-label">🗑 Descartar</div><div class="mq-sub">Baixo impacto · Alto esforço</div><div class="mq-items">${(d.matriz.descartar||[]).map(i=>`<div class="mq-i">${i}</div>`).join('')}</div></div>
+      </div>
+      ${d.matriz.primeiro_passo?`<div class="msg msg-ok">🎯 <strong>Primeiro passo concreto:</strong> ${d.matriz.primeiro_passo}</div>`:''}`
+  }else{matb.innerHTML='<div style="color:var(--t2)">—</div>'}
+
+  // Roadmap
+  const rb=document.getElementById('roadmap-body');rb.innerHTML='';
+  if(d.roadmap?.length){d.roadmap.forEach((p,i)=>{rb.innerHTML+=`<div class="ph"><div class="ph-dot">${i+1}</div><div class="ph-body"><div class="ph-title">${p.title}</div><div class="ph-period">⏱ ${p.period||''}</div><div class="ph-text">${p.actions||p.body||''}</div></div></div>`})}
+
+  // Risks
+  const rsb=document.getElementById('risks-body');rsb.innerHTML='';
+  if(d.riscos?.length){d.riscos.forEach((r,i)=>{rsb.innerHTML+=`<div class="risk-i"><div class="risk-n">${i+1}</div><div>${typeof r==='string'?r:r.descricao||JSON.stringify(r)}</div></div>`})}
+}
+
+// ══════════════════════════════════════════════════════════════
+// PROCESSING
+// ══════════════════════════════════════════════════════════════
+function setProc(on,step){
+  document.getElementById('proc-wrap').classList.toggle('on',on);
+  if(step)document.getElementById('proc-step').textContent=step;
+  if(on){
+    document.getElementById('questions-list').style.opacity='.3';
+    document.getElementById('submit-row').style.display='none';
+  }else{
+    document.getElementById('questions-list').style.opacity='1';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// CLAUDE API + PROMPTS — 4 CAMADAS
+// ══════════════════════════════════════════════════════════════
+async function callClaude(messages, maxTokens=4000){
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,system:SYSTEM_PROMPT,messages})
+  });
+  if(!res.ok){
+    const err=await res.json().catch(()=>({}));
+    const msg=err.error?.message||`Erro API ${res.status}`;
+    console.error('Claude API error:',msg,err);
+    throw new Error(msg);
+  }
+  const data=await res.json();
+  const text=data.content?.[0]?.text||'';
+  if(!text) throw new Error('Resposta vazia da API. Tente novamente.');
+  return text;
+}
+
+// ═══════════════════════════════════════════════
+// SYSTEM PROMPT — AS 4 CAMADAS
+// ═══════════════════════════════════════════════
+const SYSTEM_PROMPT=`Você é o VentureCheck DNA Board — fusão de 14 grandes empreendedores numa inteligência única de análise de negócios.
+
+DNA DOS 14 MENTORES:
+${DNA.map(p=>p.dna).join('\n')}
+
+═══ CAMADA 1 — IDENTIDADE ═══
+Você é um mentor implacável. Já viu centenas de negócios nascerem e morrerem. Sabe onde o negócio vai travar antes do empreendedor.
+
+NUNCA: perguntas genéricas, elogios sem evidência, suavizar problemas sérios, aceitar entusiasmo como validação.
+SEMPRE: identificar o que não foi dito, fazer a pergunta incômoda, usar números específicos, tratar o empreendedor como adulto.
+
+═══ CAMADA 2 — REGRAS DAS PERGUNTAS ═══
+1. ESPECIFICIDADE: impossível responder com "sim/não" ou frase genérica
+   RUIM: "Quem é seu público-alvo?"
+   BOM: "Descreva a última pessoa real que você imaginou usando — idade, profissão, dor específica, por que pagaria hoje"
+
+2. PRESSÃO DE REALIDADE (mín 3 perguntas):
+   RUIM: "Você já testou?" 
+   BOM: "Você já vendeu para alguém que não te conhece? Se não — o que está esperando?"
+
+3. PRIMEIROS PRINCÍPIOS (mín 1): "Por que esse problema ainda não foi resolvido? Qual a barreira real?"
+
+4. ESCALA (mín 1): "Como funciona com 100x o tamanho? O que quebra primeiro?"
+
+5. NÚMEROS REAIS (mín 2): "Quanto cobra, de quem, com qual frequência, quantos clientes para pagar as contas no mês 6?"
+
+6. PERGUNTA INCÔMODA (mín 1): "Se seu maior concorrente copiasse com 10x seu capital, o que faria?"
+
+═══ CAMADA 3 — AVALIAÇÃO ═══
+Score por bloco: Profundidade(1-3) + Evidência(1-3) + Autoconsciência(1-3)
+≤5 em bloco crítico → gerar perguntas complementares
+≥6 → prosseguir para análise final
+
+═══ CAMADA 4 — OUTPUT ═══
+NUNCA: "é importante considerar", "pode ser uma boa ideia", "existem oportunidades"
+SEMPRE: afirmação direta + evidência/número + implicação prática + ação recomendada
+
+CRÍTICO: Responda SEMPRE com JSON válido. Sem markdown. Sem texto antes ou depois do JSON.`;
+
+// ══════════════════════════════════════════════════════════════
+// PROMPTS
+// ══════════════════════════════════════════════════════════════
+function genQPrompt(){
+  return[{role:'user',content:`Analise a descrição deste negócio e gere um roteiro de perguntas personalizado.
+
+EMPREENDEDOR: ${S.session.name}
+NEGÓCIO: ${S.session.biz}
+SETOR: ${S.session.sector||'não informado'}
+DESCRIÇÃO: ${S.session.desc}
+
+Gere perguntas que NENHUM formulário genérico faria. Perguntas específicas para ESTE negócio, ESTE setor, ESTE empreendedor.
+
+Responda SOMENTE com este JSON:
+{
+  "intro": "frase de 1-2 linhas contextualizando o que você identificou na descrição e o que vai explorar nas perguntas",
+  "questions": [
+    {
+      "question": "a pergunta completa e específica",
+      "block": número de 1 a 7 (1=Problema, 2=Cliente, 3=Solução, 4=Modelo, 5=Mercado, 6=Time, 7=Capital),
+      "critical": true ou false (true para as 3 mais importantes),
+      "why": "por que essa pergunta é essencial para esse negócio específico",
+      "placeholder": "exemplo de como uma boa resposta começa"
+    }
+  ]
+}
+
+Gere exatamente 6 perguntas — não mais. Qualidade acima de quantidade. Pelo menos 3 devem ser "critical":true. Cubra os 7 blocos priorizando os mais críticos. Cada pergunta deve ser precisa e específica para ESTE negócio. Siga TODAS as regras de qualidade do seu DNA.
+
+IMPORTANTE: Mantenha cada campo de texto conciso — máximo 3 linhas por campo — para garantir que o JSON completo caiba na resposta.`}];
+}
+function evalPrompt(qa){
+  return[{role:'user',content:`Avalie a qualidade das respostas e decida se precisa de perguntas complementares.
+
+${qa}
+
+Avalie cada resposta nas 3 dimensões (Profundidade, Evidência, Autoconsciência).
+Score total: se ≤ 5 em algum bloco crítico → needs_complement: true
+
+Responda SOMENTE com JSON:
+{
+  "scores": {"problema":1-9,"cliente":1-9,"solucao":1-9,"modelo":1-9,"mercado":1-9,"time":1-9,"capital":1-9},
+  "needs_complement": true ou false,
+  "weak_blocks": ["nomes dos blocos fracos"],
+  "complement_questions": [
+    {
+      "question": "pergunta complementar específica e incômoda",
+      "block": número 1-7,
+      "critical": true,
+      "why": "por que essa informação está faltando",
+      "placeholder": "como começar uma boa resposta"
+    }
+  ]
+}
+
+Se needs_complement for false, complement_questions pode ser [].
+Máximo 4 perguntas complementares se necessário.`}];
+}
+
+function finalPrompt(qa){
+  return[{role:'user',content:`Análise completa de viabilidade — DNA Board 18 mentores.
+
+${qa}
+
+REGRAS DE OUTPUT:
+- Cada campo de texto: máximo 5 linhas, direto, sem repetições
+- Números com premissas claras
+- Afirmação direta + evidência + implicação + ação
+- NUNCA: "é importante considerar", "pode ser uma boa ideia"
+
+JSON COMPLETO (sem markdown, sem texto fora do JSON):
+{
+  "verdict":"APROVADO|REPROVADO|REQUER AJUSTES",
+  "resumo":"3 linhas diretas — veredito com justificativa integrada DNA Board",
+  "problema":"análise Tallis+Musk+Rony — máx 4 linhas","problema_score":1-5,
+  "solucao":"análise Zuck+Bloisi+Orosco — máx 4 linhas","solucao_score":1-5,
+  "mercado":"TAM/SAM/SOM com números — Stelleo+Benchimol — máx 4 linhas","mercado_score":1-5,
+  "modelo":"análise Soares+Nardon+Allan+Leandro com unit economics — máx 4 linhas","modelo_score":1-5,
+  "competicao":"análise Musk+Zuck+Benchimol — máx 4 linhas","competicao_score":1-5,
+  "time":"análise Nardon+Rony+Tallis+Napoli+Adibe — máx 4 linhas","time_score":1-5,
+  "capital":"análise Allan+Leandro+L.C.Fernandes+Benchimol — máx 4 linhas","capital_score":1-5,
+  "financeiro":"tese financeira em 2 linhas",
+  "financeiro_table":[
+    {"metrica":"Investimento inicial","valor":"R$ X","obs":"breakdown resumido"},
+    {"metrica":"Receita Ano 1","valor":"R$ X","obs":"premissa principal"},
+    {"metrica":"Receita Ano 2","valor":"R$ X","obs":""},
+    {"metrica":"Receita Ano 3","valor":"R$ X","obs":""},
+    {"metrica":"Break-even","valor":"X meses","obs":""},
+    {"metrica":"CAC estimado","valor":"R$ X","obs":"canal principal"},
+    {"metrica":"LTV estimado","valor":"R$ X","obs":""},
+    {"metrica":"LTV/CAC","valor":"Xx","obs":"saudável >3x"},
+    {"metrica":"ROI (3 anos)","valor":"X%","obs":""},
+    {"metrica":"TIR estimada","valor":"X%","obs":""},
+    {"metrica":"Payback","valor":"X meses","obs":""},
+    {"metrica":"Margem contribuição","valor":"X%","obs":"perspectiva Leandro"}
+  ],
+  "mvp":{
+    "descricao":"o que é o MVP — 2 linhas diretas",
+    "entra":["feature 1 — específica","feature 2","feature 3","feature 4"],
+    "fora":["o que não entra e por quê — 1","2","3"],
+    "custo":"R$ X",
+    "tempo":"X semanas",
+    "stack":"stack específica recomendada",
+    "criterios":"métricas concretas de sucesso — números específicos em 60 dias"
+  },
+  "matriz":{
+    "quick_wins":["ação concreta 1 com prazo","2","3"],
+    "apostas":["ação alto impacto alto esforço 1","2","3"],
+    "tarefas":["ação baixo impacto 1","2"],
+    "descartar":["o que descartar e por quê 1","2"],
+    "primeiro_passo":"ação CONCRETA que acontece AMANHÃ — com horário e métrica de sucesso"
+  },
+  "roadmap":[
+    {"title":"Fase 1 — Validação","period":"Mês 1-3","actions":"ações específicas Tallis+Nardon — máx 5 linhas"},
+    {"title":"Fase 2 — Tração","period":"Mês 4-6","actions":"ações Denis+Soares — máx 5 linhas"},
+    {"title":"Fase 3 — Escala","period":"Mês 7-12","actions":"ações Bloisi+Zuck — máx 5 linhas"},
+    {"title":"Fase 4 — Expansão","period":"Ano 2-3","actions":"visão Benchimol+Stelleo+Napoli+L.C.Fernandes — máx 5 linhas"}
+  ],
+  "riscos":[
+    "Risco 1: [nome] — consequência + mitigação concreta",
+    "Risco 2: [nome] — consequência + mitigação",
+    "Risco 3: [nome] — consequência + mitigação"
+  ]
+}`}];
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+renderDNA();
+renderSessions(); // async — tenta Supabase, fallback localStorage
+startAutoSave();
+initFieldAutoSave();
+setTimeout(checkDraft, 500);
+</script>
+</body>
+</html>
