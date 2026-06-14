@@ -2814,16 +2814,18 @@ let _checkoutPlan = null;
 let _upgradeTo = null;
 
 function startCheckout(plan) {
-  // Map upgrade plans to their destination plan for post-payment activation
+  // MODO TESTE — pagamento desativado, acesso direto
   const upgMap = { upg_diagnostico:'diagnostico', upg_business_plan:'business_plan', upg_venture:'venture' };
-  if (upgMap[plan]) { _upgradeTo = upgMap[plan]; } else { _upgradeTo = null; }
-  _checkoutPlan = plan;
-  const user = checkExistingAuth();
-  if (!user) {
-    showScreen('screen-auth');
-    return;
-  }
-  _openCheckoutModal(plan);
+  const resolvedPlan = upgMap[plan] || plan;
+  S.plan = resolvedPlan;
+  localStorage.setItem('vc_plan_unlocked', resolvedPlan);
+  S.questions = [];
+  S.answers = {};
+  S.complement = [];
+  S.compAnswers = {};
+  S.round = 1;
+  showScreen('screen-setup');
+  setTimeout(() => initCompletude(), 200);
 }
 
 function _openCheckoutModal(plan) {
