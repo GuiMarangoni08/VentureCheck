@@ -1232,7 +1232,15 @@ function renderSessions(){
 
 function loadSession(id){
   const s=getSessions().find(x=>x.id===id);
-  if(s?.analysis){S.session=s;renderAnalysis(s.analysis);showScreen('analysis')}
+  if(s?.analysis){
+    S.session=s;
+    S.plan=s.plan||S.plan||'diagnostico';
+    renderAnalysis(s.analysis);
+    showScreen('analysis');
+    // Restaura troféus já mostrados para não repetir
+    if(s.todoState){const done=Object.values(s.todoState).filter(v=>v.done).length;if(done>0){if(!_trophiesShown[id])_trophiesShown[id]={};if(done>=1)_trophiesShown[id]['first']=true;}}
+    setTimeout(()=>refreshTodoUI(id),100);
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2121,28 +2129,13 @@ function renderAnalysis(d){
 
     // To-do List priorizado
     if(d.todo_list?.length){
-      const prioColors={'🔴 ESTA SEMANA':'var(--red)','🟠 PRÓXIMAS 2 SEMANAS':'var(--amber)','🟡 PRÓXIMO MÊS':'#a3e635'};
       const tdEl=document.createElement('div');tdEl.style.marginTop='24px';
-      tdEl.innerHTML=`<div class="card" style="border:1px solid var(--accent);background:var(--s2)">
-        <div class="card-head"><div class="card-title" style="color:var(--accent)">✅ To-do List — Ações para cumprir os pré-requisitos do Diagnóstico</div></div>
-        <div class="card-body">
-          ${d.todo_list.map((t,i)=>{
-            const col=prioColors[t.prioridade]||'var(--t2)';
-            return`<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
-              <div style="width:20px;height:20px;border:2px solid var(--border3);border-radius:4px;flex-shrink:0;margin-top:2px"></div>
-              <div style="flex:1">
-                <div style="font-size:10px;font-family:'DM Mono',monospace;letter-spacing:1px;color:${col};margin-bottom:4px">${t.prioridade||''}</div>
-                <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">${t.acao}</div>
-                <div style="font-size:12px;color:var(--t2)">${t.impacto}</div>
-              </div>
-            </div>`;
-          }).join('')}
-          ${d.criterio_diagnostico?`<div class="msg msg-ok" style="margin-top:8px">🏁 <strong>Quando você está pronto para o Diagnóstico:</strong> ${d.criterio_diagnostico}</div>`:''}
-          <div id="upgrade-section" style="margin-top:20px"></div>
-          ${d.proximo_modulo?`<div style="font-size:12px;color:var(--accent);margin-top:10px;text-align:center">${d.proximo_modulo}</div>`:''}
-        </div>
-      </div>`;
+      tdEl.innerHTML=renderTodoList(d.todo_list,S.session?.id,'✅ To-do List — Ações para cumprir os pré-requisitos do Diagnóstico');
+      tdEl.innerHTML+=`${d.criterio_diagnostico?`<div class="msg msg-ok" style="margin-top:8px">🏁 <strong>Quando você está pronto para o Diagnóstico:</strong> ${d.criterio_diagnostico}</div>`:''}
+        <div id="upgrade-section" style="margin-top:20px"></div>
+        ${d.proximo_modulo?`<div style="font-size:12px;color:var(--accent);margin-top:10px;text-align:center">${d.proximo_modulo}</div>`:''}`;
       ppval?.parentNode?.insertBefore(tdEl, ppval);
+      setTimeout(()=>refreshTodoUI(S.session?.id),50);
     }
   }
 
@@ -2176,22 +2169,8 @@ function renderAnalysis(d){
           ${nextPlan?`<button class="btn btn-p" style="margin-top:16px;width:100%;justify-content:center" onclick="startCheckout('${nextPlan}')">Avançar para ${nextLabel} →</button>`:''}
         </div>
       </div>
-      ${todoItems?.length?`<div class="card" style="border:1px solid var(--border2);background:var(--s2)">
-        <div class="card-head"><div class="card-title">✅ To-do List — O que fazer agora</div></div>
-        <div class="card-body">
-          ${todoItems.map(t=>{
-            const col=prioColors[t.prioridade]||'var(--t2)';
-            return`<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
-              <div style="width:20px;height:20px;border:2px solid var(--border3);border-radius:4px;flex-shrink:0;margin-top:2px"></div>
-              <div style="flex:1">
-                <div style="font-size:10px;font-family:'DM Mono',monospace;letter-spacing:1px;color:${col};margin-bottom:4px">${t.prioridade||''}</div>
-                <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">${t.acao}</div>
-                <div style="font-size:12px;color:var(--t2)">${t.impacto}</div>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>`:''}`;
+      ${todoItems?.length?renderTodoList(todoItems,S.session?.id,'✅ To-do List — O que fazer agora'):''}`;
+    if(todoItems?.length) setTimeout(()=>refreshTodoUI(S.session?.id),50);
   } else if(ppsec){
     ppsec.style.display = 'none';
   }
@@ -3118,6 +3097,189 @@ const UPGRADE_NEXT = {
   business_plan:{ avulso: 'upg_venture', avulso_price: 'R$949', full: null, full_price: null, full_label: null, full_save: null, next_plan: 'venture' },
   venture: null,
 };
+
+// ══════════════════════════════════════════════════════════════
+// TO-DO INTERATIVO — GAMIFICAÇÃO
+// ══════════════════════════════════════════════════════════════
+function getTodoState(sessionId){
+  try{return JSON.parse(localStorage.getItem('vc_todo_'+sessionId)||'{}')}catch{return{}}
+}
+function saveTodoState(sessionId,state){
+  localStorage.setItem('vc_todo_'+sessionId,JSON.stringify(state));
+  // Persiste no objeto de sessão salvo
+  const sessions=getSessions();
+  const idx=sessions.findIndex(s=>s.id===sessionId);
+  if(idx>=0){sessions[idx].todoState=state;saveSess(sessions);}
+}
+
+function toggleTodoCheck(sessionId,idx){
+  const state=getTodoState(sessionId);
+  state[idx]=state[idx]||{};
+  state[idx].done=!state[idx].done;
+  saveTodoState(sessionId,state);
+  refreshTodoUI(sessionId);
+}
+
+function toggleTodoDrawer(sessionId,idx){
+  const drawer=document.getElementById('td-drawer-'+sessionId+'-'+idx);
+  if(!drawer)return;
+  const open=drawer.style.display==='none'||!drawer.style.display;
+  drawer.style.display=open?'block':'none';
+  const btn=document.getElementById('td-reg-'+sessionId+'-'+idx);
+  if(btn)btn.textContent=open?'▲ Fechar':'+ Registrar';
+}
+
+function saveTodoNote(sessionId,idx){
+  const ta=document.getElementById('td-note-'+sessionId+'-'+idx);
+  const state=getTodoState(sessionId);
+  state[idx]=state[idx]||{};
+  state[idx].note=ta?ta.value:'';
+  saveTodoState(sessionId,state);
+  showTodoToast('📝 Registrado!');
+}
+
+function handleTodoFile(sessionId,idx,input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const state=getTodoState(sessionId);
+    state[idx]=state[idx]||{};
+    state[idx].file={name:file.name,size:file.size,data:e.target.result};
+    saveTodoState(sessionId,state);
+    const label=document.getElementById('td-file-label-'+sessionId+'-'+idx);
+    if(label)label.textContent='📎 '+file.name;
+    showTodoToast('📎 Arquivo anexado!');
+  };
+  reader.readAsDataURL(file);
+}
+
+function showTodoToast(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--accent);border-radius:10px;padding:10px 20px;font-size:13px;color:var(--accent);z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.4)';
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(()=>{t.style.transition='opacity .3s';t.style.opacity='0';setTimeout(()=>t.remove(),300)},1800);
+}
+
+function showTrophyToast(trophy,msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--s2);border:2px solid var(--accent);border-radius:16px;padding:28px 36px;font-size:14px;color:var(--text);z-index:9999;box-shadow:0 8px 40px rgba(0,0,0,.6);text-align:center;max-width:340px';
+  t.innerHTML=`<div style="font-size:48px;margin-bottom:12px">${trophy}</div><div style="font-weight:700;color:var(--accent);margin-bottom:6px;font-size:16px">Troféu Desbloqueado!</div><div style="color:var(--t2);font-size:13px;line-height:1.6">${msg}</div><button onclick="this.parentNode.remove()" style="margin-top:16px;padding:8px 24px;background:var(--accent);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px">Continuar →</button>`;
+  document.body.appendChild(t);
+}
+
+const _trophiesShown={};
+function checkTrophies(sessionId,done,total){
+  const key=sessionId;
+  if(!_trophiesShown[key])_trophiesShown[key]={};
+  if(done===1 && !_trophiesShown[key]['first']){
+    _trophiesShown[key]['first']=true;
+    setTimeout(()=>showTrophyToast('🌱','Primeiro Passo — Você saiu do papel. Isso já separa você de 80% dos founders.'),400);
+  } else if(done===Math.floor(total/2) && total>2 && !_trophiesShown[key]['half']){
+    _trophiesShown[key]['half']=true;
+    setTimeout(()=>showTrophyToast('⚡','Acelerando — Metade do caminho. O DNA Board está vendo progresso real.'),400);
+  } else if(done===total && total>0 && !_trophiesShown[key]['full']){
+    _trophiesShown[key]['full']=true;
+    setTimeout(()=>showTrophyToast('🏆','To-do Zerado — Pré-requisitos cumpridos. Você está pronto para o próximo nível.'),400);
+  }
+}
+
+function refreshTodoUI(sessionId){
+  const state=getTodoState(sessionId);
+  const items=document.querySelectorAll('[data-todo-session="'+sessionId+'"]');
+  let done=0,total=items.length;
+  items.forEach(item=>{
+    const idx=parseInt(item.dataset.todoIdx);
+    const isDone=!!(state[idx]&&state[idx].done);
+    if(isDone)done++;
+    // Item visual
+    item.style.background=isDone?'rgba(127,255,110,0.06)':'';
+    item.style.borderRadius=isDone?'8px':'';
+    const check=item.querySelector('.td-check');
+    if(check){
+      check.style.background=isDone?'var(--accent)':'';
+      check.style.borderColor=isDone?'var(--accent)':'var(--border3)';
+      check.innerHTML=isDone?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round"/></svg>':'';
+    }
+    const prio=item.querySelector('.td-prio');
+    if(prio)prio.style.opacity=isDone?'0':'1';
+    const acao=item.querySelector('.td-acao');
+    if(acao)acao.style.color=isDone?'var(--accent)':'var(--text)';
+    const regBtn=document.getElementById('td-reg-'+sessionId+'-'+idx);
+    if(regBtn&&!isDone){regBtn.style.display='inline-flex';}
+    else if(regBtn&&isDone){
+      const note=state[idx]?.note;
+      const fname=state[idx]?.file?.name;
+      if(note||fname){
+        const noteEl=item.querySelector('.td-done-note');
+        if(noteEl){noteEl.style.display='block';noteEl.textContent=(note||'')+(fname?' · 📎 '+fname:'');}
+      }
+    }
+    // Restaura nota no textarea
+    const ta=document.getElementById('td-note-'+sessionId+'-'+idx);
+    if(ta&&state[idx]?.note)ta.value=state[idx].note;
+  });
+  // Barra de progresso
+  const bar=document.getElementById('td-prog-bar-'+sessionId);
+  const pct=document.getElementById('td-prog-pct-'+sessionId);
+  const fill=document.getElementById('td-prog-fill-'+sessionId);
+  const pctNum=total?Math.round(done/total*100):0;
+  if(bar)bar.style.display='block';
+  if(pct)pct.textContent=done+'/'+total+' itens · '+pctNum+'%';
+  if(fill)fill.style.width=pctNum+'%';
+  checkTrophies(sessionId,done,total);
+}
+
+function renderTodoList(items,sessionId,title){
+  if(!items?.length)return'';
+  const prioColors={'🔴 ESTA SEMANA':'var(--red)','🟠 PRÓXIMAS 2 SEMANAS':'var(--amber)','🟡 PRÓXIMAS 2 SEMANAS':'var(--amber)','🟢 PRÓXIMO MÊS':'#a3e635'};
+  const state=getTodoState(sessionId);
+  const total=items.length;
+  const done=Object.values(state).filter(v=>v.done).length;
+  const pctNum=total?Math.round(done/total*100):0;
+  return`<div class="card" style="border:1px solid var(--accent);background:var(--s2)">
+    <div class="card-head"><div class="card-title" style="color:var(--accent)">${title||'✅ To-do List'}</div></div>
+    <div class="card-body">
+      <div id="td-prog-bar-${sessionId}" style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:1px;color:var(--t3)">PROGRESSO</div>
+          <div id="td-prog-pct-${sessionId}" style="font-size:11px;font-family:'DM Mono',monospace;color:var(--accent)">${done}/${total} itens · ${pctNum}%</div>
+        </div>
+        <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden">
+          <div id="td-prog-fill-${sessionId}" style="height:100%;background:var(--accent);border-radius:3px;transition:width .4s ease;width:${pctNum}%"></div>
+        </div>
+      </div>
+      ${items.map((t,i)=>{
+        const isDone=!!(state[i]&&state[i].done);
+        const col=prioColors[t.prioridade]||'var(--t2)';
+        const savedNote=state[i]?.note||'';
+        const savedFile=state[i]?.file?.name||'';
+        return`<div data-todo-session="${sessionId}" data-todo-idx="${i}" style="padding:12px;margin-bottom:8px;border-radius:8px;border:1px solid var(--border);${isDone?'background:rgba(127,255,110,0.06);border-color:rgba(127,255,110,0.2)':''}">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div class="td-check" onclick="toggleTodoCheck('${sessionId}',${i})" style="width:20px;height:20px;border:2px solid ${isDone?'var(--accent)':'var(--border3)'};border-radius:4px;flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:${isDone?'var(--accent)':''};transition:.2s">${isDone?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round"/></svg>':''}</div>
+            <div style="flex:1;min-width:0">
+              <div class="td-prio" style="font-size:10px;font-family:'DM Mono',monospace;letter-spacing:1px;color:${col};margin-bottom:4px;opacity:${isDone?0:1};transition:.2s">${t.prioridade||''}</div>
+              <div class="td-acao" style="font-size:13px;font-weight:600;color:${isDone?'var(--accent)':'var(--text)'};margin-bottom:3px;transition:.2s">${t.acao}</div>
+              <div style="font-size:12px;color:var(--t2);margin-bottom:8px">${t.impacto}</div>
+              <div class="td-done-note" style="font-size:11px;color:var(--accent);display:${(isDone&&(savedNote||savedFile))?'block':'none'}">${savedNote+(savedFile?' · 📎 '+savedFile:'')}</div>
+              <button id="td-reg-${sessionId}-${i}" onclick="toggleTodoDrawer('${sessionId}',${i})" style="display:${isDone?'none':'inline-flex'};align-items:center;gap:4px;background:var(--s3);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--t2);cursor:pointer;font-family:'DM Sans',sans-serif">+ Registrar</button>
+            </div>
+          </div>
+          <div id="td-drawer-${sessionId}-${i}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+            <textarea id="td-note-${sessionId}-${i}" placeholder="O que você fez? Cole evidências, links, observações…" style="width:100%;min-height:80px;background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:10px;color:var(--text);font-size:12px;font-family:inherit;resize:vertical;box-sizing:border-box;margin-bottom:10px">${savedNote}</textarea>
+            <div style="display:flex;gap:8px;align-items:center">
+              <label style="display:inline-flex;align-items:center;gap:6px;background:var(--s3);border:1px solid var(--border2);border-radius:6px;padding:5px 12px;font-size:11px;color:var(--t2);cursor:pointer">
+                📎 Anexar arquivo
+                <input type="file" style="display:none" onchange="handleTodoFile('${sessionId}',${i},this)">
+              </label>
+              <span id="td-file-label-${sessionId}-${i}" style="font-size:11px;color:var(--t2)">${savedFile?'📎 '+savedFile:''}</span>
+              <button onclick="saveTodoNote('${sessionId}',${i})" style="margin-left:auto;background:var(--accent);color:#000;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
 
 function renderUpgradeSection(plan) {
   const sec = document.getElementById('upgrade-section');
