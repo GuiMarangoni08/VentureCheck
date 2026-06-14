@@ -2233,28 +2233,38 @@ function renderAnalysis(d){
   const nextPlan  = {diagnostico:'business_plan', business_plan:'venture'}[plan];
 
   if(ppsec && plan !== 'validacao' && (passos?.length || todoItems?.length)){
-    const prioColors={'🔴 ESTA SEMANA':'var(--red)','🟡 PRÓXIMAS 2 SEMANAS':'var(--amber)','🟢 PRÓXIMO MÊS':'#a3e635'};
+    const sid = S.session?.id;
     ppsec.style.display = 'block';
+    // To-do list first; prereq card is locked behind evidence gate
+    const prereqCardId = 'prereq-gate-'+(sid||'x');
     ppsec.innerHTML = `
-      <div class="card" style="border:1px solid var(--accent);background:var(--s2);margin-bottom:16px">
-        <div class="card-head">
-          <div class="card-title" style="color:var(--accent)">🏁 Pré-requisitos para ${nextLabel}</div>
+      ${todoItems?.length ? renderTodoList(todoItems, sid, '✅ To-do List — O que fazer agora') : ''}
+      <div id="${prereqCardId}" style="display:none;margin-top:16px">
+        <div class="card" style="border:1px solid var(--accent);background:var(--s2)">
+          <div class="card-head">
+            <div class="card-title" style="color:var(--accent)">🏁 Pré-requisitos para ${nextLabel}</div>
+            <div style="font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;margin-left:auto">🔓 Desbloqueado</div>
+          </div>
+          <div class="card-body">
+            ${(passos||[]).map((p,i)=>`
+              <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+                <div style="min-width:22px;height:22px;border:2px solid var(--accent);border-radius:4px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--accent)">${i+1}</div>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text)">${typeof p==='string'?p:(p.check||p)}</div>
+                  ${p.motivo?`<div style="font-size:12px;color:var(--t2);margin-top:2px">${p.motivo}</div>`:''}
+                </div>
+              </div>`).join('')}
+            ${d.proximo_modulo||d.criterio_pronto?`<div style="font-size:12px;color:var(--t2);margin-top:4px;padding-top:10px;border-top:1px solid var(--border3)">${d.proximo_modulo||d.criterio_pronto}</div>`:''}
+            ${nextPlan?`<button class="btn btn-p" style="margin-top:16px;width:100%;justify-content:center" onclick="startCheckout('${nextPlan}')">Avançar para ${nextLabel} →</button>`:''}
+          </div>
         </div>
-        <div class="card-body">
-          ${(passos||[]).map((p,i)=>`
-            <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
-              <div style="min-width:22px;height:22px;border:2px solid var(--accent);border-radius:4px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--accent)">${i+1}</div>
-              <div>
-                <div style="font-size:13px;font-weight:600;color:var(--text)">${typeof p==='string'?p:(p.check||p)}</div>
-                ${p.motivo?`<div style="font-size:12px;color:var(--t2);margin-top:2px">${p.motivo}</div>`:''}
-              </div>
-            </div>`).join('')}
-          ${d.proximo_modulo||d.criterio_pronto?`<div style="font-size:12px;color:var(--t2);margin-top:4px;padding-top:10px;border-top:1px solid var(--border3)">${d.proximo_modulo||d.criterio_pronto}</div>`:''}
-          ${nextPlan?`<button class="btn btn-p" style="margin-top:16px;width:100%;justify-content:center" onclick="startCheckout('${nextPlan}')">Avançar para ${nextLabel} →</button>`:''}
-        </div>
-      </div>
-      ${todoItems?.length?renderTodoList(todoItems,S.session?.id,'✅ To-do List — O que fazer agora'):''}`;
-    if(todoItems?.length) setTimeout(()=>refreshTodoUI(S.session?.id),50);
+      </div>`;
+    if(todoItems?.length) setTimeout(()=>refreshTodoUI(sid),50);
+    else if(passos?.length){
+      // No todos — prereq card visible immediately
+      const pg=document.getElementById(prereqCardId);
+      if(pg)pg.style.display='block';
+    }
   } else if(ppsec){
     ppsec.style.display = 'none';
   }
@@ -3311,6 +3321,23 @@ function refreshTodoUI(sessionId){
   if(pct)pct.textContent=done+'/'+total+' itens · '+pctNum+'%';
   if(fill)fill.style.width=pctNum+'%';
   checkTrophies(sessionId,done,total);
+
+  // Evidence gate — prereq card only unlocks when ALL items are done AND evidenced
+  const prereqGate=document.getElementById('prereq-gate-'+sessionId);
+  if(prereqGate && total>0){
+    const allEvidenced=Array.from(items).every(item=>{
+      const idx=parseInt(item.dataset.todoIdx);
+      const s=state[idx];
+      return s && s.done && (s.note?.trim() || s.file);
+    });
+    if(allEvidenced && prereqGate.style.display==='none'){
+      prereqGate.style.display='block';
+      prereqGate.style.animation='fadeUp .5s ease';
+      showTrophyToast('🔓','To-do com evidências completo! O card de Pré-requisitos foi desbloqueado. Você está pronto para avançar.');
+    } else if(!allEvidenced){
+      prereqGate.style.display='none';
+    }
+  }
 }
 
 function renderTodoList(items,sessionId,title){
