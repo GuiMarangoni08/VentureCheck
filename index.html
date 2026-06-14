@@ -1325,6 +1325,29 @@ async function generateQuestions(){
   const biz=document.getElementById('inp-biz').value.trim();
   const desc=document.getElementById('inp-desc').value.trim();
   if(!name||!biz||!desc){alert('Preencha nome, nome do negócio e a descrição.');return}
+  // Guard de qualidade mínima da descrição
+  const wordCount=desc.trim().split(/\s+/).filter(Boolean).length;
+  if(wordCount<30){
+    const descEl=document.getElementById('inp-desc');
+    descEl.style.borderColor='var(--red)';
+    descEl.style.boxShadow='0 0 0 3px rgba(255,107,107,.15)';
+    setTimeout(()=>{descEl.style.borderColor='';descEl.style.boxShadow='';},3000);
+    // Mostra mensagem inline no card
+    let warn=document.getElementById('desc-quality-warn');
+    if(!warn){
+      warn=document.createElement('div');
+      warn.id='desc-quality-warn';
+      warn.style.cssText='margin-top:12px;padding:12px 16px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.3);border-radius:8px;font-size:13px;color:var(--red);line-height:1.6';
+      descEl.parentNode.insertBefore(warn,descEl.nextSibling);
+    }
+    warn.innerHTML=`<strong>⚠ Descrição muito curta — ${wordCount} palavra${wordCount===1?'':'s'}.</strong><br>Com tão pouco contexto, o DNA Board não consegue gerar perguntas relevantes para o seu negócio. Descreva <strong>o problema, para quem, como resolve e como pretende ganhar dinheiro</strong> — mínimo 30 palavras.`;
+    warn.style.display='block';
+    descEl.focus();
+    return;
+  }
+  // Remove aviso se passou
+  const warn=document.getElementById('desc-quality-warn');
+  if(warn)warn.style.display='none';
 
   const conv=parseInt(document.getElementById('inp-conv')?.value||'0',10)||0;
   const convDesc=document.getElementById('inp-conv-desc')?.value.trim()||'';
