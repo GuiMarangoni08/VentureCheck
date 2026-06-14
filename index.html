@@ -1455,6 +1455,7 @@ function saveDraft(silent=true){
   try{
     const draft = {
       session: S.session,
+      plan: S.plan,
       questions: S.questions,
       answers: S.answers,
       complement: S.complement,
@@ -1608,6 +1609,7 @@ function recoverSession(){
 
     // Restaurar estado
     if(draft.session) S.session = draft.session;
+    if(draft.plan) S.plan = draft.plan;
     if(draft.questions) S.questions = draft.questions;
     if(draft.answers) S.answers = draft.answers;
     if(draft.complement) S.complement = draft.complement;
