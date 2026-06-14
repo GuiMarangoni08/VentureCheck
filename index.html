@@ -50,7 +50,8 @@ body::after{
   width:260px;min-width:260px;
   background:var(--s1);border-right:1px solid var(--border);
   display:flex;flex-direction:column;
-  position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;
+  position:fixed;top:0;left:0;bottom:0;z-index:100;
+  overflow-y:auto;overflow-x:hidden;
 }
 
 .sidebar-logo{padding:28px 22px 18px;border-bottom:1px solid var(--border)}
@@ -89,7 +90,7 @@ body::after{
 }
 .sidebar-cta:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(127,255,110,.2)}
 
-.session-list{flex:1;overflow-y:auto;padding-bottom:20px}
+.session-list{flex:1;overflow-y:visible;padding-bottom:20px}
 .s-item{
   padding:11px 14px;margin:3px 8px;
   border-radius:var(--r);cursor:pointer;
