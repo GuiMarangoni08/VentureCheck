@@ -987,6 +987,27 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
         <div id="captacao-body"></div>
       </div>
 
+      <!-- Card de Réplica — aparece entre relatório e to-do list -->
+      <div id="replica-section" style="display:none;margin-top:32px">
+        <div class="card" style="border:1px solid var(--accent2,#6c63ff)">
+          <div class="card-head">
+            <div class="card-title">✍️ Sua réplica</div>
+            <div style="font-size:11px;color:var(--t2);margin-left:auto;font-family:'DM Mono',monospace">Opcional</div>
+          </div>
+          <div class="card-body">
+            <div style="font-size:13px;color:var(--t2);margin-bottom:12px">Algo foi interpretado de forma errada? Quer ajustar algum ponto antes de gerar o seu to-do list personalizado?</div>
+            <textarea id="replica-input" maxlength="400" placeholder="Ex: O mercado que estou atacando é B2B, não B2C. Meu MVP já tem 3 clientes pagantes..." style="width:100%;box-sizing:border-box;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;font-size:13px;padding:12px;resize:vertical;min-height:90px;outline:none" oninput="document.getElementById('replica-count').textContent=this.value.length"></textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+              <span style="font-size:11px;color:var(--t2)"><span id="replica-count">0</span>/400 caracteres</span>
+              <div style="display:flex;gap:8px">
+                <button class="btn" style="font-size:12px;padding:6px 14px" onclick="skipReplica()">Pular →</button>
+                <button class="btn btn-p" style="font-size:12px;padding:6px 14px" onclick="confirmReplica()">Confirmar e ver to-do list →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Seção Próximos Passos — aparece em todos os planos -->
       <div id="proximos-passos-section" style="display:none;margin-top:32px"></div>
 
@@ -1257,6 +1278,11 @@ function loadSession(id){
     S.session=s;
     S.plan=s.plan||S.plan||'diagnostico';
     renderAnalysis(s.analysis);
+    // Sessão existente: pular réplica e mostrar to-do diretamente
+    const replicaSec=document.getElementById('replica-section');
+    if(replicaSec) replicaSec.style.display='none';
+    const ppsec=document.getElementById('proximos-passos-section');
+    if(ppsec && ppsec.innerHTML.trim()) ppsec.style.display='block';
     showScreen('analysis');
     // Restaura troféus já mostrados para não repetir
     if(s.todoState){const done=Object.values(s.todoState).filter(v=>v.done).length;if(done>0){if(!_trophiesShown[id])_trophiesShown[id]={};if(done>=1)_trophiesShown[id]['first']=true;}}
@@ -2235,7 +2261,18 @@ function renderAnalysis(d){
 
   if(ppsec && plan !== 'validacao' && (passos?.length || todoItems?.length)){
     const sid = S.session?.id;
-    ppsec.style.display = 'block';
+    // Keep proximos-passos hidden — replica card will reveal it
+    ppsec.style.display = 'none';
+    // Show replica card
+    const replicaSec = document.getElementById('replica-section');
+    if(replicaSec){
+      const inp = document.getElementById('replica-input');
+      if(inp) inp.value='';
+      const cnt = document.getElementById('replica-count');
+      if(cnt) cnt.textContent='0';
+      replicaSec.style.display = 'block';
+      setTimeout(()=>replicaSec.scrollIntoView({behavior:'smooth',block:'start'}),200);
+    }
     // To-do list first; prereq card is locked behind evidence gate
     const prereqCardId = 'prereq-gate-'+(sid||'x');
     ppsec.innerHTML = `
@@ -2262,7 +2299,7 @@ function renderAnalysis(d){
       </div>`;
     if(todoItems?.length) setTimeout(()=>refreshTodoUI(sid),50);
     else if(passos?.length){
-      // No todos — prereq card visible immediately
+      // No todos — prereq card visible immediately (after replica confirm)
       const pg=document.getElementById(prereqCardId);
       if(pg)pg.style.display='block';
     }
@@ -2283,6 +2320,36 @@ function renderAnalysis(d){
     const fb5 = document.getElementById('fb-card-5');
     if (fb5) fb5.style.display = plan === 'venture' ? 'block' : 'none';
   }
+}
+
+// ══════════════════════════════════════════════════════════════
+// RÉPLICA
+// ══════════════════════════════════════════════════════════════
+function _revealTodoSection(){
+  const replicaSec = document.getElementById('replica-section');
+  if(replicaSec) replicaSec.style.display = 'none';
+  const ppsec = document.getElementById('proximos-passos-section');
+  if(ppsec && ppsec.innerHTML.trim()){
+    ppsec.style.display = 'block';
+    setTimeout(()=>ppsec.scrollIntoView({behavior:'smooth',block:'start'}),100);
+    // Refresh todo checkboxes after reveal
+    if(S.session?.id) setTimeout(()=>refreshTodoUI(S.session.id),150);
+  }
+}
+
+function skipReplica(){
+  _revealTodoSection();
+}
+
+function confirmReplica(){
+  const inp = document.getElementById('replica-input');
+  const text = inp ? inp.value.trim() : '';
+  if(text && S.session){
+    // Store replica on the session for context
+    S.session.replica = text;
+    saveSess(getSess());
+  }
+  _revealTodoSection();
 }
 
 // ══════════════════════════════════════════════════════════════
