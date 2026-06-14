@@ -927,6 +927,7 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
       <div class="ana-tabs" id="ana-tabs">
         <div class="ana-tab active" onclick="switchTab('viability')">📊 Viabilidade</div>
+        <div class="ana-tab tab-cliente-btn" onclick="switchTab('cliente')">🎯 Lente do Cliente</div>
         <div class="ana-tab tab-financial-btn" onclick="switchTab('financial')">💰 Financeiro</div>
         <div class="ana-tab tab-mvp-btn" onclick="switchTab('mvp')">🚀 MVP</div>
         <div class="ana-tab tab-matrix-btn" onclick="switchTab('matrix')">⚡ Priorização</div>
@@ -939,6 +940,9 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
       <div class="tab-panel active" id="tab-viability">
         <div class="card"><div class="card-head"><div class="card-title">📊 Scores por bloco</div></div><div class="card-body"><div class="score-g" id="score-g"></div></div></div>
         <div id="ana-blocks"></div>
+      </div>
+      <div class="tab-panel" id="tab-cliente">
+        <div class="card"><div class="card-head"><div class="card-title">🎯 Lente do Cliente</div></div><div class="card-body" id="cliente-body"></div></div>
       </div>
       <div class="tab-panel" id="tab-financial">
         <div class="card"><div class="card-head"><div class="card-title">💰 Projeção Financeira Completa</div></div><div class="card-body" id="fin-body"></div></div>
@@ -1813,12 +1817,13 @@ function renderAnalysis(d){
 
   // Controla visibilidade das tabs por plano
   const tabsConfig = {
-    validacao:    {financial:false, mvp:false, matrix:false, roadmap:false, risks:false, benchmarks:false, captacao:false},
-    diagnostico:  {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:false},
-    business_plan:{financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:false},
-    venture:      {financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:true},
+    validacao:    {cliente:true,  financial:false, mvp:false, matrix:false, roadmap:false, risks:false, benchmarks:false, captacao:false},
+    diagnostico:  {cliente:true,  financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:false},
+    business_plan:{cliente:true,  financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:false},
+    venture:      {cliente:true,  financial:true,  mvp:true,  matrix:true,  roadmap:true,  risks:true,  benchmarks:true,  captacao:true},
   };
   const tc = tabsConfig[plan] || tabsConfig.diagnostico;
+  document.querySelector('.tab-cliente-btn').style.display     = tc.cliente     ? '' : 'none';
   document.querySelector('.tab-financial-btn').style.display   = tc.financial   ? '' : 'none';
   document.querySelector('.tab-mvp-btn').style.display         = tc.mvp         ? '' : 'none';
   document.querySelector('.tab-matrix-btn').style.display      = tc.matrix      ? '' : 'none';
@@ -1866,6 +1871,33 @@ function renderAnalysis(d){
     const ccText = typeof cc === 'string' ? cc
       : (cc.diferencial||'') + (cc.alerta ? ' | ' + cc.alerta : '');
     if(ccText) ab.innerHTML += `<div class="ab"><div class="ab-head"><span class="ab-num">C</span><span class="ab-title">Mapa Competitivo</span></div><div class="ab-body"><div style="font-size:13px;line-height:1.7">${ccText}</div></div></div>`;
+  }
+
+  // Lente do Cliente
+  const clb=document.getElementById('cliente-body');
+  if(clb){
+    const cl=d.lente_cliente;
+    if(cl){
+      const farolColor=cl.farol_validacao==='🟢'?'var(--accent)':cl.farol_validacao==='🟡'?'var(--amber)':'var(--red)';
+      clb.innerHTML=`
+        ${cl.job_statement?`<div style="background:var(--s3);border-left:3px solid var(--accent);border-radius:var(--r);padding:14px 18px;margin-bottom:20px;font-size:13px;line-height:1.8;color:var(--text)"><span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--accent);display:block;margin-bottom:6px">JOB STATEMENT</span>${cl.job_statement}</div>`:''}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+          <div class="card" style="margin:0"><div class="card-head"><div class="card-title">😣 Problema Central</div></div><div class="card-body" style="font-size:13px;line-height:1.7;color:var(--t2)">${cl.problema_central||'—'}</div></div>
+          <div class="card" style="margin:0"><div class="card-head"><div class="card-title">👤 Perfil do Cliente</div></div><div class="card-body" style="font-size:13px;line-height:1.7;color:var(--t2)">${cl.perfil_cliente||'—'}</div></div>
+          <div class="card" style="margin:0"><div class="card-head"><div class="card-title">✅ O que ele ganha</div></div><div class="card-body">
+            ${cl.ganhos_funcionais?`<div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--accent);margin-bottom:6px;letter-spacing:1px">FUNCIONAL</div><div style="font-size:13px;color:var(--t2);margin-bottom:12px">${cl.ganhos_funcionais}</div>`:''}
+            ${cl.ganhos_emocionais?`<div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--purple);margin-bottom:6px;letter-spacing:1px">EMOCIONAL</div><div style="font-size:13px;color:var(--t2)">${cl.ganhos_emocionais}</div>`:''}
+          </div></div>
+          <div class="card" style="margin:0"><div class="card-head"><div class="card-title">🔄 Como resolve hoje</div></div><div class="card-body" style="font-size:13px;line-height:1.7;color:var(--t2)">${cl.alternativas_atuais||'—'}</div></div>
+        </div>
+        ${cl.diferencial_percebido?`<div class="ab" style="margin-bottom:14px"><div class="ab-head"><span class="ab-num">D</span><span class="ab-title">Por que esta solução vence</span></div><div class="ab-body">${cl.diferencial_percebido}</div></div>`:''}
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--s2);border-radius:var(--r);border:1px solid var(--border2)">
+          <span style="font-size:28px">${cl.farol_validacao||'🟡'}</span>
+          <div><div style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:2px;color:var(--t3);margin-bottom:4px">FAROL — PROBLEMA VALIDADO?</div><div style="font-size:13px;color:${farolColor}">${cl.farol_label||'Hipótese ainda não confirmada'}</div></div>
+        </div>`;
+    } else {
+      clb.innerHTML='<div style="color:var(--t2);font-size:13px">Dados da Lente do Cliente não disponíveis neste relatório.</div>';
+    }
   }
 
   // Financial
@@ -2433,6 +2465,17 @@ JSON (sem markdown, sem texto fora):
     {"prioridade":"🟡 PRÓXIMAS 2 SEMANAS","acao":"ação 3","impacto":"impacto 3"},
     {"prioridade":"🟡 PRÓXIMAS 2 SEMANAS","acao":"ação 4","impacto":"impacto 4"}
   ],
+  "lente_cliente":{
+    "job_statement":"[persona] usa [solução] para [resultado desejado] sem [fricção evitada] — 1 frase",
+    "problema_central":"qual dor real o cliente sente hoje, antes da solução existir — 2 frases",
+    "perfil_cliente":"quem é o beneficiário principal — contexto de vida ou trabalho, não só segmento — 1 frase",
+    "ganhos_funcionais":"tempo, dinheiro, praticidade — o que concretamente melhora — 1 frase",
+    "ganhos_emocionais":"status, segurança, tranquilidade — o que o cliente sente — 1 frase",
+    "alternativas_atuais":"como ele resolve hoje sem esta solução — 1 frase",
+    "diferencial_percebido":"por que esta solução vence na percepção do cliente, não do founder — 1 frase",
+    "farol_validacao":"🟢|🟡|🔴",
+    "farol_label":"Problema validado com clientes reais|Hipótese razoável — validar urgente|Dor ainda não confirmada"
+  },
   "prereqs_diagnostico":[
     "pré-requisito 1 — verificável e específico (ex: 10 entrevistas com clientes reais documentadas)",
     "pré-requisito 2",
@@ -2708,6 +2751,17 @@ JSON (sem markdown, sem texto fora):
     "pré-requisito 4",
     "pré-requisito 5"
   ],
+  "lente_cliente":{
+    "job_statement":"[persona] usa [solução] para [resultado desejado] sem [fricção evitada] — 1 frase",
+    "problema_central":"qual dor real o cliente sente hoje, antes da solução existir — 2 frases",
+    "perfil_cliente":"quem é o beneficiário principal — contexto de vida ou trabalho, não só segmento — 1 frase",
+    "ganhos_funcionais":"tempo, dinheiro, praticidade — o que concretamente melhora — 1 frase",
+    "ganhos_emocionais":"status, segurança, tranquilidade — o que o cliente sente — 1 frase",
+    "alternativas_atuais":"como ele resolve hoje sem esta solução — 1 frase",
+    "diferencial_percebido":"por que esta solução vence na percepção do cliente, não do founder — 1 frase",
+    "farol_validacao":"🟢|🟡|🔴",
+    "farol_label":"Problema validado com clientes reais|Hipótese razoável — validar urgente|Dor ainda não confirmada"
+  },
   "todo_list":[
     {"prioridade":"🔴 ESTA SEMANA","acao":"ação concreta ligada ao prereq mais crítico — método + critério de conclusão","impacto":"qual prereq de captação isso destrava"},
     {"prioridade":"🔴 ESTA SEMANA","acao":"ação 2","impacto":"impacto 2"},
