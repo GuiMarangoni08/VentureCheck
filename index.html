@@ -1705,7 +1705,7 @@ async function submitAnswers(){
 
   try{
     const qa=buildQA();
-    const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 4096, 'claude-haiku-4-5-20251001');
+    const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 7000, 'claude-haiku-4-5-20251001');
     let finalParsed;
     try{finalParsed=parseJSON(finalRes)}
     catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório. Tente novamente.')}
@@ -2327,12 +2327,14 @@ Máximo 4 perguntas complementares se necessário.`}];
 }
 
 function finalPrompt(qa, plan){
-  const rules=`REGRAS DE OUTPUT:
-- Cada campo de texto: máximo 5 linhas, direto, sem repetições
-- Números com premissas claras
-- Afirmação direta + evidência + implicação + ação
+  const rules=`REGRAS DE OUTPUT (CRÍTICO — respeitar rigorosamente):
+- Cada campo de texto: MÁXIMO 2 FRASES. Sem repetição entre campos.
+- Arrays de strings: máximo 3 itens, 1 frase curta cada.
+- Números com premissas em 1 linha.
+- Afirmação direta + ação. Sem rodeios.
 - NUNCA: "é importante considerar", "pode ser uma boa ideia"
-- Responda SOMENTE com JSON válido. Sem markdown. Sem texto fora do JSON.`;
+- Responda SOMENTE com JSON válido. Sem markdown. Sem texto fora do JSON.
+- TOTAL do JSON: máx 6000 caracteres. Corte onde precisar para fechar o JSON.`;
 
   // ── PLANO VALIDAÇÃO ──────────────────────────────────────────
   if(plan==='validacao'){
@@ -2491,14 +2493,14 @@ ${rules}
 JSON (sem markdown):
 {
   "verdict":"PRONTO PARA CAPTAR|QUASE PRONTO|NÃO ESTÁ PRONTO",
-  "resumo":"3 linhas — avaliação de investibilidade com justificativa",
-  "problema":"análise Tallis+Musk+Rony — máx 4 linhas","problema_score":1-5,
-  "solucao":"análise Zuck+Bloisi+Orosco — máx 4 linhas","solucao_score":1-5,
-  "mercado":"TAM/SAM/SOM com números — Stelleo+Benchimol — máx 4 linhas","mercado_score":1-5,
-  "modelo":"análise Soares+Nardon+Allan+Leandro com unit economics — máx 4 linhas","modelo_score":1-5,
-  "competicao":"análise Musk+Zuck+Benchimol — máx 4 linhas","competicao_score":1-5,
-  "time":"análise Nardon+Rony+Tallis+Napoli+Adibe — máx 4 linhas","time_score":1-5,
-  "capital":"análise Allan+Leandro+L.C.Fernandes+Benchimol — máx 4 linhas","capital_score":1-5,
+  "resumo":"2 frases — investibilidade com justificativa",
+  "problema":"2 frases — validação do problema + gap principal","problema_score":1-5,
+  "solucao":"2 frases — diferencial real + fraqueza principal","solucao_score":1-5,
+  "mercado":"TAM/SAM/SOM em 1 linha com número","mercado_score":1-5,
+  "modelo":"unit economics em 1 linha + risco principal","modelo_score":1-5,
+  "competicao":"2 concorrentes + defesa ou VULNERABILIDADE ABERTA","competicao_score":1-5,
+  "time":"2 frases — força + gap crítico do time","time_score":1-5,
+  "capital":"necessidade em R$ + runway + risco principal","capital_score":1-5,
   "financeiro":"tese financeira em 2 linhas",
   "financeiro_table":[
     {"metrica":"Valuation pré-money sugerido","valor":"R$ X","obs":"metodologia usada"},
@@ -2551,11 +2553,7 @@ JSON (sem markdown):
     "onde_buscar":"3 canais específicos para encontrar no Brasil",
     "evitar":"perfil de investidor errado para este estágio e por quê"
   },
-  "data_room":[
-    "documento 1 — por que o investidor vai pedir",
-    "documento 2","documento 3","documento 4","documento 5",
-    "documento 6","documento 7","documento 8"
-  ],
+  "data_room":["documento 1","documento 2","documento 3","documento 4","documento 5"],
   "pitch_narrativa":{
     "gancho":"frase de abertura — 1 linha que prende a atenção",
     "problema":"como apresentar o problema em 30 segundos",
@@ -2564,16 +2562,13 @@ JSON (sem markdown):
     "pergunta_dificil":"a pergunta mais difícil que o investidor vai fazer e a resposta correta"
   },
   "proximos_passos":[
-    {"check":"ação específica 1","motivo":"por que isso é pré-requisito para fechar o investimento"},
+    {"check":"ação 1","motivo":"pré-requisito para fechar investimento"},
     {"check":"ação 2","motivo":"motivo 2"},
     {"check":"ação 3","motivo":"motivo 3"},
     {"check":"ação 4","motivo":"motivo 4"},
-    {"check":"ação 5","motivo":"motivo 5"},
-    {"check":"ação 6","motivo":"motivo 6"},
-    {"check":"ação 7","motivo":"motivo 7"},
-    {"check":"ação 8","motivo":"motivo 8"}
+    {"check":"ação 5","motivo":"motivo 5"}
   ],
-  "criterio_pronto":"frase completa — quando o founder pode dizer que está pronto para captar"
+  "criterio_pronto":"1 frase — quando está pronto para captar"
 }`}];
   }
 
@@ -2604,13 +2599,13 @@ JSON COMPLETO (sem markdown, sem texto fora do JSON):
     "founder":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"},
     "tracao":{"nota":0-20,"conceito":"Embrionário|Em desenvolvimento|Comprovado","obs":"1 linha"}
   },
-  "problema":"análise Tallis+Musk+Rony — máx 4 linhas","problema_score":1-5,
-  "solucao":"análise Zuck+Bloisi+Orosco — máx 4 linhas","solucao_score":1-5,
-  "mercado":"TAM/SAM/SOM com números — Stelleo+Benchimol — máx 4 linhas","mercado_score":1-5,
-  "modelo":"análise Soares+Nardon+Allan+Leandro com unit economics — máx 4 linhas","modelo_score":1-5,
-  "competicao":"análise Musk+Zuck+Benchimol — máx 4 linhas","competicao_score":1-5,
-  "time":"análise Nardon+Rony+Tallis+Napoli+Adibe — máx 4 linhas","time_score":1-5,
-  "capital":"análise Allan+Leandro+L.C.Fernandes+Benchimol — máx 4 linhas","capital_score":1-5,
+  "problema":"2 frases — problema real + gap de validação","problema_score":1-5,
+  "solucao":"2 frases — diferencial real + maior fraqueza","solucao_score":1-5,
+  "mercado":"TAM/SAM/SOM em 1 linha com número","mercado_score":1-5,
+  "modelo":"unit economics em 1 linha + risco principal","modelo_score":1-5,
+  "competicao":"2 concorrentes + VULNERABILIDADE ABERTA se não houver defesa","competicao_score":1-5,
+  "time":"2 frases — ponto forte + gap crítico do time","time_score":1-5,
+  "capital":"necessidade em R$ + runway + risco principal","capital_score":1-5,
   "financeiro":"tese financeira em 2 linhas",
   "financeiro_table":[
     {"metrica":"Investimento inicial","valor":"R$ X","obs":"breakdown resumido"},
