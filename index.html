@@ -1054,8 +1054,9 @@ hr{border:none;border-top:1px solid var(--border);margin:32px 0}
 
       <hr>
       <div class="btn-row">
-        <button class="btn btn-p" id="btn-export-pdf" onclick="exportPDF()">📄 Baixar PDF</button>
-        <button class="btn btn-g" onclick="startModeB()">+ Novo diagnóstico</button>
+        <button class="btn btn-p" id="btn-export-playbook" onclick="exportPlaybook()">📋 Exportar Playbook</button>
+        <button class="btn btn-g" id="btn-export-pdf" onclick="exportPDF()">📄 Baixar PDF</button>
+        <button class="btn btn-g" onclick="startModeB()">+ Nova análise</button>
         <button class="btn btn-g" onclick="showScreen('home')">Dashboard</button>
       </div>
     </div>
@@ -2078,7 +2079,7 @@ function renderAnalysis(d){
   // Unifica campos: prereqs_captacao (novo) ou proximos_passos (legado/BP/venture)
   const passos = d.prereqs_captacao || d.proximos_passos;
   const todoItems = d.todo_list;
-  const planLabels = {diagnostico:'Captação (R$497)', business_plan:'Venture (R$1.697)', venture:'Série A'};
+  const planLabels = {diagnostico:'Business Plan (R$997)', business_plan:'Venture (R$1.697)', venture:'Série A'};
   const nextLabel = planLabels[plan] || 'próximo nível';
   const nextPlan  = {diagnostico:'business_plan', business_plan:'venture'}[plan];
 
@@ -2825,18 +2826,15 @@ let _checkoutPlan = null;
 let _upgradeTo = null;
 
 function startCheckout(plan) {
-  // MODO TESTE — pagamento desativado, acesso direto
   const upgMap = { upg_diagnostico:'diagnostico', upg_business_plan:'business_plan', upg_venture:'venture' };
-  const resolvedPlan = upgMap[plan] || plan;
-  S.plan = resolvedPlan;
-  localStorage.setItem('vc_plan_unlocked', resolvedPlan);
-  S.questions = [];
-  S.answers = {};
-  S.complement = [];
-  S.compAnswers = {};
-  S.round = 1;
-  showScreen('screen-setup');
-  setTimeout(() => initCompletude(), 200);
+  if (upgMap[plan]) { _upgradeTo = upgMap[plan]; } else { _upgradeTo = null; }
+  _checkoutPlan = plan;
+  const user = checkExistingAuth();
+  if (!user) {
+    showScreen('screen-auth');
+    return;
+  }
+  _openCheckoutModal(plan);
 }
 
 function _openCheckoutModal(plan) {
@@ -2903,6 +2901,87 @@ function exportPDF() {
     document.title = oldTitle;
     if (btn) { btn.textContent = '📄 Baixar PDF'; btn.disabled = false; }
   }, 150);
+}
+
+// ══════════════════════════════════════════════════════════════
+// EXPORTAR PLAYBOOK — HTML standalone com conteúdo da tela
+// ══════════════════════════════════════════════════════════════
+function exportPlaybook() {
+  const btn = document.getElementById('btn-export-playbook');
+  if (btn) { btn.textContent = '⏳ Exportando...'; btn.disabled = true; }
+
+  // Captura o conteúdo do relatório
+  const reportEl = document.getElementById('screen-report');
+  if (!reportEl) {
+    alert('Gere um relatório primeiro.');
+    if (btn) { btn.textContent = '📋 Exportar Playbook'; btn.disabled = false; }
+    return;
+  }
+
+  const reportHTML = reportEl.innerHTML;
+
+  // Captura todos os estilos da página
+  const styles = Array.from(document.styleSheets).map(sheet => {
+    try {
+      return Array.from(sheet.cssRules).map(r => r.cssText).join('\n');
+    } catch { return ''; }
+  }).join('\n');
+
+  const biz = S.session?.biz || document.getElementById('ana-title')?.textContent || 'Relatório';
+  const name = S.session?.name || '';
+  const plan = S.plan || 'diagnostico';
+  const planNames = { validacao:'Validação', diagnostico:'Diagnóstico', business_plan:'Business Plan', venture:'Venture' };
+  const planLabel = planNames[plan] || plan;
+  const date = new Date().toLocaleDateString('pt-BR');
+
+  const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VentureCheck — ${biz} — ${planLabel}</title>
+<style>
+${styles}
+/* Overrides para standalone */
+body { background: #0a0a0a !important; }
+#screen-report { display: block !important; opacity: 1 !important; padding: 24px !important; max-width: 860px; margin: 0 auto; }
+.btn-row { display: none !important; }
+#feedback-section { display: none !important; }
+#upgrade-section { display: none !important; }
+.tab-nav { pointer-events: none; }
+.tab-panel { display: block !important; opacity: 1 !important; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<div style="background:#0a0a0a;min-height:100vh;padding:16px 0">
+  <div style="max-width:860px;margin:0 auto;padding:0 16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0 24px;border-bottom:1px solid #222;margin-bottom:24px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#00ff88;letter-spacing:3px">VENTURECHECK</div>
+      <div style="font-size:12px;color:#666;font-family:monospace">${planLabel} · ${name} · ${date}</div>
+    </div>
+    <div id="screen-report">
+      ${reportHTML}
+    </div>
+    <div style="text-align:center;padding:32px 0;border-top:1px solid #222;margin-top:32px">
+      <div style="font-size:11px;color:#444;font-family:monospace">Gerado por VentureCheck · DNA Board 31 Lentes · aesthetic-granita-9df2c5.netlify.app</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>`;
+
+  // Download
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `venturecheck_${(biz).replace(/\s+/g,'_').toLowerCase()}_${plan}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  if (btn) { btn.textContent = '📋 Exportar Playbook'; btn.disabled = false; }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -3024,45 +3103,6 @@ function checkPaymentReturn() {
 // ══════════════════════════════════════════════════════════════
 // PDF EXPORT — html2pdf via CDN
 // ══════════════════════════════════════════════════════════════
-function exportPDF() {
-  const btn = document.querySelector('[onclick="exportPDF()"]');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando PDF...'; }
-
-  // Carrega html2pdf dinamicamente se não estiver disponível
-  function doExport() {
-    const el = document.getElementById('screen-report');
-    const name = (S.session?.name || 'empreendedor').replace(/\s+/g,'_').toLowerCase();
-    const idea = (S.session?.idea || 'ideia').slice(0,30).replace(/\s+/g,'_').toLowerCase();
-    const filename = `venturecheck_${name}_${idea}.pdf`;
-
-    const opt = {
-      margin:       [10, 10, 10, 10],
-      filename,
-      image:        { type: 'jpeg', quality: 0.92 },
-      html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
-    };
-
-    html2pdf().set(opt).from(el).save().then(() => {
-      if (btn) { btn.disabled = false; btn.textContent = '📄 Baixar PDF'; }
-    }).catch(e => {
-      if (btn) { btn.disabled = false; btn.textContent = '📄 Baixar PDF'; }
-      console.error('PDF error:', e);
-      window.print(); // fallback
-    });
-  }
-
-  if (typeof html2pdf !== 'undefined') {
-    doExport();
-  } else {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-    script.onload = doExport;
-    script.onerror = () => { window.print(); };
-    document.head.appendChild(script);
-  }
-}
 
 // ══════════════════════════════════════════════════════════════
 // CHECKLIST DE COMPLETUDE
