@@ -1705,7 +1705,7 @@ async function submitAnswers(){
 
   try{
     const qa=buildQA();
-    const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 2000, 'claude-haiku-4-5-20251001');
+    const finalRes=await callClaude(finalPrompt(qa, S.plan||'diagnostico'), 3500, 'claude-haiku-4-5-20251001');
     let finalParsed;
     try{finalParsed=parseJSON(finalRes)}
     catch(e){console.error('Final parse error:',e,'\nRaw:',finalRes);throw new Error('Erro ao gerar relatório. Tente novamente.')}
@@ -2697,8 +2697,6 @@ startAutoSave();
 initFieldAutoSave();
 // Verificar rascunho após render da home
 setTimeout(checkDraft, 300);
-// Verificar retorno de pagamento
-checkPaymentReturn();
 </script>
 
 <!-- ══ MODAL CHECKOUT ══ -->
@@ -3243,6 +3241,9 @@ function submitFeedback(win) {
     </div>`;
   }
 }
+
+// Verificar retorno de pagamento (chamada aqui pois a função está neste bloco)
+checkPaymentReturn();
 </script>
 </body>
 </html>
